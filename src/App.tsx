@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Reset } from "styled-reset";
 import * as d3 from "d3";
 
@@ -14,16 +14,17 @@ interface countryDataI {
   dataByDate: dataByDateT;
 }
 
+const initialCountryData = {
+  ProvinceOrState: null,
+  CountryOrRegion: null,
+  Lat: null,
+  Long: null,
+  dataByDate: [],
+};
+
 const getData = async () => {
-  const initialCountryData = {
-    ProvinceOrState: null,
-    CountryOrRegion: null,
-    Lat: null,
-    Long: null,
-    dataByDate: [],
-  };
   const loadedData = await d3.csv("time_series_covid19_confirmed_global.csv");
-  console.log("loadedData: ", loadedData);
+  console.log(loadedData[0]);
   const countryData: countryDataI = initialCountryData;
   let arr = [];
   const csvData = loadedData.map((d) => {
@@ -70,49 +71,94 @@ const getMax = (data: dataByDateT, yValue: (d: dType) => number | null) => {
 };
 
 const App = () => {
-  useEffect(() => {
-    const render = (data: Array<countryDataI>) => {
-      console.log("data: ", data);
-      const svg = d3.select("svg");
-      const svgW = +svg.attr("width");
-      const svgH = +svg.attr("height");
-      const margin = { top: 50, right: 50, bottom: 50, left: 50 };
-      const innerW = svgW - margin.left - margin.right;
-      const innerH = svgH - margin.top - margin.bottom;
-      const xValue = (d: dType) => d.date;
-      const yValue = (d: dType) => d.confirmed;
-      const xScale = d3
-        .scaleTime()
-        .domain(getDomainArray(data[0].dataByDate, xValue))
-        .range([0, innerW]);
-      const yScale = d3
-        .scaleLinear()
-        .domain([getMax(data[0].dataByDate, yValue), 0])
-        .range([0, innerH]);
-      const xAxis = d3.axisBottom(xScale);
-      const yAxis = d3.axisRight(yScale);
-      const g = svg
-        .append("g")
-        .attr("width", innerW)
-        .attr("height", innerH)
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+  const [data, setData] = useState<Array<countryDataI>>([initialCountryData]);
+  const svgW = 1500;
+  const svgH = 600;
+  const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+  const innerW = svgW - margin.left - margin.right;
+  const innerH = svgH - margin.top - margin.bottom;
+  const xValue = (d: dType) => d.date;
+  const yValue = (d: dType) => d.confirmed;
 
-      const xAxisG = g
-        .append("g")
-        .call(xAxis)
-        .attr("transform", `translate(0, ${innerH})`);
-      const yAxisG = g
-        .append("g")
-        .call(yAxis)
-        .attr("transform", `translate(${innerW}, 0)`);
-    };
-    getData().then((data) => render(data));
+  useEffect(() => {
+    getData().then((data) => setData(data));
   }, []);
+
+  const xTicks = useMemo(() => {
+    if (data.length === 1) {
+      return null;
+    }
+    const xScale = d3
+      .scaleTime()
+      .domain(getDomainArray(data[0].dataByDate, xValue))
+      .range([0, innerW]);
+    return xScale.ticks().map((v) => ({
+      v,
+      xOffset: xScale(v),
+    }));
+  }, [data]);
+
+  const yTicks = useMemo(() => {
+    if (data.length === 1) {
+      return null;
+    }
+    const yScale = d3
+      .scaleLinear()
+      .domain([getMax(data[0].dataByDate, yValue), 0])
+      .range([0, innerH]);
+    return yScale.ticks().map((v) => ({ v, yOffset: yScale(v) }));
+  }, [data]);
+
   return (
     <>
       <Reset />
       <div className="App">
-        <svg width="1000" height="600"></svg>
+        <svg width={svgW} height={svgH}>
+          <g
+            width={innerW}
+            height={innerH}
+            transform={`translate(${margin.left}, ${margin.top})`}
+          >
+            <g transform={`translate(0, ${innerH})`}>
+              <path d={`M 0 0 L ${innerW} 0`} stroke="currentColor" />
+              {xTicks &&
+                xTicks.map(({ v, xOffset }, i) => (
+                  <g key={i} transform={`translate(${xOffset}, 0)`}>
+                    <line y2="6" stroke="currentColor" />
+                    <text
+                      key={i}
+                      style={{
+                        fontSize: "10px",
+                        textAnchor: "middle",
+                        transform: "translateY(20px)",
+                      }}
+                    >
+                      {v.getMonth() + 1}/{v.getDate()}
+                    </text>
+                  </g>
+                ))}
+            </g>
+            <g>
+              <path d={`M 0 0 L 0 ${innerH}`} stroke="currentColor" />
+              {yTicks &&
+                yTicks.map(({ v, yOffset }, i) => (
+                  <g key={i} transform={`translate(0, ${yOffset})`}>
+                    <line x2="-6" stroke="currentColor" />
+                    <text
+                      key={i}
+                      style={{
+                        fontSize: "10px",
+                        textAnchor: "middle",
+                        transform: "translate(-25px, 3px)",
+                      }}
+                    >
+                      {v}
+                    </text>
+                  </g>
+                ))}
+            </g>
+          </g>
+        </svg>
       </div>
     </>
   );
