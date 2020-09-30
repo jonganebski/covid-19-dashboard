@@ -58,6 +58,7 @@ const getMax = (data: Array<D>, yValue: (d: D) => number) => {
 
 const App = () => {
   const [data, setData] = useState<Array<D> | null>(null);
+  const [dataPiece, setDataPiece] = useState<D | null>(null);
   const [mouseCoord, setMouseCoord] = useState<{ x: number; y: number } | null>(
     null
   );
@@ -114,10 +115,11 @@ const App = () => {
     const bs = d3.bisector((d: D) => d.date);
     const i = bs.left(data!, hoveredDate, 1);
     setY(yScaleRef.current!(data![i].confirmed)!);
+    setDataPiece(data![i]);
     console.log(data![i]);
     return;
   };
-
+  console.log("rendered");
   return (
     <>
       <Reset />
@@ -200,7 +202,25 @@ const App = () => {
                 />
               )}
               {mouseCoord && y && (
-                <circle cx={mouseCoord.x} cy={y} r="4" fill="black" />
+                <g transform={`translate(${mouseCoord.x}, ${y})`}>
+                  <circle r="4" fill="black"></circle>
+                  <g transform="translate(-120, -70)">
+                    <rect
+                      width="100"
+                      height="50"
+                      transform="translate()"
+                      fill="tomato"
+                      opacity="0.5"
+                    ></rect>
+                    <text transform="translate(0, 20)">
+                      {new Date(dataPiece!.date!).getMonth() + 1}/
+                      {new Date(dataPiece!.date!).getDate()}
+                    </text>
+                    <text transform="translate(0, 40)">
+                      {dataPiece!.confirmed!}
+                    </text>
+                  </g>
+                </g>
               )}
             </LineGraphGroup>
           </BoundGroup>
