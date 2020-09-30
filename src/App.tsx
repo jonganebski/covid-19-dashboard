@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { mouse } from "d3";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { Reset } from "styled-reset";
@@ -11,6 +12,7 @@ interface D {
 const BoundGroup = styled.g``;
 const XAxisGroup = styled.g``;
 const YAxisGroup = styled.g``;
+const LineGraphGroup = styled.g``;
 
 const getData = async () => {
   const loadedData = await d3.csv("time_series_covid19_confirmed_global.csv");
@@ -56,6 +58,10 @@ const getMax = (data: Array<D>, yValue: (d: D) => number) => {
 
 const App = () => {
   const [data, setData] = useState<Array<D> | null>(null);
+  const [mouseCoord, setMouseCoord] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const [y, setY] = useState<number | null>(null);
   const svgW = 1500;
   const svgH = 600;
   const margin = { top: 50, right: 50, bottom: 50, left: 50 };
@@ -88,7 +94,8 @@ const App = () => {
       yScaleRef.current = d3
         .scaleLinear()
         .domain([getMax(data, yValue), 0])
-        .range([0, innerH]);
+        .range([0, innerH])
+        .nice();
       return yScaleRef.current
         .ticks()
         .map((v) => ({ v, yOffset: yScaleRef.current!(v) }));
@@ -101,6 +108,16 @@ const App = () => {
     .y((d) => yScaleRef.current!(yValue(d)) ?? 0)
     .curve(d3.curveBasis);
 
+  const handleMouseMove = (e: any) => {
+    setMouseCoord({ x: e.screenX - margin.left, y: e.screenY - 150 });
+    const hoveredDate = xScaleRef.current?.invert(e.screenX - 50).getTime();
+    const bs = d3.bisector((d: D) => d.date);
+    const i = bs.left(data!, hoveredDate, 1);
+    setY(yScaleRef.current!(data![i].confirmed)!);
+    console.log(data![i]);
+    return;
+  };
+
   return (
     <>
       <Reset />
@@ -111,12 +128,23 @@ const App = () => {
             height={innerH}
             transform={`translate(${margin.left}, ${margin.top})`}
           >
+            <rect
+              width={innerW}
+              height={innerH}
+              opacity="0"
+              onMouseMove={handleMouseMove}
+            />
             <XAxisGroup transform={`translate(0, ${innerH})`}>
               <path d={`M 0 0 L ${innerW} 0`} stroke="currentColor" />
               {xTicks &&
                 xTicks.map(({ v, xOffset }, i) => (
                   <g key={i} transform={`translate(${xOffset}, 0)`}>
                     <line y2="6" stroke="currentColor" />
+                    <line
+                      y2={-innerH}
+                      stroke="lightgray"
+                      strokeDasharray="5, 5"
+                    />
                     <text
                       key={i}
                       style={{
@@ -129,6 +157,15 @@ const App = () => {
                     </text>
                   </g>
                 ))}
+              {mouseCoord && (
+                <line
+                  x1={mouseCoord.x}
+                  x2={mouseCoord.x}
+                  y1="0"
+                  y2={-innerH}
+                  stroke="currentColor"
+                />
+              )}
             </XAxisGroup>
             <YAxisGroup>
               <path d={`M 0 0 L 0 ${innerH}`} stroke="currentColor" />
@@ -136,6 +173,11 @@ const App = () => {
                 yTicks.map(({ v, yOffset }, i) => (
                   <g key={i} transform={`translate(0, ${yOffset})`}>
                     <line x2="-6" stroke="currentColor" />
+                    <line
+                      x2={innerW}
+                      stroke="lightgray"
+                      strokeDasharray="5, 5"
+                    />
                     <text
                       key={i}
                       style={{
@@ -149,7 +191,7 @@ const App = () => {
                   </g>
                 ))}
             </YAxisGroup>
-            <g>
+            <LineGraphGroup>
               {data && (
                 <path
                   d={lineGenerator(data)!}
@@ -157,7 +199,10 @@ const App = () => {
                   fill="none"
                 />
               )}
-            </g>
+              {mouseCoord && y && (
+                <circle cx={mouseCoord.x} cy={y} r="4" fill="black" />
+              )}
+            </LineGraphGroup>
           </BoundGroup>
         </svg>
       </div>
