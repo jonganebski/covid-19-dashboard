@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import { mouse } from "d3";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { Reset } from "styled-reset";
@@ -10,9 +9,26 @@ interface D {
 }
 
 const BoundGroup = styled.g``;
+const MouseListener = styled.rect``;
 const XAxisGroup = styled.g``;
 const YAxisGroup = styled.g``;
 const LineGraphGroup = styled.g``;
+const TooltipGroup = styled.g``;
+
+const months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 const getData = async () => {
   const loadedData = await d3.csv("time_series_covid19_confirmed_global.csv");
@@ -34,10 +50,10 @@ const getData = async () => {
       confirmed: d[1] ? +d[1] : 0,
     };
   });
-  console.log(data);
   return data;
 };
 
+// d3.extent() 에서 [undefined, undefined]가 나오는 경우를 배제하는 함수다.
 const getDomainArray = (data: Array<D>, xValue: (d: D) => number) => {
   const arr = d3.extent(data, xValue);
   if (!arr[0] || !arr[1]) {
@@ -47,6 +63,7 @@ const getDomainArray = (data: Array<D>, xValue: (d: D) => number) => {
   }
 };
 
+// d3.max() 에서 undefined가 나오는 경우를 배제하는 함수다.
 const getMax = (data: Array<D>, yValue: (d: D) => number) => {
   const max = d3.max(data, yValue);
   if (typeof max !== "number") {
@@ -59,19 +76,16 @@ const getMax = (data: Array<D>, yValue: (d: D) => number) => {
 const App = () => {
   const [data, setData] = useState<Array<D> | null>(null);
   const [dataPiece, setDataPiece] = useState<D | null>(null);
-  const [mouseCoord, setMouseCoord] = useState<{ x: number; y: number } | null>(
-    null
-  );
-  const [y, setY] = useState<number | null>(null);
+  const [coord, setCoord] = useState<{ x: number; y: number } | null>(null);
   const svgW = 1500;
   const svgH = 600;
-  const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+  const margin = { top: 100, right: 100, bottom: 100, left: 100 };
   const innerW = svgW - margin.left - margin.right;
   const innerH = svgH - margin.top - margin.bottom;
   const xValue = (d: D) => d.date;
   const yValue = (d: D) => d.confirmed;
-  const xScaleRef = useRef<d3.ScaleTime<number, number>>();
-  const yScaleRef = useRef<d3.ScaleLinear<number, number>>();
+  const xScaleRef = useRef<d3.ScaleTime<number, number> | null>(null);
+  const yScaleRef = useRef<d3.ScaleLinear<number, number> | null>(null);
 
   useEffect(() => {
     getData().then((data) => setData(data));
@@ -83,12 +97,13 @@ const App = () => {
         .scaleTime()
         .domain(getDomainArray(data, xValue))
         .range([0, innerW]);
-      return xScaleRef.current.ticks().map((v) => ({
+      const ticksArr = xScaleRef.current.ticks().map((v) => ({
         v,
         xOffset: xScaleRef.current!(v),
       }));
+      return ticksArr;
     }
-  }, [data]);
+  }, [data, innerW]);
 
   const yTicks = useMemo(() => {
     if (data) {
@@ -97,11 +112,12 @@ const App = () => {
         .domain([getMax(data, yValue), 0])
         .range([0, innerH])
         .nice();
-      return yScaleRef.current
+      const ticksArr = yScaleRef.current
         .ticks()
         .map((v) => ({ v, yOffset: yScaleRef.current!(v) }));
+      return ticksArr;
     }
-  }, [data]);
+  }, [data, innerH]);
 
   const lineGenerator = d3
     .line<D>()
@@ -109,17 +125,25 @@ const App = () => {
     .y((d) => yScaleRef.current!(yValue(d)) ?? 0)
     .curve(d3.curveBasis);
 
-  const handleMouseMove = (e: any) => {
-    setMouseCoord({ x: e.screenX - margin.left, y: e.screenY - 150 });
-    const hoveredDate = xScaleRef.current?.invert(e.screenX - 50).getTime();
-    const bs = d3.bisector((d: D) => d.date);
-    const i = bs.left(data!, hoveredDate, 1);
-    setY(yScaleRef.current!(data![i].confirmed)!);
-    setDataPiece(data![i]);
-    console.log(data![i]);
+  const handleMouseMove = (e: React.MouseEvent<SVGRectElement, MouseEvent>) => {
+    if (xScaleRef.current && yScaleRef.current && data) {
+      const hoveredDate = xScaleRef.current
+        .invert(e.screenX - margin.left)
+        .getTime();
+      const bs = d3.bisector((d: D) => d.date);
+      const i = bs.left(data, hoveredDate, 1);
+      const y = yScaleRef.current(data[i].confirmed);
+      if (y) {
+        setCoord({
+          x: e.screenX - margin.left,
+          y,
+        });
+        setDataPiece(data[i]);
+      }
+    }
     return;
   };
-  console.log("rendered");
+
   return (
     <>
       <Reset />
@@ -130,7 +154,7 @@ const App = () => {
             height={innerH}
             transform={`translate(${margin.left}, ${margin.top})`}
           >
-            <rect
+            <MouseListener
               width={innerW}
               height={innerH}
               opacity="0"
@@ -155,14 +179,14 @@ const App = () => {
                         transform: "translateY(20px)",
                       }}
                     >
-                      {v.getMonth() + 1}/{v.getDate()}
+                      {months[v.getMonth()]}
                     </text>
                   </g>
                 ))}
-              {mouseCoord && (
+              {coord && (
                 <line
-                  x1={mouseCoord.x}
-                  x2={mouseCoord.x}
+                  x1={coord.x}
+                  x2={coord.x}
                   y1="0"
                   y2={-innerH}
                   stroke="currentColor"
@@ -194,32 +218,36 @@ const App = () => {
                 ))}
             </YAxisGroup>
             <LineGraphGroup>
-              {data && (
+              {data && lineGenerator(data) && (
                 <path
-                  d={lineGenerator(data)!}
+                  d={lineGenerator(data) as string}
                   stroke="currentColor"
                   fill="none"
                 />
               )}
-              {mouseCoord && y && (
-                <g transform={`translate(${mouseCoord.x}, ${y})`}>
-                  <circle r="4" fill="black"></circle>
-                  <g transform="translate(-120, -70)">
+              {coord && (
+                <g transform={`translate(${coord.x}, ${coord.y})`}>
+                  <circle
+                    r="6"
+                    fill="none"
+                    stroke="steelblue"
+                    strokeWidth="3"
+                  ></circle>
+                  <TooltipGroup transform="translate(-120, -70)">
                     <rect
                       width="100"
                       height="50"
-                      transform="translate()"
                       fill="tomato"
                       opacity="0.5"
                     ></rect>
                     <text transform="translate(0, 20)">
-                      {new Date(dataPiece!.date!).getMonth() + 1}/
-                      {new Date(dataPiece!.date!).getDate()}
+                      {new Date(dataPiece!.date!).getDate()}{" "}
+                      {months[new Date(dataPiece!.date!).getMonth()]}
                     </text>
                     <text transform="translate(0, 40)">
                       {dataPiece!.confirmed!}
                     </text>
-                  </g>
+                  </TooltipGroup>
                 </g>
               )}
             </LineGraphGroup>
