@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Reset } from "styled-reset";
 import * as d3 from "d3";
 import LineChart from "./Components/LineChart";
+import MapWithCircles from "./Components/MapWithCircles";
 
 export interface IDateCount {
   date: number;
@@ -68,24 +69,25 @@ const App = () => {
   > | null>(null);
   const [testData, setTestData] = useState<Array<IDateCount> | null>(null);
   useEffect(() => {
-    getCsvData("time_series_covid19_confirmed_global.csv").then((data) =>
-      setCumulativeCasesData(data)
-    );
-    getCsvData("time_series_covid19_deaths_global.csv").then((data) =>
-      setCumulativeDeathsData(data)
-    );
-    getCsvData("time_series_covid19_recovered_global.csv").then((data) =>
-      setCumulativeRecoveredData(data)
-    );
-    getApiData().then((data) => setTestData(data));
+    // getCsvData("time_series_covid19_confirmed_global.csv").then((data) =>
+    //   setCumulativeCasesData(data)
+    // );
+    // getCsvData("time_series_covid19_deaths_global.csv").then((data) =>
+    //   setCumulativeDeathsData(data)
+    // );
+    // getCsvData("time_series_covid19_recovered_global.csv").then((data) =>
+    //   setCumulativeRecoveredData(data)
+    // );
+    // getApiData().then((data) => setTestData(data));
   }, []);
   return (
     <div className="App">
       <Reset />
-      {cumulativeCasesData && <LineChart data={cumulativeCasesData} />}
+      {/* {cumulativeCasesData && <LineChart data={cumulativeCasesData} />}
       {cumulativeDeathsData && <LineChart data={cumulativeDeathsData} />}
       {cumulativeRecoveredData && <LineChart data={cumulativeRecoveredData} />}
-      {testData && <LineChart data={testData} />}
+      {testData && <LineChart data={testData} />} */}
+      <MapWithCircles />
     </div>
   );
 };
