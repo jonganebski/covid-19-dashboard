@@ -87,7 +87,9 @@ const App = () => {
       {cumulativeDeathsData && <LineChart data={cumulativeDeathsData} />}
       {cumulativeRecoveredData && <LineChart data={cumulativeRecoveredData} />}
       {testData && <LineChart data={testData} />} */}
-      <MapWithCircles />
+      <div style={{ margin: 100 }}>
+        <MapWithCircles />
+      </div>
     </div>
   );
 };
