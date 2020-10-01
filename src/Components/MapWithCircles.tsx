@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
 import * as d3 from "d3";
-import { FeatureCollection, Feature } from "geojson";
+import { D3ZoomEvent } from "d3";
+import { Feature, FeatureCollection } from "geojson";
+import React, { useEffect, useMemo, useState } from "react";
 
 interface MapWithCirclesProps {}
 
@@ -11,9 +12,15 @@ const pathGenerator = d3.geoPath().projection(projection);
 const pathD = pathGenerator({ type: "Sphere" });
 const svgW = 1200;
 const svgH = 800;
+const oceanColor = "steelblue";
+const countryColor = "lightgray";
+const countryColorOnHover = "red";
+const circleColor = "black";
+const circleColorOnHover = "white";
 
 // ----------- 함수 -----------
-
+// 데이터를 무조건 [{countryCode, countryName, feature, number}, ....] 형식으로 바꿔야 되나?
+// 아니면 features를 기반으로 하고 그 안의 properties 안에 데이터를 넣어버릴까?
 const loadAndProcessData = () => {
   return Promise.all<FeatureCollection, any>([
     d3.json(
@@ -54,7 +61,8 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
     y: 0,
     scale: 1,
   });
-
+  console.log("data: ", data);
+  console.log("features: ", features);
   useEffect(() => {
     // ----------- 데이텨 로드 -----------
     loadAndProcessData().then(({ features, countriesWithFeature }) => {
@@ -63,53 +71,82 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
     });
     // d3.zoom()을 붙인 엘리먼트의 transfer를 건드리면 느려지고 흔들리고 문제가 많다.
     // 이에 대한 해결책은 다른 그룹을 만들어서 d3.zoom이 물려있는 그룹과 transform되는 그룹을 분리하는 것이다.
-    const g = d3.select("svg").select("#zoom-handler") as any;
-    const zoom = d3.zoom().on("zoom", (e: any) => {
-      console.log(e.transform.x);
+    const g = d3.select("svg").select("#zoom-handler") as d3.Selection<
+      Element,
+      unknown,
+      any,
+      any
+    >;
+    const handleZoom = (e: D3ZoomEvent<any, any>) => {
       setTransform({
         x: e.transform.x,
         y: e.transform.y,
         scale: e.transform.k,
       });
-    });
+    };
+    const zoom = d3
+      .zoom()
+      .on("zoom", handleZoom as d3.ValueFn<Element, unknown, void>);
     g.call(zoom);
   }, []);
 
   const earthPathComponents = useMemo(() => {
     if (pathD) {
-      return <path d={pathD} fill="green" />;
+      return <path d={pathD} fill={oceanColor} />;
     }
   }, []);
 
   const borderPathComponents = useMemo(() => {
     if (features) {
-      return features.map((feature) => (
-        <path
-          key={feature.properties?.name}
-          d={pathGenerator(feature)!}
-          fill="black"
-          onMouseOver={(e) => {
-            const path = e.target as SVGPathElement;
-            path.style.fill = "red";
-            const circle = document.getElementById(
-              feature.properties!.iso_a2
-            ) as any;
-            if (circle) {
-              circle.style.fill = "black";
-            }
-          }}
-          onMouseOut={(e) => {
-            const path = e.target as SVGPathElement;
-            path.style.fill = "black";
-          }}
-        />
-      ));
+      return features.map((feature) => {
+        return (
+          <g>
+            <title>{feature.properties!.name}</title>
+            <path
+              key={feature.properties?.name}
+              d={pathGenerator(feature)!}
+              stroke="black"
+              strokeWidth={0.05}
+              fill={countryColor}
+              opacity={0.5}
+              onMouseOver={(e) => {
+                const path = e.target as SVGPathElement;
+                path.style.fill = countryColorOnHover;
+                if (feature.properties!.iso_a2 !== "-99") {
+                  const circle = d3.select(`#${feature.properties!.iso_a2}`);
+                  circle.attr("fill", circleColorOnHover);
+                }
+              }}
+              onMouseOut={(e) => {
+                const path = e.target as SVGPathElement;
+                path.style.fill = countryColor;
+                if (feature.properties!.iso_a2 !== "-99") {
+                  const circle = d3.select(`#${feature.properties!.iso_a2}`);
+                  circle.attr("fill", circleColor);
+                }
+              }}
+            />
+          </g>
+        );
+      });
     }
   }, [features]);
 
+  const getMax = (data: any) => {
+    const max = d3.max(data, (d: any) => d.data?.TotalConfirmed);
+    if (typeof max !== "number") {
+      throw Error("Unable to make y scale.");
+    } else {
+      return max;
+    }
+  };
+
   const circleComponents = useMemo(() => {
-    const getRadius = d3.scaleSqrt().domain([0, 1000000]).range([0, 20]);
     if (data) {
+      const getRadius = d3
+        .scaleSqrt()
+        .domain([0, getMax(data)])
+        .range([0, 50]);
       return data.map(
         (d: any) =>
           d.countryCode !== "-99" && (
@@ -119,7 +156,7 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
               cx={projection(d3.geoCentroid(d.feature))![0]}
               cy={projection(d3.geoCentroid(d.feature))![1]}
               r={getRadius(d.data?.TotalConfirmed)}
-              fill="white"
+              fill={circleColor}
               opacity={0.5}
               pointerEvents="none"
             />
