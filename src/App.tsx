@@ -1,25 +1,15 @@
-import React, { useEffect, useState } from "react";
+import { Box, Flex, Grid, Heading } from "@chakra-ui/core";
 import * as d3 from "d3";
-import LineChart from "./Components/LineChart";
-import MapWithCircles from "./Components/MapWithCircles";
 import {
-  FeatureCollection,
   Feature,
-  Geometry,
+  FeatureCollection,
   GeoJsonProperties,
+  Geometry,
 } from "geojson";
-import {
-  Box,
-  Divider,
-  Flex,
-  Grid,
-  Heading,
-  List,
-  ListItem,
-  Stack,
-  Text,
-} from "@chakra-ui/core";
-import { useRef } from "react";
+import React, { useEffect, useState } from "react";
+import CenterColumn from "./Components/CenterColumn";
+import LeftColumn from "./Components/LeftColumn";
+import RightColumn from "./Components/RightColumn";
 
 export interface IDateCount {
   date: number;
@@ -45,16 +35,6 @@ export type TdataForMap = Array<{
   data: any;
 }>;
 
-type TdataGlobalNow = {
-  date: string;
-  NewConfirmed: number;
-  NewDeaths: number;
-  NewRecovered: number;
-  TotalConfirmed: number;
-  TotalDeaths: number;
-  TotalRecovered: number;
-};
-
 const getApiData = async () => {
   const response = await fetch(
     "https://api.covid19api.com/country/south-africa/status/confirmed"
@@ -69,6 +49,7 @@ const getApiData = async () => {
 
 const getCsvData = async (fileName: string) => {
   const loadedData = await d3.csv(fileName);
+  console.log("csvData: ", loadedData);
   const selectedData = loadedData.filter(
     (d) => d["Country/Region"] === "Japan"
   );
@@ -101,10 +82,10 @@ const loadAndProcessData = () => {
       response.json()
     ),
   ]).then(([geojsonData, summaryData]) => {
-    console.log("geojsonData: ", geojsonData);
-    console.log("summaryData: ", summaryData);
+    // console.log("geojsonData: ", geojsonData);
+    // console.log("summaryData: ", summaryData);
 
-    const countriesObj = summaryData.Countries.reduce(
+    const countriesObj = summaryData.Countries?.reduce(
       (acc: { [key: string]: any }, countryD: any) => {
         const countryCode = countryD.CountryCode;
         acc[countryCode] = countryD;
@@ -112,19 +93,18 @@ const loadAndProcessData = () => {
       },
       {}
     );
-    console.log("countriesObj: ", countriesObj);
+    // console.log("countriesObj: ", countriesObj);
     const countriesWithFeature = geojsonData.features.map((feature) => {
       const countryCode = feature.properties!.iso_a2;
       return { countryCode, feature, data: countriesObj[countryCode] };
     });
-    console.log("countriesWithFeature: ", countriesWithFeature);
+    // console.log("countriesWithFeature: ", countriesWithFeature);
 
     return { summaryData, countriesWithFeature };
   });
 };
 
 const App = () => {
-  const svgContainerRef = useRef<HTMLDivElement | null>(null);
   const [cumulativeCasesData, setCumulativeCasesData] = useState<Array<
     IDateCount
   > | null>(null);
@@ -158,151 +138,34 @@ const App = () => {
   }, []);
 
   return (
-    <>
-      <div
-        className="App"
+    <div
+      className="App"
+      style={{
+        padding: "5px",
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+      }}
+    >
+      <Grid
+        w="100%"
+        gap={1}
         style={{
-          padding: "5px",
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
+          gridTemplate: `"header header header" 5vh
+                          "left center right" 94vh / 3fr 9fr 5fr`,
         }}
       >
-        <Grid
-          w="100%"
-          gap={1}
-          style={{
-            gridTemplate: `"header header header" 5vh
-                          "left center right" 94vh / 3fr 9fr 5fr`,
-          }}
-        >
-          <Box gridArea="header" bg="blue.500"></Box>
-          <Grid
-            gridArea="left"
-            bg="blue.200"
-            gridTemplateRows="2fr 12fr 1.5fr"
-            gap={1}
-          >
-            <Flex direction="column" align="center" justify="center">
-              <Heading size="md">Global Cases</Heading>
-              <Text fontSize="sm">(cumulative)</Text>
-              <Heading size="xl" color="red.600">
-                {summaryData?.Global.TotalConfirmed.toLocaleString()}
-              </Heading>
-            </Flex>
-            <Box bg="blue.400" overflowY="scroll" p={5}>
-              <List spacing={1}>
-                {summaryData?.Countries.sort(
-                  (a: any, b: any) => b.TotalConfirmed - a.TotalConfirmed
-                ).map((country: any) => (
-                  <ListItem>
-                    <Text fontWeight={600} color="red.600" display="inline">
-                      {country.TotalConfirmed.toLocaleString()}
-                    </Text>{" "}
-                    {country.Country}
-                    <Divider />
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-            <Flex
-              direction="column"
-              align="center"
-              justify="center"
-              bg="blue.500"
-            >
-              <Text>Last Updated at</Text>
-              <Text fontSize="2xl" fontWeight={500}>
-                {new Date(summaryData?.Date).toLocaleString()}
-              </Text>
-            </Flex>
-          </Grid>
-          <Grid gridArea="center" gridTemplateRows="7fr 1fr" gap={1}>
-            <Stack bg="green.300">
-              {dataForMap && <MapWithCircles data={dataForMap} />}
-            </Stack>
-            <Box bg="green.700"></Box>
-          </Grid>
-          <Grid
-            gridArea="right"
-            gap={1}
-            bg="red.200"
-            style={{
-              gridTemplate: `"global today" 3fr
-                            "global today" 3fr
-                            "graph graph" 4fr / 1fr 1fr`,
-            }}
-          >
-            <Grid
-              gridArea="global"
-              bg="red.300"
-              gridTemplateRows="1fr 5fr"
-              p={5}
-            >
-              <Flex mb={5} direction="column" align="center" justify="center">
-                <Heading size="md">Global Deaths</Heading>
-                <Text fontSize="sm">(cumulative)</Text>
-                <Heading size="xl" color="red.600">
-                  {summaryData?.Global.TotalDeaths.toLocaleString()}
-                </Heading>
-              </Flex>
-              <Box overflowY="scroll">
-                <List spacing={1}>
-                  {summaryData?.Countries.sort(
-                    (a: any, b: any) => b.TotalDeaths - a.TotalDeaths
-                  ).map((country: any) => (
-                    <ListItem>
-                      <Text fontWeight={600} color="gray.200">
-                        {country.TotalDeaths.toLocaleString()} deaths
-                      </Text>{" "}
-                      {country.Country}
-                      <Divider />
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            </Grid>
-            <Grid
-              gridArea="today"
-              bg="red.300"
-              gridTemplateRows="1fr 5fr"
-              p={5}
-            >
-              <Flex mb={5} direction="column" align="center" justify="center">
-                <Heading size="md">Global Cases</Heading>
-                <Text fontSize="sm">(new cases)</Text>
-                <Heading size="xl" color="red.600">
-                  {summaryData?.Global.NewConfirmed.toLocaleString()}
-                </Heading>
-              </Flex>
-              <Box overflowY="scroll">
-                <List spacing={1}>
-                  {summaryData?.Countries.sort(
-                    (a: any, b: any) => b.NewConfirmed - a.NewConfirmed
-                  ).map((country: any) => (
-                    <ListItem>
-                      <Text fontWeight={600} color="gray.200">
-                        {country.NewConfirmed.toLocaleString()} new cases
-                      </Text>{" "}
-                      {country.Country}
-                      <Divider />
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            </Grid>
-            <Box ref={svgContainerRef} gridArea="graph" bg="red.500">
-              {cumulativeCasesData && (
-                <LineChart
-                  data={cumulativeCasesData}
-                  svgContainerRef={svgContainerRef}
-                />
-              )}
-            </Box>
-          </Grid>
-        </Grid>
-      </div>
-    </>
+        <Flex gridArea="header" justify="center" bg="blue.500">
+          <Heading> Covid-19 Information Dashboard</Heading>
+        </Flex>
+        <LeftColumn summaryData={summaryData} />
+        <CenterColumn dataForMap={dataForMap} />
+        <RightColumn
+          summaryData={summaryData}
+          cumulativeCasesData={cumulativeCasesData}
+        />
+      </Grid>
+    </div>
   );
 };
 

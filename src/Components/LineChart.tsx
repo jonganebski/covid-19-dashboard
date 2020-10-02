@@ -1,6 +1,5 @@
 import * as d3 from "d3";
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { IDateCount } from "../App";
 import { getMonthName } from "../utils";
@@ -64,7 +63,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
       .height;
     const svgW = svgParentW ?? 0;
     const svgH = svgParentH ?? 0;
-    console.log(svgW, svgH);
+    // console.log(svgW, svgH);
     setSvgW(svgW);
     setSvgH(svgH);
   };
