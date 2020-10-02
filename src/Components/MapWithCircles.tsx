@@ -101,7 +101,6 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
       return features.map((feature) => {
         return (
           <g>
-            <title>{feature.properties!.name}</title>
             <path
               key={feature.properties?.name}
               d={pathGenerator(feature)!}
@@ -114,7 +113,11 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
                 path.style.fill = countryColorOnHover;
                 if (feature.properties!.iso_a2 !== "-99") {
                   const circle = d3.select(`#${feature.properties!.iso_a2}`);
+                  const tooltip = d3.select(
+                    `#${feature.properties!.iso_a2}-tooltip`
+                  );
                   circle.attr("fill", circleColorOnHover);
+                  tooltip.attr("opacity", 1);
                 }
               }}
               onMouseOut={(e) => {
@@ -122,10 +125,17 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
                 path.style.fill = countryColor;
                 if (feature.properties!.iso_a2 !== "-99") {
                   const circle = d3.select(`#${feature.properties!.iso_a2}`);
+                  const tooltip = d3.select(
+                    `#${feature.properties!.iso_a2}-tooltip`
+                  );
                   circle.attr("fill", circleColor);
+                  tooltip.attr("opacity", 0);
                 }
               }}
             />
+            <rect x={20} y={20}>
+              hello there!
+            </rect>
           </g>
         );
       });
@@ -147,21 +157,85 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
         .scaleSqrt()
         .domain([0, getMax(data)])
         .range([0, 50]);
-      return data.map(
-        (d: any) =>
+      return data.map((d: any) => {
+        const radius = getRadius(d.data?.TotalConfirmed) ?? 0;
+
+        return (
           d.countryCode !== "-99" && (
-            <circle
+            <g
               key={d.countryCode}
-              id={d.countryCode}
-              cx={projection(d3.geoCentroid(d.feature))![0]}
-              cy={projection(d3.geoCentroid(d.feature))![1]}
-              r={getRadius(d.data?.TotalConfirmed)}
-              fill={circleColor}
-              opacity={0.5}
-              pointerEvents="none"
-            />
+              transform={`translate(${
+                projection(d3.geoCentroid(d.feature))![0]
+              }, ${projection(d3.geoCentroid(d.feature))![1]})`}
+            >
+              <circle
+                id={d.countryCode}
+                r={radius}
+                fill={circleColor}
+                opacity={0.5}
+                pointerEvents="none"
+              />
+            </g>
           )
-      );
+        );
+      });
+    }
+  }, [data]);
+
+  const tooltipComponents = useMemo(() => {
+    if (data) {
+      const getRadius = d3
+        .scaleSqrt()
+        .domain([0, getMax(data)])
+        .range([0, 50]);
+      return data.map((d: any) => {
+        const radius = getRadius(d.data?.TotalConfirmed) ?? 0;
+
+        return (
+          d.countryCode !== "-99" && (
+            <g
+              key={d.countryCode}
+              transform={`translate(${
+                projection(d3.geoCentroid(d.feature))![0]
+              }, ${projection(d3.geoCentroid(d.feature))![1]})`}
+            >
+              <g
+                id={d.countryCode + "-tooltip"}
+                opacity={0}
+                pointerEvents="none"
+                transform={`translate(${Math.max(20, radius + 10)},${Math.min(
+                  -50,
+                  -radius - 25
+                )})`}
+                style={{ boxSizing: "content-box" }}
+              >
+                {
+                  <foreignObject style={{ overflow: "visible", zIndex: 10 }}>
+                    <article
+                      style={{
+                        display: "inline-block",
+                        minWidth: "60px",
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        padding: "0px 7px 0px 7px",
+                        lineHeight: "20px",
+                        fontSize: "15px",
+                        textAlign: "center",
+                        borderRadius: "5px",
+                        borderBottomLeftRadius: "0px",
+                      }}
+                    >
+                      <h6 style={{ whiteSpace: "nowrap" }}>
+                        {d.data?.Country}
+                      </h6>
+                      <pre>{d.data?.TotalConfirmed ?? "No data"}</pre>
+                    </article>
+                  </foreignObject>
+                }
+              </g>
+            </g>
+          )
+        );
+      });
     }
   }, [data]);
 
@@ -175,6 +249,7 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
           {earthPathComponents}
           {borderPathComponents}
           {circleComponents}
+          {tooltipComponents}
         </g>
       </g>
     </svg>
