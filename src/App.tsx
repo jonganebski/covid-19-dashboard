@@ -8,7 +8,6 @@ import {
   Geometry,
   GeoJsonProperties,
 } from "geojson";
-import styled from "styled-components";
 import {
   Box,
   Divider,
@@ -20,6 +19,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/core";
+import { useRef } from "react";
 
 export interface IDateCount {
   date: number;
@@ -67,28 +67,28 @@ const getApiData = async () => {
   return data;
 };
 
-// const getCsvData = async (fileName: string) => {
-//   const loadedData = await d3.csv(fileName);
-//   const selectedData = loadedData.filter(
-//     (d) => d["Country/Region"] === "Japan"
-//   );
-//   const filteredData = Object.entries(selectedData[0]).filter(([key, _]) => {
-//     const date = new Date(key);
-//     if (isNaN(date.getTime())) {
-//       return false;
-//     } else {
-//       return true;
-//     }
-//   });
-//   const data = filteredData.map((d) => {
-//     const date = new Date(d[0]);
-//     return {
-//       date: date.getTime(),
-//       count: d[1] ? +d[1] : 0,
-//     };
-//   });
-//   return data;
-// };
+const getCsvData = async (fileName: string) => {
+  const loadedData = await d3.csv(fileName);
+  const selectedData = loadedData.filter(
+    (d) => d["Country/Region"] === "Japan"
+  );
+  const filteredData = Object.entries(selectedData[0]).filter(([key, _]) => {
+    const date = new Date(key);
+    if (isNaN(date.getTime())) {
+      return false;
+    } else {
+      return true;
+    }
+  });
+  const data = filteredData.map((d) => {
+    const date = new Date(d[0]);
+    return {
+      date: date.getTime(),
+      count: d[1] ? +d[1] : 0,
+    };
+  });
+  return data;
+};
 
 // ----------- 함수 -----------
 // https://api.covid19api.com 에서는 세계의 시간에 따른 변화를 보여주는 데이터가 없다... 나라별만 있음.
@@ -124,9 +124,10 @@ const loadAndProcessData = () => {
 };
 
 const App = () => {
-  // const [cumulativeCasesData, setCumulativeCasesData] = useState<Array<
-  //   IDateCount
-  // > | null>(null);
+  const svgContainerRef = useRef<HTMLDivElement | null>(null);
+  const [cumulativeCasesData, setCumulativeCasesData] = useState<Array<
+    IDateCount
+  > | null>(null);
   // const [cumulativeDeathsData, setCumulativeDeathsData] = useState<Array<
   //   IDateCount
   // > | null>(null);
@@ -136,24 +137,24 @@ const App = () => {
   // const [testData, setTestData] = useState<Array<IDateCount> | null>(null);
   const [dataForMap, setDataForMap] = useState<TdataForMap | null>(null);
   const [summaryData, setSummaryData] = useState<any | null>(null);
-  // useEffect(() => {
-  // getCsvData("time_series_covid19_confirmed_global.csv").then((data) =>
-  //   setCumulativeCasesData(data)
-  // );
-  // getCsvData("time_series_covid19_deaths_global.csv").then((data) =>
-  //   setCumulativeDeathsData(data)
-  // );
-  // getCsvData("time_series_covid19_recovered_global.csv").then((data) =>
-  //   setCumulativeRecoveredData(data)
-  // );
-  // getApiData().then((data) => setTestData(data));
-  // }, []);
+  useEffect(() => {
+    // getCsvData("time_series_covid19_deaths_global.csv").then((data) =>
+    //   setCumulativeDeathsData(data)
+    // );
+    // getCsvData("time_series_covid19_recovered_global.csv").then((data) =>
+    //   setCumulativeRecoveredData(data)
+    // );
+    // getApiData().then((data) => setTestData(data));
+  }, []);
   useEffect(() => {
     // ----------- 데이터 로드 -----------
     loadAndProcessData().then(({ summaryData, countriesWithFeature }) => {
       setDataForMap(countriesWithFeature);
       setSummaryData(summaryData);
     });
+    getCsvData("time_series_covid19_confirmed_global.csv").then((data) =>
+      setCumulativeCasesData(data)
+    );
   }, []);
 
   return (
@@ -167,11 +168,6 @@ const App = () => {
           display: "flex",
         }}
       >
-        {/* {cumulativeCasesData && <LineChart data={cumulativeCasesData} />}
-      {cumulativeDeathsData && <LineChart data={cumulativeDeathsData} />}
-      {cumulativeRecoveredData && <LineChart data={cumulativeRecoveredData} />}
-      {testData && <LineChart data={testData} />} */}
-
         <Grid
           w="100%"
           gap={1}
@@ -295,7 +291,14 @@ const App = () => {
                 </List>
               </Box>
             </Grid>
-            <Box gridArea="graph" bg="red.500"></Box>
+            <Box ref={svgContainerRef} gridArea="graph" bg="red.500">
+              {cumulativeCasesData && (
+                <LineChart
+                  data={cumulativeCasesData}
+                  svgContainerRef={svgContainerRef}
+                />
+              )}
+            </Box>
           </Grid>
         </Grid>
       </div>
