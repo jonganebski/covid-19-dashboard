@@ -1,76 +1,37 @@
 import * as d3 from "d3";
 import { D3ZoomEvent } from "d3";
-import { Feature, FeatureCollection } from "geojson";
 import React, { useEffect, useMemo, useState } from "react";
+import { TdataForMap } from "../App";
+import { geoPatterson } from "d3-geo-projection";
 
-interface MapWithCirclesProps {}
+interface MapWithCirclesProps {
+  data: TdataForMap;
+}
 
 // ----------- 전역변수 -----------
 
-const projection = d3.geoNaturalEarth1();
+// const projection = d3.geoNaturalEarth1();
+const projection = geoPatterson();
 const pathGenerator = d3.geoPath().projection(projection);
 const pathD = pathGenerator({ type: "Sphere" });
-const svgW = 1200;
-const svgH = 800;
-const oceanColor = "steelblue";
+const svgW = "100%";
+const svgH = "80%";
+const oceanColor = "teal";
 const countryColor = "lightgray";
 const countryColorOnHover = "red";
 const circleColor = "black";
 const circleColorOnHover = "white";
 
-// ----------- 함수 -----------
-// 데이터를 무조건 [{countryCode, countryName, feature, number}, ....] 형식으로 바꿔야 되나?
-// 아니면 features를 기반으로 하고 그 안의 properties 안에 데이터를 넣어버릴까?
-const loadAndProcessData = () => {
-  return Promise.all<FeatureCollection, any>([
-    d3.json(
-      "https://unpkg.com/visionscarto-world-atlas@0.0.6/world/50m_countries.geojson"
-    ),
-    fetch("https://api.covid19api.com/summary").then((response) =>
-      response.json()
-    ),
-  ]).then(([geojsonData, apiData]) => {
-    console.log("geojsonData: ", geojsonData);
-    console.log("apiData: ", apiData);
-    const countriesObj = apiData.Countries.reduce(
-      (acc: { [key: string]: any }, countryD: any) => {
-        const countryCode = countryD.CountryCode;
-        acc[countryCode] = countryD;
-        return acc;
-      },
-      {}
-    );
-
-    const countriesWithFeature = geojsonData.features.map((feature) => {
-      const countryCode = feature.properties!.iso_a2;
-      return { countryCode, feature, data: countriesObj[countryCode] };
-    });
-
-    return {
-      features: geojsonData.features,
-      countriesWithFeature,
-    };
-  });
-};
-
-const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
-  const [features, setFeatures] = useState<Array<Feature> | null>(null);
-  const [data, setData] = useState<any>(null);
+const MapWithCircles: React.FC<MapWithCirclesProps> = ({ data }) => {
   const [transform, setTransform] = useState({
     x: 0,
     y: 0,
     scale: 1,
   });
-  console.log("data: ", data);
-  console.log("features: ", features);
+
+  // d3.zoom()을 붙인 엘리먼트의 transfer를 건드리면 느려지고 흔들리고 문제가 많다.
+  // 이에 대한 해결책은 다른 그룹을 만들어서 d3.zoom이 물려있는 그룹과 transform되는 그룹을 분리하는 것이다.
   useEffect(() => {
-    // ----------- 데이텨 로드 -----------
-    loadAndProcessData().then(({ features, countriesWithFeature }) => {
-      setFeatures(features);
-      setData(countriesWithFeature);
-    });
-    // d3.zoom()을 붙인 엘리먼트의 transfer를 건드리면 느려지고 흔들리고 문제가 많다.
-    // 이에 대한 해결책은 다른 그룹을 만들어서 d3.zoom이 물려있는 그룹과 transform되는 그룹을 분리하는 것이다.
     const g = d3.select("svg").select("#zoom-handler") as d3.Selection<
       Element,
       unknown,
@@ -97,13 +58,13 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
   }, []);
 
   const borderPathComponents = useMemo(() => {
-    if (features) {
-      return features.map((feature) => {
+    if (data) {
+      return data.map((d) => {
         return (
           <g>
             <path
-              key={feature.properties?.name}
-              d={pathGenerator(feature)!}
+              key={d.feature.properties?.name}
+              d={pathGenerator(d.feature)!}
               stroke="black"
               strokeWidth={0.05}
               fill={countryColor}
@@ -111,10 +72,10 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
               onMouseOver={(e) => {
                 const path = e.target as SVGPathElement;
                 path.style.fill = countryColorOnHover;
-                if (feature.properties!.iso_a2 !== "-99") {
-                  const circle = d3.select(`#${feature.properties!.iso_a2}`);
+                if (d.feature.properties!.iso_a2 !== "-99") {
+                  const circle = d3.select(`#${d.feature.properties!.iso_a2}`);
                   const tooltip = d3.select(
-                    `#${feature.properties!.iso_a2}-tooltip`
+                    `#${d.feature.properties!.iso_a2}-tooltip`
                   );
                   circle.attr("fill", circleColorOnHover);
                   tooltip.attr("opacity", 1);
@@ -123,24 +84,21 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
               onMouseOut={(e) => {
                 const path = e.target as SVGPathElement;
                 path.style.fill = countryColor;
-                if (feature.properties!.iso_a2 !== "-99") {
-                  const circle = d3.select(`#${feature.properties!.iso_a2}`);
+                if (d.feature.properties!.iso_a2 !== "-99") {
+                  const circle = d3.select(`#${d.feature.properties!.iso_a2}`);
                   const tooltip = d3.select(
-                    `#${feature.properties!.iso_a2}-tooltip`
+                    `#${d.feature.properties!.iso_a2}-tooltip`
                   );
                   circle.attr("fill", circleColor);
                   tooltip.attr("opacity", 0);
                 }
               }}
             />
-            <rect x={20} y={20}>
-              hello there!
-            </rect>
           </g>
         );
       });
     }
-  }, [features]);
+  }, [data]);
 
   const getMax = (data: any) => {
     const max = d3.max(data, (d: any) => d.data?.TotalConfirmed);
@@ -241,7 +199,12 @@ const MapWithCircles: React.FC<MapWithCirclesProps> = () => {
 
   return (
     <svg width={svgW} height={svgH}>
-      <g id="zoom-handler">
+      <g
+        id="zoom-handler"
+        width="100%"
+        height="100%"
+        transform="translate(0, 0)"
+      >
         <g
           transform={`translate(${transform.x}, ${transform.y}) scale(${transform.scale})`}
         >
