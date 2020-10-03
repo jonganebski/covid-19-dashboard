@@ -35,105 +35,165 @@ export type TdataForMap = Array<{
   data: any;
 }>;
 
-const getApiData = async () => {
-  const response = await fetch(
-    "https://api.covid19api.com/country/south-africa/status/confirmed"
-  );
-  const loadedData = await response.json();
-  const data: Array<IDateCount> = loadedData.map((d: I) => ({
-    date: new Date(d.Date).getTime(),
-    count: d.Cases,
+// export type TTimeseriesD = { date: number | null; count: number | null };
+export type TMainD = {
+  CountryRegion: string;
+  ProvinceState: string;
+  Lat: number | null;
+  Long: number | null;
+  data: IDateCount[];
+};
+
+export type TDailyD = {
+  Country_Region: string;
+  Last_Update: string;
+  Active: number;
+  Confirmed: number;
+  Deaths: number;
+  Recovered: number;
+  Lat: number;
+  Long_: number;
+  Admin2: string;
+  CaseFatality_Ratio: number;
+  Combined_Key: string;
+  FIPS: string;
+  Incidence_Rate: number;
+  Province_State: string;
+};
+
+function compareDailyData(a: TDailyD, b: TDailyD) {
+  // Use toUpperCase() to ignore character casing
+  const bandA = a.Country_Region.toUpperCase();
+  const bandB = b.Country_Region.toUpperCase();
+
+  let comparison = 0;
+  if (bandA > bandB) {
+    comparison = 1;
+  } else if (bandA < bandB) {
+    comparison = -1;
+  }
+  return comparison;
+}
+
+const getDailyData = async (filename: string) => {
+  const loadedData = await d3.csv(filename);
+  // console.log("loadedData: ", loadedData);
+  const dailyRegionData: TDailyD[] = loadedData.map((d) => ({
+    Country_Region: d.Country_Region ?? "",
+    Active: d.Active ? +d.Active : 0,
+    Confirmed: d.Confirmed ? +d.Confirmed : 0,
+    Deaths: d.Deaths ? +d.Deaths : 0,
+    Recovered: d.Recovered ? +d.Recovered : 0,
+    Lat: d.Lat ? +d.Lat : 0,
+    Long_: d.Long_ ? +d.Long_ : 0,
+    Last_Update: d.Last_Update ?? "",
+    Admin2: d.Admin2 ?? "",
+    CaseFatality_Ratio: d["Case-Fatality_Ratio"]
+      ? +d["Case-Fatality_Ratio"]
+      : 0,
+    Combined_Key: d.Combined_Key ?? "",
+    FIPS: d.FIPS ?? "",
+    Incidence_Rate: d.Incident_Rate ? +d.Incident_Rate : 0,
+    Province_State: d.Province_State ?? "",
   }));
-  return data;
-};
+  dailyRegionData.sort(compareDailyData);
+  dailyRegionData.push({ ...dailyRegionData[0] });
+  // console.log("dailyRegionData: ", dailyRegionData);
 
-const getCsvData = async (fileName: string) => {
-  const loadedData = await d3.csv(fileName);
-  console.log("csvData: ", loadedData);
-  const selectedData = loadedData.filter(
-    (d) => d["Country/Region"] === "Japan"
-  );
-  const filteredData = Object.entries(selectedData[0]).filter(([key, _]) => {
-    const date = new Date(key);
-    if (isNaN(date.getTime())) {
-      return false;
+  const dailyCountryData: TDailyD[] = [];
+  dailyRegionData.reduce((acc, d) => {
+    if (acc.Country_Region === d.Country_Region) {
+      acc.Active = acc.Active + d.Active;
+      acc.Confirmed = acc.Confirmed + d.Confirmed;
+      acc.Deaths = acc.Deaths + d.Deaths;
+      acc.Recovered = acc.Recovered + d.Recovered;
+      acc.Admin2 = "";
+      acc.CaseFatality_Ratio = 0;
+      acc.Combined_Key = "";
+      acc.FIPS = "";
+      acc.Province_State = "";
     } else {
-      return true;
+      dailyCountryData.push(acc);
+      acc = d;
     }
+    return acc;
   });
-  const data = filteredData.map((d) => {
-    const date = new Date(d[0]);
-    return {
-      date: date.getTime(),
-      count: d[1] ? +d[1] : 0,
-    };
-  });
-  return data;
+  dailyRegionData.pop();
+  console.log(dailyCountryData);
+  return { dailyCountryData, dailyRegionData };
 };
 
-// ----------- 함수 -----------
-// https://api.covid19api.com 에서는 세계의 시간에 따른 변화를 보여주는 데이터가 없다... 나라별만 있음.
-const loadAndProcessData = () => {
-  return Promise.all<FeatureCollection, any>([
-    d3.json(
-      "https://unpkg.com/visionscarto-world-atlas@0.0.6/world/50m_countries.geojson"
-    ),
-    fetch("https://api.covid19api.com/summary").then((response) =>
-      response.json()
-    ),
-  ]).then(([geojsonData, summaryData]) => {
-    // console.log("geojsonData: ", geojsonData);
-    // console.log("summaryData: ", summaryData);
-
-    const countriesObj = summaryData.Countries?.reduce(
-      (acc: { [key: string]: any }, countryD: any) => {
-        const countryCode = countryD.CountryCode;
-        acc[countryCode] = countryD;
-        return acc;
-      },
-      {}
-    );
-    // console.log("countriesObj: ", countriesObj);
-    const countriesWithFeature = geojsonData.features.map((feature) => {
-      const countryCode = feature.properties!.iso_a2;
-      return { countryCode, feature, data: countriesObj[countryCode] };
+const getTimeSeriesData = async (fileName: string) => {
+  const loadedData = await d3.csv(fileName);
+  const D: TMainD = {
+    CountryRegion: "",
+    ProvinceState: "",
+    Lat: 0,
+    Long: 0,
+    data: [],
+  };
+  const data = loadedData.map((d) => {
+    const timeData: IDateCount[] = [];
+    Object.entries(d).forEach(([key, value]) => {
+      if (key === "Country/Region") {
+        D.CountryRegion = value ?? "";
+      } else if (key === "Province/State") {
+        D.ProvinceState = value ?? "";
+      } else if (key === "Lat") {
+        D.Lat = value ? +value : null;
+      } else if (key === "Long") {
+        D.Long = value ? +value : null;
+      } else {
+        timeData.push({
+          date: new Date(key).getTime() ?? null,
+          count: value ? +value : 0,
+        });
+      }
     });
-    // console.log("countriesWithFeature: ", countriesWithFeature);
-
-    return { summaryData, countriesWithFeature };
+    return { ...D, data: [...timeData] };
   });
+  const countryWise: any = [];
+  data.push({
+    ProvinceState: "",
+    CountryRegion: "",
+    Lat: null,
+    Long: null,
+    data: [],
+  });
+  data.reduce((acc, d) => {
+    if (acc.CountryRegion === d.CountryRegion) {
+      console.log("same");
+      acc.ProvinceState = "";
+      d.data.forEach((d, i) => {
+        acc.data[i].count = (acc.data[i].count ?? 0) + (d.count ?? 0);
+      });
+    } else {
+      countryWise.push(acc);
+      acc = d;
+    }
+    return acc;
+  }, data[0]);
+
+  // console.log("countryWise: ", countryWise);
+  return countryWise;
 };
 
 const App = () => {
-  const [cumulativeCasesData, setCumulativeCasesData] = useState<Array<
-    IDateCount
-  > | null>(null);
-  // const [cumulativeDeathsData, setCumulativeDeathsData] = useState<Array<
-  //   IDateCount
-  // > | null>(null);
-  // const [cumulativeRecoveredData, setCumulativeRecoveredData] = useState<Array<
-  //   IDateCount
-  // > | null>(null);
-  // const [testData, setTestData] = useState<Array<IDateCount> | null>(null);
-  const [dataForMap, setDataForMap] = useState<TdataForMap | null>(null);
-  const [summaryData, setSummaryData] = useState<any | null>(null);
-  useEffect(() => {
-    // getCsvData("time_series_covid19_deaths_global.csv").then((data) =>
-    //   setCumulativeDeathsData(data)
-    // );
-    // getCsvData("time_series_covid19_recovered_global.csv").then((data) =>
-    //   setCumulativeRecoveredData(data)
-    // );
-    // getApiData().then((data) => setTestData(data));
-  }, []);
+  const [timeSeriesData, setTimeSeriesData] = useState<TMainD[] | null>(null);
+  const [dailyData, setDailyData] = useState<{
+    dailyCountryData: TDailyD[];
+    dailyRegionData: TDailyD[];
+  } | null>(null);
+  console.log("timeSeriesData: ", timeSeriesData);
   useEffect(() => {
     // ----------- 데이터 로드 -----------
-    loadAndProcessData().then(({ summaryData, countriesWithFeature }) => {
-      setDataForMap(countriesWithFeature);
-      setSummaryData(summaryData);
-    });
-    getCsvData("time_series_covid19_confirmed_global.csv").then((data) =>
-      setCumulativeCasesData(data)
+    getTimeSeriesData("time_series_covid19_confirmed_global.csv").then((data) =>
+      setTimeSeriesData(data)
+    );
+    getDailyData(
+      "10-02-2020.csv"
+    ).then(({ dailyCountryData, dailyRegionData }) =>
+      setDailyData({ dailyCountryData, dailyRegionData })
     );
   }, []);
 
@@ -158,12 +218,9 @@ const App = () => {
         <Flex gridArea="header" justify="center" bg="blue.500">
           <Heading> Covid-19 Information Dashboard</Heading>
         </Flex>
-        <LeftColumn summaryData={summaryData} />
-        <CenterColumn dataForMap={dataForMap} />
-        <RightColumn
-          summaryData={summaryData}
-          cumulativeCasesData={cumulativeCasesData}
-        />
+        <LeftColumn data={dailyData} />
+        {/* <CenterColumn dataForMap={dataForMap} /> */}
+        <RightColumn dailyData={dailyData} timeSeriesData={timeSeriesData} />
       </Grid>
     </div>
   );

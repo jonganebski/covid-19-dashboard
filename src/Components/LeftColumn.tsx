@@ -1,20 +1,34 @@
 import {
-  Grid,
-  Flex,
-  Heading,
   Box,
+  Divider,
+  Flex,
+  Grid,
+  Heading,
   List,
   ListItem,
-  Divider,
   Text,
 } from "@chakra-ui/core";
 import React from "react";
+import { TDailyD } from "../App";
 
 interface LeftColumnProps {
-  summaryData: any;
+  data: {
+    dailyCountryData: TDailyD[];
+    dailyRegionData: TDailyD[];
+  } | null;
 }
 
-const LeftColumn: React.FC<LeftColumnProps> = ({ summaryData }) => {
+const LeftColumn: React.FC<LeftColumnProps> = ({ data }) => {
+  let totalConfirmed = 0;
+  let sortedCountryData: TDailyD[] = [];
+  if (data) {
+    sortedCountryData = [...data.dailyCountryData];
+    sortedCountryData.sort((a, b) => b.Confirmed - a.Confirmed);
+    sortedCountryData.forEach((d) => {
+      totalConfirmed = totalConfirmed + d.Confirmed;
+    });
+  }
+
   return (
     <Grid
       gridArea="left"
@@ -26,28 +40,28 @@ const LeftColumn: React.FC<LeftColumnProps> = ({ summaryData }) => {
         <Heading size="md">Global Cases</Heading>
         <Text fontSize="sm">(cumulative)</Text>
         <Heading size="xl" color="red.600">
-          {summaryData?.Global.TotalConfirmed.toLocaleString()}
+          {totalConfirmed.toLocaleString()}
         </Heading>
       </Flex>
       <Box bg="blue.400" overflowY="scroll" p={5}>
         <List spacing={1}>
-          {summaryData?.Countries.sort(
-            (a: any, b: any) => b.TotalConfirmed - a.TotalConfirmed
-          ).map((country: any) => (
-            <ListItem>
-              <Text fontWeight={600} color="red.600" display="inline">
-                {country.TotalConfirmed.toLocaleString()}
-              </Text>{" "}
-              {country.Country}
-              <Divider />
-            </ListItem>
-          ))}
+          {sortedCountryData &&
+            sortedCountryData.map((d, i) => (
+              <ListItem key={i}>
+                <Text fontWeight={600} color="red.600" display="inline">
+                  {d.Confirmed.toLocaleString()}
+                </Text>{" "}
+                {d.Country_Region}
+                <Divider />
+              </ListItem>
+            ))}
         </List>
       </Box>
       <Flex direction="column" align="center" justify="center" bg="blue.500">
         <Text>Last Updated at</Text>
         <Text fontSize="2xl" fontWeight={500}>
-          {new Date(summaryData?.Date).toLocaleString()}
+          {data &&
+            new Date(data?.dailyCountryData[0].Last_Update).toLocaleString()}
         </Text>
       </Flex>
     </Grid>

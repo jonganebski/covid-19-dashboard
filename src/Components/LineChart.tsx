@@ -140,21 +140,15 @@ const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
 
   return (
     <>
-      {/* <svg ref={svgRef} width={svgW} height={svgH}> */}
-      {/* <svg ref={svgRef} viewBox={`0 0 ${svgW} ${svgH}`}> */}
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${svgW} ${svgH}`}
-        preserveAspectRatio="xMidyMid meet"
-      >
+      <svg ref={svgRef} viewBox={`0 0 ${svgW} ${svgH}`}>
         <BoundGroup
           width={innerW}
           height={innerH}
           transform={`translate(${margin.left}, ${margin.top})`}
         >
           <MouseListener
-            width={innerW}
-            height={innerH}
+            width={Math.abs(innerW)}
+            height={Math.abs(innerH)}
             opacity="0"
             onMouseMove={handleMouseMove}
           />
@@ -199,7 +193,6 @@ const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
                   <line x2="-6" stroke="currentColor" />
                   <line x2={innerW} stroke="lightgray" strokeDasharray="5, 5" />
                   <text
-                    key={i}
                     style={{
                       fontSize: "10px",
                       textAnchor: "middle",

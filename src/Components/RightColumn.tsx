@@ -9,19 +9,54 @@ import {
   Text,
 } from "@chakra-ui/core";
 import React, { useRef } from "react";
-import { IDateCount } from "../App";
+import { IDateCount, TDailyD, TMainD } from "../App";
 import LineChart from "./LineChart";
 
 interface RightColumnProps {
-  summaryData: any;
-  cumulativeCasesData: Array<IDateCount> | null;
+  dailyData: {
+    dailyCountryData: TDailyD[];
+    dailyRegionData: TDailyD[];
+  } | null;
+  timeSeriesData: TMainD[] | null;
 }
 
 const RightColumn: React.FC<RightColumnProps> = ({
-  summaryData,
-  cumulativeCasesData,
+  dailyData,
+  timeSeriesData,
 }) => {
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
+  let totalDeaths = 0;
+  let sortedCountryData: TDailyD[] = [];
+
+  if (dailyData) {
+    sortedCountryData = [...dailyData.dailyCountryData];
+    sortedCountryData.sort((a, b) => b.Confirmed - a.Confirmed);
+    sortedCountryData.forEach((d) => {
+      totalDeaths = totalDeaths + d.Deaths;
+    });
+  }
+
+  const newConfirmedData = timeSeriesData?.map((country) => {
+    const { CountryRegion, data } = country;
+    const lastInx = data.length - 1;
+    const currnetConfirmed = data[lastInx].count;
+    const prevConfirmed = data[lastInx - 1].count;
+    const newConfirmed =
+      currnetConfirmed && prevConfirmed ? currnetConfirmed - prevConfirmed : -1;
+    return {
+      CountryRegion,
+      date: data[lastInx].date,
+      newConfirmed,
+    };
+  });
+
+  console.log("newConfirmed: ", newConfirmedData);
+
+  let globalNewConfirmed = 0;
+  newConfirmedData?.forEach((d) => {
+    globalNewConfirmed = globalNewConfirmed + d.newConfirmed;
+  });
+
   return (
     <Grid
       gridArea="right"
@@ -38,19 +73,17 @@ const RightColumn: React.FC<RightColumnProps> = ({
           <Heading size="md">Global Deaths</Heading>
           <Text fontSize="sm">(cumulative)</Text>
           <Heading size="xl" color="red.600">
-            {summaryData?.Global.TotalDeaths.toLocaleString()}
+            {totalDeaths.toLocaleString()}
           </Heading>
         </Flex>
         <Box overflowY="scroll">
           <List spacing={1}>
-            {summaryData?.Countries.sort(
-              (a: any, b: any) => b.TotalDeaths - a.TotalDeaths
-            ).map((country: any) => (
-              <ListItem>
+            {sortedCountryData.map((country, i) => (
+              <ListItem key={i}>
                 <Text fontWeight={600} color="gray.200">
-                  {country.TotalDeaths.toLocaleString()} deaths
+                  {country.Deaths.toLocaleString()} deaths
                 </Text>{" "}
-                {country.Country}
+                {country.Country_Region}
                 <Divider />
               </ListItem>
             ))}
@@ -62,29 +95,29 @@ const RightColumn: React.FC<RightColumnProps> = ({
           <Heading size="md">Global Cases</Heading>
           <Text fontSize="sm">(new cases)</Text>
           <Heading size="xl" color="red.600">
-            {summaryData?.Global.NewConfirmed.toLocaleString()}
+            {globalNewConfirmed?.toLocaleString()}
           </Heading>
         </Flex>
         <Box overflowY="scroll">
           <List spacing={1}>
-            {summaryData?.Countries.sort(
-              (a: any, b: any) => b.NewConfirmed - a.NewConfirmed
-            ).map((country: any) => (
-              <ListItem>
-                <Text fontWeight={600} color="gray.200">
-                  {country.NewConfirmed.toLocaleString()} new cases
-                </Text>{" "}
-                {country.Country}
-                <Divider />
-              </ListItem>
-            ))}
+            {newConfirmedData
+              ?.sort((a, b) => b.newConfirmed - a.newConfirmed)
+              .map((country, i) => (
+                <ListItem key={i}>
+                  <Text fontWeight={600} color="gray.200">
+                    {country.newConfirmed.toLocaleString()} new cases
+                  </Text>{" "}
+                  {country.CountryRegion}
+                  <Divider />
+                </ListItem>
+              ))}
           </List>
         </Box>
       </Grid>
       <Box ref={svgContainerRef} gridArea="graph" bg="red.500">
-        {cumulativeCasesData && (
+        {timeSeriesData && (
           <LineChart
-            data={cumulativeCasesData}
+            data={timeSeriesData[0].data}
             svgContainerRef={svgContainerRef}
           />
         )}
