@@ -1,11 +1,6 @@
-import { Box, Flex, Grid, Heading } from "@chakra-ui/core";
+import { Flex, Grid, Heading } from "@chakra-ui/core";
 import * as d3 from "d3";
-import {
-  Feature,
-  FeatureCollection,
-  GeoJsonProperties,
-  Geometry,
-} from "geojson";
+import { Feature, GeoJsonProperties, Geometry } from "geojson";
 import React, { useEffect, useState } from "react";
 import CenterColumn from "./Components/CenterColumn";
 import LeftColumn from "./Components/LeftColumn";
@@ -54,73 +49,110 @@ export type TDailyD = {
   Lat: number;
   Long_: number;
   Admin2: string;
-  CaseFatality_Ratio: number;
+  CaseFatality_Ratio: number | null;
   Combined_Key: string;
   FIPS: string;
-  Incidence_Rate: number;
+  Incidence_Rate: number | null;
   Province_State: string;
 };
-
-function compareDailyData(a: TDailyD, b: TDailyD) {
-  // Use toUpperCase() to ignore character casing
-  const bandA = a.Country_Region.toUpperCase();
-  const bandB = b.Country_Region.toUpperCase();
-
-  let comparison = 0;
-  if (bandA > bandB) {
-    comparison = 1;
-  } else if (bandA < bandB) {
-    comparison = -1;
-  }
-  return comparison;
-}
-
+const COORDS: { [key: string]: { lat: number; lon: number } } = {
+  Australia: { lat: -24.77612, lon: 134.754991 },
+  Brazil: { lat: -10.33335, lon: -53.199991 },
+  Canada: { lat: 61.066689, lon: -107.991692 },
+  Chile: { lat: -31.761326, lon: -71.318776 },
+  China: { lat: 35.000072, lon: 104.999934 },
+  Colombia: { lat: 2.889445, lon: -73.78391 },
+  Denmark: { lat: 55.670244, lon: 10.333308 },
+  France: { lat: 46.603361, lon: 1.88834 },
+  Germany: { lat: 51.083433, lon: 10.42343 },
+  India: { lat: 22.35113, lon: 78.667762 },
+  Italy: { lat: 42.63843, lon: 12.674297 },
+  Japan: { lat: 36.574857, lon: 139.23943 },
+  Mexico: { lat: 22.500051, lon: -100.000038 },
+  Netherlands: { lat: 52.500174, lon: 5.748103 },
+  Pakistan: { lat: 30.330827, lon: 71.247484 },
+  Peru: { lat: -6.869955, lon: -75.045835 },
+  Russia: { lat: 64.686314, lon: 97.745309 },
+  Spain: { lat: 39.326218, lon: -4.838083 },
+  Sweden: { lat: 59.674972, lon: 14.520859 },
+  US: { lat: 39.783728, lon: -100.445886 },
+  Ukraine: { lat: 49.487187, lon: 31.271836 },
+  "United Kingdom": { lat: 54.70235, lon: -3.276565 },
+};
 const getDailyData = async (filename: string) => {
   const loadedData = await d3.csv(filename);
   // console.log("loadedData: ", loadedData);
-  const dailyRegionData: TDailyD[] = loadedData.map((d) => ({
-    Country_Region: d.Country_Region ?? "",
-    Active: d.Active ? +d.Active : 0,
-    Confirmed: d.Confirmed ? +d.Confirmed : 0,
-    Deaths: d.Deaths ? +d.Deaths : 0,
-    Recovered: d.Recovered ? +d.Recovered : 0,
-    Lat: d.Lat ? +d.Lat : 0,
-    Long_: d.Long_ ? +d.Long_ : 0,
-    Last_Update: d.Last_Update ?? "",
-    Admin2: d.Admin2 ?? "",
-    CaseFatality_Ratio: d["Case-Fatality_Ratio"]
-      ? +d["Case-Fatality_Ratio"]
-      : 0,
-    Combined_Key: d.Combined_Key ?? "",
-    FIPS: d.FIPS ?? "",
-    Incidence_Rate: d.Incident_Rate ? +d.Incident_Rate : 0,
-    Province_State: d.Province_State ?? "",
-  }));
-  dailyRegionData.sort(compareDailyData);
-  dailyRegionData.push({ ...dailyRegionData[0] });
-  // console.log("dailyRegionData: ", dailyRegionData);
+  const mixedCountries: Set<string> = new Set();
 
-  const dailyCountryData: TDailyD[] = [];
-  dailyRegionData.reduce((acc, d) => {
-    if (acc.Country_Region === d.Country_Region) {
-      acc.Active = acc.Active + d.Active;
-      acc.Confirmed = acc.Confirmed + d.Confirmed;
-      acc.Deaths = acc.Deaths + d.Deaths;
-      acc.Recovered = acc.Recovered + d.Recovered;
-      acc.Admin2 = "";
-      acc.CaseFatality_Ratio = 0;
-      acc.Combined_Key = "";
-      acc.FIPS = "";
-      acc.Province_State = "";
-    } else {
-      dailyCountryData.push(acc);
-      acc = d;
+  const provinceWise: TDailyD[] = loadedData.map((d, i, arr) => {
+    if (0 < i && d.Country_Region === arr[i - 1].Country_Region) {
+      mixedCountries.add(d.Country_Region ?? "");
     }
-    return acc;
+    return {
+      Country_Region: d.Country_Region ?? "",
+      Active: d.Active ? +d.Active : 0,
+      Confirmed: d.Confirmed ? +d.Confirmed : 0,
+      Deaths: d.Deaths ? +d.Deaths : 0,
+      Recovered: d.Recovered ? +d.Recovered : 0,
+      Lat: d.Lat ? +d.Lat : 0,
+      Long_: d.Long_ ? +d.Long_ : 0,
+      Last_Update: d.Last_Update ?? "",
+      Admin2: d.Admin2 ?? "",
+      CaseFatality_Ratio: d["Case-Fatality_Ratio"]
+        ? +d["Case-Fatality_Ratio"]
+        : 0,
+      Combined_Key: d.Combined_Key ?? "",
+      FIPS: d.FIPS ?? "",
+      Incidence_Rate: d.Incident_Rate ? +d.Incident_Rate : 0,
+      Province_State: d.Province_State ?? "",
+    };
   });
-  dailyRegionData.pop();
-  console.log(dailyCountryData);
-  return { dailyCountryData, dailyRegionData };
+  console.log("provinceWise: ", provinceWise);
+  console.log(mixedCountries);
+
+  const clean: TDailyD[] = [];
+  const blackList: TDailyD[] = [];
+  provinceWise.forEach((d) => {
+    if (mixedCountries.has(d.Country_Region)) {
+      blackList.push(d);
+    } else {
+      clean.push(d);
+    }
+  });
+
+  console.log("clean: ", clean);
+  console.log("blackList: ", blackList);
+
+  const x = Array.from(mixedCountries).map((countryName) => {
+    return blackList
+      .filter((d) => d.Country_Region === countryName)
+      .reduce((acc, d) => {
+        acc = {
+          Country_Region: d.Country_Region,
+          Active: acc.Active + d.Active,
+          Confirmed: acc.Confirmed + d.Confirmed,
+          Deaths: acc.Deaths + d.Deaths,
+          Recovered: acc.Recovered + d.Recovered,
+          Last_Update: d.Last_Update,
+          Lat: COORDS[d.Country_Region].lat,
+          Long_: COORDS[d.Country_Region].lon,
+          FIPS: "",
+          Incidence_Rate: null,
+          CaseFatality_Ratio: null,
+          Combined_Key: "",
+          Admin2: "",
+          Province_State: "",
+        };
+        return acc;
+      });
+  });
+
+  console.log("x: ", x);
+
+  const countryWise = clean.concat(x);
+
+  console.log("countryWise: ", countryWise);
+  return { provinceWise, countryWise };
 };
 
 const getTimeSeriesData = async (fileName: string) => {
@@ -162,7 +194,7 @@ const getTimeSeriesData = async (fileName: string) => {
   });
   data.reduce((acc, d) => {
     if (acc.CountryRegion === d.CountryRegion) {
-      console.log("same");
+      // console.log("same");
       acc.ProvinceState = "";
       d.data.forEach((d, i) => {
         acc.data[i].count = (acc.data[i].count ?? 0) + (d.count ?? 0);
@@ -181,19 +213,17 @@ const getTimeSeriesData = async (fileName: string) => {
 const App = () => {
   const [timeSeriesData, setTimeSeriesData] = useState<TMainD[] | null>(null);
   const [dailyData, setDailyData] = useState<{
-    dailyCountryData: TDailyD[];
-    dailyRegionData: TDailyD[];
+    countryWise: TDailyD[];
+    provinceWise: TDailyD[];
   } | null>(null);
-  console.log("timeSeriesData: ", timeSeriesData);
+  // console.log("timeSeriesData: ", timeSeriesData);
   useEffect(() => {
     // ----------- 데이터 로드 -----------
     getTimeSeriesData("time_series_covid19_confirmed_global.csv").then((data) =>
       setTimeSeriesData(data)
     );
-    getDailyData(
-      "10-02-2020.csv"
-    ).then(({ dailyCountryData, dailyRegionData }) =>
-      setDailyData({ dailyCountryData, dailyRegionData })
+    getDailyData("10-02-2020.csv").then(({ countryWise, provinceWise }) =>
+      setDailyData({ countryWise, provinceWise })
     );
   }, []);
 
@@ -218,8 +248,8 @@ const App = () => {
         <Flex gridArea="header" justify="center" bg="blue.500">
           <Heading> Covid-19 Information Dashboard</Heading>
         </Flex>
-        <LeftColumn data={dailyData} />
-        {/* <CenterColumn dataForMap={dataForMap} /> */}
+        <LeftColumn dailyData={dailyData} />
+        <CenterColumn dailyData={dailyData} />
         <RightColumn dailyData={dailyData} timeSeriesData={timeSeriesData} />
       </Grid>
     </div>

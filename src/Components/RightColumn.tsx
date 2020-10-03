@@ -1,21 +1,21 @@
 import {
-  Grid,
-  Flex,
-  Heading,
   Box,
+  Divider,
+  Flex,
+  Grid,
+  Heading,
   List,
   ListItem,
-  Divider,
   Text,
 } from "@chakra-ui/core";
 import React, { useRef } from "react";
-import { IDateCount, TDailyD, TMainD } from "../App";
+import { TDailyD, TMainD } from "../App";
 import LineChart from "./LineChart";
 
 interface RightColumnProps {
   dailyData: {
-    dailyCountryData: TDailyD[];
-    dailyRegionData: TDailyD[];
+    countryWise: TDailyD[];
+    provinceWise: TDailyD[];
   } | null;
   timeSeriesData: TMainD[] | null;
 }
@@ -26,15 +26,10 @@ const RightColumn: React.FC<RightColumnProps> = ({
 }) => {
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
   let totalDeaths = 0;
-  let sortedCountryData: TDailyD[] = [];
-
-  if (dailyData) {
-    sortedCountryData = [...dailyData.dailyCountryData];
-    sortedCountryData.sort((a, b) => b.Confirmed - a.Confirmed);
-    sortedCountryData.forEach((d) => {
-      totalDeaths = totalDeaths + d.Deaths;
-    });
-  }
+  dailyData?.countryWise.forEach((d) => {
+    totalDeaths = totalDeaths + d.Deaths;
+  });
+  // sortedCountryData.sort((a, b) => b.Confirmed - a.Confirmed);
 
   const newConfirmedData = timeSeriesData?.map((country) => {
     const { CountryRegion, data } = country;
@@ -50,7 +45,7 @@ const RightColumn: React.FC<RightColumnProps> = ({
     };
   });
 
-  console.log("newConfirmed: ", newConfirmedData);
+  // console.log("newConfirmed: ", newConfirmedData);
 
   let globalNewConfirmed = 0;
   newConfirmedData?.forEach((d) => {
@@ -78,15 +73,17 @@ const RightColumn: React.FC<RightColumnProps> = ({
         </Flex>
         <Box overflowY="scroll">
           <List spacing={1}>
-            {sortedCountryData.map((country, i) => (
-              <ListItem key={i}>
-                <Text fontWeight={600} color="gray.200">
-                  {country.Deaths.toLocaleString()} deaths
-                </Text>{" "}
-                {country.Country_Region}
-                <Divider />
-              </ListItem>
-            ))}
+            {dailyData?.countryWise
+              .sort((a, b) => b.Deaths - a.Deaths)
+              .map((d, i) => (
+                <ListItem key={i}>
+                  <Text fontWeight={600} color="gray.200">
+                    {d.Deaths.toLocaleString()} deaths
+                  </Text>{" "}
+                  {d.Country_Region}
+                  <Divider />
+                </ListItem>
+              ))}
           </List>
         </Box>
       </Grid>

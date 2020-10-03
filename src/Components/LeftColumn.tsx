@@ -12,22 +12,17 @@ import React from "react";
 import { TDailyD } from "../App";
 
 interface LeftColumnProps {
-  data: {
-    dailyCountryData: TDailyD[];
-    dailyRegionData: TDailyD[];
+  dailyData: {
+    countryWise: TDailyD[];
+    provinceWise: TDailyD[];
   } | null;
 }
 
-const LeftColumn: React.FC<LeftColumnProps> = ({ data }) => {
+const LeftColumn: React.FC<LeftColumnProps> = ({ dailyData }) => {
   let totalConfirmed = 0;
-  let sortedCountryData: TDailyD[] = [];
-  if (data) {
-    sortedCountryData = [...data.dailyCountryData];
-    sortedCountryData.sort((a, b) => b.Confirmed - a.Confirmed);
-    sortedCountryData.forEach((d) => {
-      totalConfirmed = totalConfirmed + d.Confirmed;
-    });
-  }
+  dailyData?.countryWise.forEach((d) => {
+    totalConfirmed = totalConfirmed + d.Confirmed;
+  });
 
   return (
     <Grid
@@ -45,8 +40,9 @@ const LeftColumn: React.FC<LeftColumnProps> = ({ data }) => {
       </Flex>
       <Box bg="blue.400" overflowY="scroll" p={5}>
         <List spacing={1}>
-          {sortedCountryData &&
-            sortedCountryData.map((d, i) => (
+          {dailyData?.countryWise
+            .sort((a, b) => b.Confirmed - a.Confirmed)
+            .map((d, i) => (
               <ListItem key={i}>
                 <Text fontWeight={600} color="red.600" display="inline">
                   {d.Confirmed.toLocaleString()}
@@ -60,8 +56,8 @@ const LeftColumn: React.FC<LeftColumnProps> = ({ data }) => {
       <Flex direction="column" align="center" justify="center" bg="blue.500">
         <Text>Last Updated at</Text>
         <Text fontSize="2xl" fontWeight={500}>
-          {data &&
-            new Date(data?.dailyCountryData[0].Last_Update).toLocaleString()}
+          {dailyData &&
+            new Date(dailyData.countryWise[0].Last_Update).toLocaleString()}
         </Text>
       </Flex>
     </Grid>

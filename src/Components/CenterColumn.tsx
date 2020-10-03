@@ -1,17 +1,21 @@
-import { Grid, Stack, Box, Text, Link } from "@chakra-ui/core";
+import { Box, Grid, Link, Stack, Text } from "@chakra-ui/core";
 import React from "react";
-import { TdataForMap } from "../App";
-import MapWithCircles from "./MapWithCircles";
+import { TDailyD } from "../App";
+import LeafletMap from "./LeafletMap";
 
 interface CenterColumnProps {
-  dataForMap: TdataForMap | null;
+  dailyData: {
+    countryWise: TDailyD[];
+    provinceWise: TDailyD[];
+  } | null;
 }
 
-const CenterColumn: React.FC<CenterColumnProps> = ({ dataForMap }) => {
+const CenterColumn: React.FC<CenterColumnProps> = ({ dailyData }) => {
   return (
     <Grid gridArea="center" gridTemplateRows="7fr 1fr" gap={1}>
       <Stack bg="green.300">
-        {dataForMap && <MapWithCircles data={dataForMap} />}
+        {/* {dataForMap && <MapWithCircles data={dataForMap} />} */}
+        <LeafletMap dailyData={dailyData} />
       </Stack>
       <Box bg="green.700">
         <Text>
@@ -21,11 +25,7 @@ const CenterColumn: React.FC<CenterColumnProps> = ({ dataForMap }) => {
           </Link>
         </Text>
         <Text>
-          Data sources:{" "}
-          <Link href="https://api.covid19api.com" target="_blank">
-            https://api.covid19api.com
-          </Link>
-          ,{" "}
+          Data source:{" "}
           <Link
             href="https://github.com/CSSEGISandData/COVID-19"
             target="_blank"
