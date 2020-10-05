@@ -111,7 +111,7 @@ export const getDailyData = async (filename: string) => {
   });
 
   const data = cleanData.concat(cleanedData);
-  console.log("data: ", data);
+  console.log("getting data...: ", data);
   return data;
 };
 

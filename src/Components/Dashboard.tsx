@@ -11,6 +11,8 @@ const Dashboard = () => {
   const [dailyData, setDailyData] = useState<TDailyCountryD[] | null>(null);
   const [selected, setSelected] = useState("");
 
+  console.log("selected: ", selected);
+
   const handleLiClick = (countryName: string) => {
     setSelected((prev) => (prev === countryName ? "" : countryName));
   };
