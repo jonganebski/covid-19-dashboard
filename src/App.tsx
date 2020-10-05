@@ -216,6 +216,35 @@ const App = () => {
     countryWise: TDailyD[];
     provinceWise: TDailyD[];
   } | null>(null);
+  const [selected, setSelected] = useState("");
+  console.log("selected: ", selected);
+
+  const handleLiClick = (countryName: string) => {
+    setSelected((prev) => (prev === countryName ? "" : countryName));
+  };
+
+  const scrollList = (ref: React.MutableRefObject<HTMLDivElement | null>) => {
+    if (selected) {
+      const target = ref.current?.querySelector(
+        `#${selected.replace(/\s+/g, "")}`
+      );
+      console.log(target);
+      const parent = target?.parentElement;
+      const parentID = parent?.id;
+      const scrollHeight =
+        parentID && parent?.scrollHeight
+          ? (+parentID - 1) * parent.scrollHeight
+          : 0;
+
+      ref.current?.scrollTo({
+        top: scrollHeight < 0 ? 0 : scrollHeight,
+        behavior: "smooth",
+      });
+    } else {
+      ref.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   // console.log("timeSeriesData: ", timeSeriesData);
   useEffect(() => {
     // ----------- 데이터 로드 -----------
@@ -248,9 +277,22 @@ const App = () => {
         <Flex gridArea="header" justify="center" bg="blue.500">
           <Heading> Covid-19 Information Dashboard</Heading>
         </Flex>
-        <LeftColumn dailyData={dailyData} />
+        <LeftColumn
+          dailyData={dailyData}
+          selected={selected}
+          setSelected={setSelected}
+          handleLiClick={handleLiClick}
+          scrollList={scrollList}
+        />
         <CenterColumn dailyData={dailyData} />
-        <RightColumn dailyData={dailyData} timeSeriesData={timeSeriesData} />
+        <RightColumn
+          dailyData={dailyData}
+          timeSeriesData={timeSeriesData}
+          selected={selected}
+          setSelected={setSelected}
+          handleLiClick={handleLiClick}
+          scrollList={scrollList}
+        />
       </Grid>
     </div>
   );

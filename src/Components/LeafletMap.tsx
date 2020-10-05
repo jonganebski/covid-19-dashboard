@@ -11,8 +11,8 @@ interface LeafletMapProps {
 
 const LeafletMap: React.FC<LeafletMapProps> = ({ dailyData }) => {
   const [viewport] = useState({
-    lat: 51.505,
-    lng: -0.09,
+    lat: 20,
+    lng: 10,
     zoom: 2,
   });
 

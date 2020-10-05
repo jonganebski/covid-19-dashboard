@@ -8,7 +8,7 @@ import {
   ListItem,
   Text,
 } from "@chakra-ui/core";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { TDailyD, TMainD } from "../App";
 import LineChart from "./LineChart";
 
@@ -18,13 +18,29 @@ interface RightColumnProps {
     provinceWise: TDailyD[];
   } | null;
   timeSeriesData: TMainD[] | null;
+  selected: string;
+  setSelected: React.Dispatch<React.SetStateAction<string>>;
+  handleLiClick: (countryName: string) => void;
+  scrollList: (ref: React.MutableRefObject<HTMLDivElement | null>) => void;
 }
 
 const RightColumn: React.FC<RightColumnProps> = ({
   dailyData,
   timeSeriesData,
+  selected,
+  setSelected,
+  handleLiClick,
+  scrollList,
 }) => {
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
+  const deathsBoxRef = useRef<HTMLDivElement | null>(null);
+  const newCasesBoxRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    scrollList(deathsBoxRef);
+    scrollList(newCasesBoxRef);
+  }, [selected, scrollList]);
+
   let totalDeaths = 0;
   dailyData?.countryWise.forEach((d) => {
     totalDeaths = totalDeaths + d.Deaths;
@@ -34,10 +50,10 @@ const RightColumn: React.FC<RightColumnProps> = ({
   const newConfirmedData = timeSeriesData?.map((country) => {
     const { CountryRegion, data } = country;
     const lastInx = data.length - 1;
-    const currnetConfirmed = data[lastInx].count;
+    const currentConfirmed = data[lastInx].count;
     const prevConfirmed = data[lastInx - 1].count;
     const newConfirmed =
-      currnetConfirmed && prevConfirmed ? currnetConfirmed - prevConfirmed : -1;
+      currentConfirmed && prevConfirmed ? currentConfirmed - prevConfirmed : -1;
     return {
       CountryRegion,
       date: data[lastInx].date,
@@ -65,46 +81,81 @@ const RightColumn: React.FC<RightColumnProps> = ({
     >
       <Grid gridArea="global" bg="red.300" gridTemplateRows="1fr 5fr" p={5}>
         <Flex mb={5} direction="column" align="center" justify="center">
-          <Heading size="md">Global Deaths</Heading>
+          <Heading size="md">Total Deaths</Heading>
+          <Heading size="lg">{selected ? selected : "Global"}</Heading>
           <Text fontSize="sm">(cumulative)</Text>
           <Heading size="xl" color="red.600">
-            {totalDeaths.toLocaleString()}
+            {selected === ""
+              ? totalDeaths.toLocaleString()
+              : dailyData?.countryWise
+                  .filter((d) => d.Country_Region === selected)[0]
+                  .Deaths.toLocaleString()}
           </Heading>
         </Flex>
-        <Box overflowY="scroll">
+        <Box overflowY="scroll" ref={deathsBoxRef}>
           <List spacing={1}>
             {dailyData?.countryWise
               .sort((a, b) => b.Deaths - a.Deaths)
-              .map((d, i) => (
-                <ListItem key={i}>
-                  <Text fontWeight={600} color="gray.200">
-                    {d.Deaths.toLocaleString()} deaths
-                  </Text>{" "}
-                  {d.Country_Region}
-                  <Divider />
-                </ListItem>
-              ))}
+              .map((d, i) => {
+                const li = (
+                  <ListItem
+                    key={i}
+                    id={i.toString()}
+                    cursor="pointer"
+                    onClick={() => handleLiClick(d.Country_Region)}
+                    bg={selected === d.Country_Region ? "blue.300" : "none"}
+                  >
+                    <Text fontWeight={600} color="gray.200">
+                      {d.Deaths.toLocaleString()} deaths
+                    </Text>
+                    <Text id={d.Country_Region.replace(/\s+/g, "")}>
+                      {d.Country_Region}
+                    </Text>
+                    <Divider />
+                  </ListItem>
+                );
+                return li;
+              })}
           </List>
         </Box>
       </Grid>
       <Grid gridArea="today" bg="red.300" gridTemplateRows="1fr 5fr" p={5}>
         <Flex mb={5} direction="column" align="center" justify="center">
-          <Heading size="md">Global Cases</Heading>
-          <Text fontSize="sm">(new cases)</Text>
+          <Heading size="md">New Cases</Heading>
+          <Heading size="lg">{selected ? selected : "Global"}</Heading>
+          <Text fontSize="sm">
+            (
+            {newConfirmedData
+              ? new Date(newConfirmedData[0].date).toLocaleString()
+              : "No data"}
+            )
+          </Text>
           <Heading size="xl" color="red.600">
-            {globalNewConfirmed?.toLocaleString()}
+            {selected
+              ? newConfirmedData
+                  ?.filter((d) => d.CountryRegion === selected)[0]
+                  .newConfirmed.toLocaleString()
+              : globalNewConfirmed?.toLocaleString()}
           </Heading>
         </Flex>
-        <Box overflowY="scroll">
+        <Box overflowY="scroll" ref={newCasesBoxRef}>
           <List spacing={1}>
             {newConfirmedData
               ?.sort((a, b) => b.newConfirmed - a.newConfirmed)
               .map((country, i) => (
-                <ListItem key={i}>
+                <ListItem
+                  key={i}
+                  id={i.toString()}
+                  cursor="pointer"
+                  onClick={() => handleLiClick(country.CountryRegion)}
+                  bg={selected === country.CountryRegion ? "blue.300" : "none"}
+                >
                   <Text fontWeight={600} color="gray.200">
                     {country.newConfirmed.toLocaleString()} new cases
-                  </Text>{" "}
-                  {country.CountryRegion}
+                  </Text>
+                  <Text id={country.CountryRegion.replace(/\s+/g, "")}>
+                    {country.CountryRegion}
+                  </Text>
                   <Divider />
                 </ListItem>
               ))}

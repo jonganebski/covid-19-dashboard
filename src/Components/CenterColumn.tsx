@@ -12,7 +12,7 @@ interface CenterColumnProps {
 
 const CenterColumn: React.FC<CenterColumnProps> = ({ dailyData }) => {
   return (
-    <Grid gridArea="center" gridTemplateRows="7fr 1fr" gap={1}>
+    <Grid gridArea="center" gridTemplateRows="5fr 1fr" gap={1}>
       <Stack bg="green.300">
         {/* {dataForMap && <MapWithCircles data={dataForMap} />} */}
         <LeafletMap dailyData={dailyData} />
