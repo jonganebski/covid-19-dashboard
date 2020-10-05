@@ -1,20 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Circle, Map, Popup, TileLayer } from "react-leaflet";
-import { TDailyD } from "../App";
+import { TDailyCountryD } from "../types";
 
 interface LeafletMapProps {
-  dailyData: {
-    countryWise: TDailyD[];
-    provinceWise: TDailyD[];
-  } | null;
+  dailyData: TDailyCountryD[] | null;
+  selected: string;
+  setSelected: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const LeafletMap: React.FC<LeafletMapProps> = ({ dailyData }) => {
-  const [viewport] = useState({
+const LeafletMap: React.FC<LeafletMapProps> = ({
+  dailyData,
+  selected,
+  setSelected,
+}) => {
+  const [viewport, setViewport] = useState({
     lat: 20,
     lng: 10,
     zoom: 2,
   });
+
+  useEffect(() => {
+    if (selected) {
+      const lat =
+        dailyData?.filter((d) => d.Country_Region === selected)[0].Lat ?? 20;
+      const lon =
+        dailyData?.filter((d) => d.Country_Region === selected)[0].Long_ ?? 10;
+      setViewport({ lat, lng: lon, zoom: 5 });
+    } else {
+      setViewport({ lat: 20, lng: 10, zoom: 2 });
+    }
+  }, [selected, dailyData]);
 
   const position = { lat: viewport.lat, lng: viewport.lng };
 
@@ -28,25 +43,34 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ dailyData }) => {
         attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {dailyData &&
-        dailyData.provinceWise.map(
+      {dailyData?.map((D) => {
+        return D.provinceData?.map(
           (d, i) =>
+            d.Confirmed &&
             d.Lat &&
             d.Long_ && (
               <Circle
-                key={i}
                 center={{ lat: d.Lat, lng: d.Long_ }}
                 radius={d.Confirmed}
                 stroke={false}
                 fillColor="tomato"
-                fillOpacity={0.5}
+                fillOpacity={
+                  selected && selected === d.Country_Region
+                    ? 0.8
+                    : !selected
+                    ? 0.6
+                    : 0.2
+                }
               >
                 <Popup>
-                  {d.Country_Region}, {d.Province_State}: {d.Confirmed} cases.
+                  {d.Country_Region}
+                  {d.Province_State ? ", " + d.Province_State : ""}:{" "}
+                  {d.Confirmed.toLocaleString()} cases.
                 </Popup>
               </Circle>
             )
-        )}
+        );
+      })}
     </Map>
   );
 };

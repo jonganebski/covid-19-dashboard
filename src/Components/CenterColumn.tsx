@@ -1,21 +1,27 @@
 import { Box, Grid, Link, Stack, Text } from "@chakra-ui/core";
 import React from "react";
-import { TDailyD } from "../App";
+import { TDailyCountryD } from "../types";
 import LeafletMap from "./LeafletMap";
 
 interface CenterColumnProps {
-  dailyData: {
-    countryWise: TDailyD[];
-    provinceWise: TDailyD[];
-  } | null;
+  dailyData: TDailyCountryD[] | null;
+  selected: string;
+  setSelected: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const CenterColumn: React.FC<CenterColumnProps> = ({ dailyData }) => {
+const CenterColumn: React.FC<CenterColumnProps> = ({
+  dailyData,
+  selected,
+  setSelected,
+}) => {
   return (
     <Grid gridArea="center" gridTemplateRows="5fr 1fr" gap={1}>
       <Stack bg="green.300">
-        {/* {dataForMap && <MapWithCircles data={dataForMap} />} */}
-        <LeafletMap dailyData={dailyData} />
+        <LeafletMap
+          dailyData={dailyData}
+          selected={selected}
+          setSelected={setSelected}
+        />
       </Stack>
       <Box bg="green.700">
         <Text>

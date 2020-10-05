@@ -8,18 +8,14 @@ import {
   ListItem,
   Text,
 } from "@chakra-ui/core";
-import React, { useEffect, useRef } from "react";
-import { TDailyD, TMainD } from "../App";
+import React, { useEffect, useMemo, useRef } from "react";
+import { TDailyCountryD, TMainD } from "../types";
 import LineChart from "./LineChart";
 
 interface RightColumnProps {
-  dailyData: {
-    countryWise: TDailyD[];
-    provinceWise: TDailyD[];
-  } | null;
+  dailyData: TDailyCountryD[] | null;
   timeSeriesData: TMainD[] | null;
   selected: string;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
   handleLiClick: (countryName: string) => void;
   scrollList: (ref: React.MutableRefObject<HTMLDivElement | null>) => void;
 }
@@ -28,7 +24,6 @@ const RightColumn: React.FC<RightColumnProps> = ({
   dailyData,
   timeSeriesData,
   selected,
-  setSelected,
   handleLiClick,
   scrollList,
 }) => {
@@ -41,25 +36,31 @@ const RightColumn: React.FC<RightColumnProps> = ({
     scrollList(newCasesBoxRef);
   }, [selected, scrollList]);
 
-  let totalDeaths = 0;
-  dailyData?.countryWise.forEach((d) => {
-    totalDeaths = totalDeaths + d.Deaths;
-  });
-  // sortedCountryData.sort((a, b) => b.Confirmed - a.Confirmed);
+  const totalDeaths = useMemo(() => {
+    let count = 0;
+    dailyData?.forEach((d) => {
+      count = count + (d.Deaths ?? 0);
+    });
+    return count;
+  }, [dailyData]);
 
-  const newConfirmedData = timeSeriesData?.map((country) => {
-    const { CountryRegion, data } = country;
-    const lastInx = data.length - 1;
-    const currentConfirmed = data[lastInx].count;
-    const prevConfirmed = data[lastInx - 1].count;
-    const newConfirmed =
-      currentConfirmed && prevConfirmed ? currentConfirmed - prevConfirmed : -1;
-    return {
-      CountryRegion,
-      date: data[lastInx].date,
-      newConfirmed,
-    };
-  });
+  const newConfirmedData = useMemo(() => {
+    return timeSeriesData?.map((country) => {
+      const { CountryRegion, data } = country;
+      const lastInx = data.length - 1;
+      const currentConfirmed = data[lastInx].count;
+      const prevConfirmed = data[lastInx - 1].count;
+      const newConfirmed =
+        currentConfirmed && prevConfirmed
+          ? currentConfirmed - prevConfirmed
+          : -1;
+      return {
+        CountryRegion,
+        date: data[lastInx].date,
+        newConfirmed,
+      };
+    });
+  }, [timeSeriesData]);
 
   // console.log("newConfirmed: ", newConfirmedData);
 
@@ -87,15 +88,16 @@ const RightColumn: React.FC<RightColumnProps> = ({
           <Heading size="xl" color="red.600">
             {selected === ""
               ? totalDeaths.toLocaleString()
-              : dailyData?.countryWise
-                  .filter((d) => d.Country_Region === selected)[0]
-                  .Deaths.toLocaleString()}
+              : dailyData
+                  ?.filter((d) => d.Country_Region === selected)[0]
+                  .Deaths?.toLocaleString() ?? "No data"}
           </Heading>
         </Flex>
         <Box overflowY="scroll" ref={deathsBoxRef}>
           <List spacing={1}>
-            {dailyData?.countryWise
-              .sort((a, b) => b.Deaths - a.Deaths)
+            {dailyData
+              ?.filter((d) => d.Deaths)
+              .sort((a, b) => b.Deaths! - a.Deaths!)
               .map((d, i) => {
                 const li = (
                   <ListItem
@@ -106,7 +108,9 @@ const RightColumn: React.FC<RightColumnProps> = ({
                     bg={selected === d.Country_Region ? "blue.300" : "none"}
                   >
                     <Text fontWeight={600} color="gray.200">
-                      {d.Deaths.toLocaleString()} deaths
+                      {d.Deaths
+                        ? `${d.Deaths?.toLocaleString()} deaths`
+                        : "No data"}
                     </Text>
                     <Text id={d.Country_Region.replace(/\s+/g, "")}>
                       {d.Country_Region}

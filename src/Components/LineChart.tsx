@@ -1,8 +1,8 @@
 import * as d3 from "d3";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import { IDateCount } from "../App";
-import { getMonthName } from "../utils";
+import { IDateCount } from "../types";
+import { getMonthName } from "../utils/utils";
 
 interface LineChartProps {
   data: Array<IDateCount>;
@@ -48,7 +48,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const tooltipG = d3.select("#tooltip-group");
 
-  const margin = { top: 50, right: 0, bottom: 50, left: 50 };
+  const margin = { top: 50, right: 20, bottom: 50, left: 50 };
   const innerW = svgW - margin.left - margin.right;
   const innerH = svgH - margin.top - margin.bottom;
   const xValue = (d: IDateCount) => d.date;

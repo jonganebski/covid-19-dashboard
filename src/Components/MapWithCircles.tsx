@@ -1,12 +1,18 @@
 import * as d3 from "d3";
 import { D3ZoomEvent } from "d3";
-import React, { useEffect, useMemo, useState } from "react";
-import { TdataForMap } from "../App";
 import { geoPatterson } from "d3-geo-projection";
+import { Feature, GeoJsonProperties, Geometry } from "geojson";
+import React, { useEffect, useMemo, useState } from "react";
 
 interface MapWithCirclesProps {
   data: TdataForMap;
 }
+
+type TdataForMap = Array<{
+  countryCode: any;
+  feature: Feature<Geometry, GeoJsonProperties>;
+  data: any;
+}>;
 
 // ----------- 전역변수 -----------
 
