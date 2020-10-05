@@ -8,17 +8,17 @@ import {
   Text,
 } from "@chakra-ui/core";
 import React, { useEffect, useMemo, useRef } from "react";
-import { TDailyCountryD } from "../types";
+import { TDailyD } from "../types";
 
 interface LeftColumnProps {
-  dailyData: TDailyCountryD[] | null;
+  countryData: TDailyD[] | null;
   selected: string;
   handleLiClick: (countryName: string) => void;
   scrollList: (ref: React.MutableRefObject<HTMLDivElement | null>) => void;
 }
 
 const LeftColumn: React.FC<LeftColumnProps> = ({
-  dailyData,
+  countryData,
   selected,
   handleLiClick,
   scrollList,
@@ -26,11 +26,11 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
   const listBoxRef = useRef<HTMLDivElement | null>(null);
   const totalConfirmed = useMemo(() => {
     let count = 0;
-    dailyData?.forEach((d) => {
+    countryData?.forEach((d) => {
       count = count + (d.Confirmed ?? 0);
     });
     return count;
-  }, [dailyData]);
+  }, [countryData]);
   const changeBg = (countryName: string) =>
     selected === countryName ? "red.100" : "none";
 
@@ -52,14 +52,14 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
         <Heading size="xl" color="red.600">
           {selected === ""
             ? totalConfirmed.toLocaleString()
-            : dailyData
+            : countryData
                 ?.filter((d) => d.Country_Region === selected)[0]
                 .Confirmed?.toLocaleString() ?? "No data"}
         </Heading>
       </Flex>
       <Box bg="blue.400" overflowY="scroll" p={5} ref={listBoxRef}>
         <List spacing={1}>
-          {dailyData
+          {countryData
             ?.filter((d) => d.Confirmed)
             .sort((a, b) => b.Confirmed! - a.Confirmed!)
             .map((d, i) => {
@@ -91,7 +91,7 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
       <Flex direction="column" align="center" justify="center" bg="blue.500">
         <Text>Last Updated at</Text>
         <Text fontSize="2xl" fontWeight={500}>
-          {dailyData && new Date(dailyData[0].Last_Update).toLocaleString()}
+          {countryData && new Date(countryData[0].Last_Update).toLocaleString()}
         </Text>
       </Flex>
     </Grid>

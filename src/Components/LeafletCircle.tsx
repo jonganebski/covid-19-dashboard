@@ -1,10 +1,9 @@
 import React from "react";
 import { Circle, Popup } from "react-leaflet";
-import { TDailyCountryD, TDailyD } from "../types";
-import * as d3 from "d3";
+import { TDailyD } from "../types";
 
 interface LCProps {
-  d: TDailyD | TDailyCountryD;
+  d: TDailyD;
   radius: number;
   selected: string;
   setSelected: React.Dispatch<React.SetStateAction<string>>;

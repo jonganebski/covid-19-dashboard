@@ -28,10 +28,6 @@ export type TDailyD = {
   Incidence_Rate: number | null;
 };
 
-export type TDailyCountryD = {
-  provinceData: TDailyD[] | null;
-} & TDailyD;
-
 export type TReferenceD = {
   Country_Region: string;
   Province_State: string;

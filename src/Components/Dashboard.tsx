@@ -1,6 +1,6 @@
 import { Flex, Grid, Heading } from "@chakra-ui/core";
 import React, { useEffect, useState } from "react";
-import { TDailyCountryD, TMainD } from "../types";
+import { TDailyD, TMainD } from "../types";
 import { getDailyData, getTimeSeriesData } from "../utils/data";
 import CenterColumn from "./CenterColumn";
 import LeftColumn from "./LeftColumn";
@@ -8,7 +8,8 @@ import RightColumn from "./RightColumn";
 
 const Dashboard = () => {
   const [timeSeriesData, setTimeSeriesData] = useState<TMainD[] | null>(null);
-  const [dailyData, setDailyData] = useState<TDailyCountryD[] | null>(null);
+  const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
+  const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
   const [selected, setSelected] = useState("");
 
   console.log("selected: ", selected);
@@ -43,7 +44,10 @@ const Dashboard = () => {
     getTimeSeriesData("time_series_covid19_confirmed_global.csv").then((data) =>
       setTimeSeriesData(data)
     );
-    getDailyData("10-02-2020.csv").then((data) => setDailyData(data));
+    getDailyData("10-02-2020.csv").then(({ countryWise, provinceWise }) => {
+      setCountryData(countryWise);
+      setProvinceData(provinceWise);
+    });
   }, []);
 
   return (
@@ -68,18 +72,18 @@ const Dashboard = () => {
           <Heading> Covid-19 Information Dashboard</Heading>
         </Flex>
         <LeftColumn
-          dailyData={dailyData}
+          countryData={countryData}
           selected={selected}
           handleLiClick={handleLiClick}
           scrollList={scrollList}
         />
         <CenterColumn
-          dailyData={dailyData}
+          provinceData={provinceData}
           selected={selected}
           setSelected={setSelected}
         />
         <RightColumn
-          dailyData={dailyData}
+          countryData={countryData}
           timeSeriesData={timeSeriesData}
           selected={selected}
           handleLiClick={handleLiClick}

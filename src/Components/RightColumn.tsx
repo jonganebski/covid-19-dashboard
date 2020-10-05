@@ -9,11 +9,11 @@ import {
   Text,
 } from "@chakra-ui/core";
 import React, { useEffect, useMemo, useRef } from "react";
-import { TDailyCountryD, TMainD } from "../types";
+import { TDailyD, TMainD } from "../types";
 import LineChart from "./LineChart";
 
 interface RightColumnProps {
-  dailyData: TDailyCountryD[] | null;
+  countryData: TDailyD[] | null;
   timeSeriesData: TMainD[] | null;
   selected: string;
   handleLiClick: (countryName: string) => void;
@@ -21,7 +21,7 @@ interface RightColumnProps {
 }
 
 const RightColumn: React.FC<RightColumnProps> = ({
-  dailyData,
+  countryData,
   timeSeriesData,
   selected,
   handleLiClick,
@@ -38,11 +38,11 @@ const RightColumn: React.FC<RightColumnProps> = ({
 
   const totalDeaths = useMemo(() => {
     let count = 0;
-    dailyData?.forEach((d) => {
+    countryData?.forEach((d) => {
       count = count + (d.Deaths ?? 0);
     });
     return count;
-  }, [dailyData]);
+  }, [countryData]);
 
   const newConfirmedData = useMemo(() => {
     return timeSeriesData?.map((country) => {
@@ -88,14 +88,14 @@ const RightColumn: React.FC<RightColumnProps> = ({
           <Heading size="xl" color="red.600">
             {selected === ""
               ? totalDeaths.toLocaleString()
-              : dailyData
+              : countryData
                   ?.filter((d) => d.Country_Region === selected)[0]
                   .Deaths?.toLocaleString() ?? "No data"}
           </Heading>
         </Flex>
         <Box overflowY="scroll" ref={deathsBoxRef}>
           <List spacing={1}>
-            {dailyData
+            {countryData
               ?.filter((d) => d.Deaths)
               .sort((a, b) => b.Deaths! - a.Deaths!)
               .map((d, i) => {

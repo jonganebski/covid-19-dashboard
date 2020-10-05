@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Map, TileLayer } from "react-leaflet";
-import { TDailyCountryD } from "../types";
+import { TDailyD } from "../types";
 import LeafletCircle from "./LeafletCircle";
 import * as d3 from "d3";
 
 interface LeafletMapProps {
-  dailyData: TDailyCountryD[] | null;
+  provinceData: TDailyD[] | null;
   selected: string;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -17,7 +17,7 @@ const initialViewport = {
 };
 
 const LeafletMap: React.FC<LeafletMapProps> = ({
-  dailyData,
+  provinceData,
   selected,
   setSelected,
 }) => {
@@ -27,7 +27,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     if (!selected) {
       setViewport(initialViewport);
     } else {
-      const countryD = dailyData?.find((D) => D.Country_Region === selected);
+      const countryD = provinceData?.find((D) => D.Country_Region === selected);
       const lat = countryD?.Lat;
       const lng = countryD?.Long_;
       const zoom = selected === "Russia" ? 3 : 4;
@@ -35,16 +35,10 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         setViewport({ lat, lng, zoom });
       }
     }
-  }, [selected, dailyData]);
+  }, [selected, provinceData]);
 
-  const getMax = (data: TDailyCountryD[]) => {
-    const max = d3.max(data, (D) => {
-      if (D.provinceData) {
-        D.provinceData.forEach((d) => d.Confirmed ?? 0);
-      } else {
-        return D.Confirmed ?? 0;
-      }
-    });
+  const getMax = (data: TDailyD[]) => {
+    const max = d3.max(data, (D) => D.Confirmed ?? 0);
     if (max) {
       return max;
     } else {
@@ -64,44 +58,25 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {dailyData
-        ?.filter((D) => D.Confirmed)
+      {provinceData
+        ?.filter((d) => d.Confirmed)
         .sort((a, b) => b.Confirmed! - a.Confirmed!)
-        .map((D, I) => {
+        .map((d, i) => {
           const getRadius = d3
             .scaleSqrt()
-            .domain([0, getMax(dailyData)])
+            .domain([0, getMax(provinceData)])
             .range([0, 400000]);
-          if (D.provinceData) {
-            return D.provinceData
-              ?.filter((d) => d.Confirmed)
-              .sort((a, b) => b.Confirmed! - a.Confirmed!)
-              .map((d, i) => {
-                const radius = getRadius(d.Confirmed ?? 0) ?? 0;
-                return (
-                  <LeafletCircle
-                    key={i}
-                    d={d}
-                    radius={radius}
-                    selected={selected}
-                    setSelected={setSelected}
-                    setViewport={setViewport}
-                  />
-                );
-              });
-          } else {
-            const radius = getRadius(D.Confirmed ?? 0) ?? 0;
-            return (
-              <LeafletCircle
-                key={I}
-                d={D}
-                radius={radius}
-                selected={selected}
-                setSelected={setSelected}
-                setViewport={setViewport}
-              />
-            );
-          }
+          const radius = getRadius(d.Confirmed ?? 0) ?? 0;
+          return (
+            <LeafletCircle
+              key={i}
+              d={d}
+              radius={radius}
+              selected={selected}
+              setSelected={setSelected}
+              setViewport={setViewport}
+            />
+          );
         })}
     </Map>
   );

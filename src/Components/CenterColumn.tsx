@@ -1,16 +1,16 @@
 import { Box, Grid, Link, Stack, Text } from "@chakra-ui/core";
 import React from "react";
-import { TDailyCountryD } from "../types";
+import { TDailyD } from "../types";
 import LeafletMap from "./LeafletMap";
 
 interface CenterColumnProps {
-  dailyData: TDailyCountryD[] | null;
+  provinceData: TDailyD[] | null;
   selected: string;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const CenterColumn: React.FC<CenterColumnProps> = ({
-  dailyData,
+  provinceData,
   selected,
   setSelected,
 }) => {
@@ -18,7 +18,7 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
     <Grid gridArea="center" gridTemplateRows="5fr 1fr" gap={1}>
       <Stack bg="green.300">
         <LeafletMap
-          dailyData={dailyData}
+          provinceData={provinceData}
           selected={selected}
           setSelected={setSelected}
         />

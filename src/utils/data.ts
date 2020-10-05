@@ -1,4 +1,4 @@
-import { TReferenceD, TDailyCountryD, TMainD, IDateCount } from "../types";
+import { TReferenceD, TMainD, IDateCount, TDailyD } from "../types";
 import * as d3 from "d3";
 
 export const getDailyData = async (filename: string) => {
@@ -51,13 +51,13 @@ export const getDailyData = async (filename: string) => {
     };
   });
 
-  const cleanData: TDailyCountryD[] = [];
-  const dirtyData: TDailyCountryD[] = [];
+  const cleanData: TDailyD[] = [];
+  const dirtyData: TDailyD[] = [];
   provinceWise.forEach((d) => {
     if (mixedCountries.has(d.Country_Region)) {
-      dirtyData.push({ ...d, provinceData: [] });
+      dirtyData.push(d);
     } else {
-      cleanData.push({ ...d, provinceData: null });
+      cleanData.push(d);
     }
   });
 
@@ -102,17 +102,15 @@ export const getDailyData = async (filename: string) => {
           Combined_Key: "",
           Admin2: "",
           Province_State: "",
-          provinceData: provinceWise.filter(
-            (country) => country.Country_Region === d.Country_Region
-          ),
         };
         return acc;
       });
   });
 
-  const data = cleanData.concat(cleanedData);
-  console.log("getting data...: ", data);
-  return data;
+  const countryWise = cleanData.concat(cleanedData);
+  console.log("getting countryWise data...: ", countryWise);
+  console.log("getting provinceWise data...: ", provinceWise);
+  return { countryWise, provinceWise };
 };
 
 export const getTimeSeriesData = async (fileName: string) => {
