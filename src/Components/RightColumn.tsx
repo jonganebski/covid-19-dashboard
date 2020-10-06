@@ -1,16 +1,8 @@
-import {
-  Box,
-  Divider,
-  Flex,
-  Grid,
-  Heading,
-  List,
-  ListItem,
-  Text,
-} from "@chakra-ui/core";
-import React, { useEffect, useMemo, useRef } from "react";
+import { Box, Grid, Select } from "@chakra-ui/core";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { TDailyD, TMainD } from "../types";
 import LineChart from "./LineChart";
+import RightColumnList from "./RightColumnList";
 
 interface RightColumnProps {
   countryData: TDailyD[] | null;
@@ -20,6 +12,8 @@ interface RightColumnProps {
   scrollList: (ref: React.MutableRefObject<HTMLDivElement | null>) => void;
 }
 
+export type TTab = "active" | "deaths" | "recovered" | "new cases";
+
 const RightColumn: React.FC<RightColumnProps> = ({
   countryData,
   timeSeriesData,
@@ -28,47 +22,110 @@ const RightColumn: React.FC<RightColumnProps> = ({
   scrollList,
 }) => {
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
-  const deathsBoxRef = useRef<HTMLDivElement | null>(null);
-  const newCasesBoxRef = useRef<HTMLDivElement | null>(null);
+  const listContainerRefL = useRef<HTMLDivElement | null>(null);
+  const listContainerRefR = useRef<HTMLDivElement | null>(null);
+  const [tabL, setTabL] = useState<TTab>("active");
+  const [tabR, setTabR] = useState<TTab>("new cases");
 
   useEffect(() => {
-    scrollList(deathsBoxRef);
-    scrollList(newCasesBoxRef);
+    scrollList(listContainerRefL);
+    scrollList(listContainerRefR);
   }, [selected, scrollList]);
 
-  const totalActive = useMemo(() => {
-    let count = 0;
-    countryData?.forEach((d) => {
-      count = count + (d.Active ?? 0);
-    });
-    return count;
-  }, [countryData]);
+  const totalCount = useMemo(() => {
+    let active = 0;
+    let deaths = 0;
+    let recovered = 0;
+    let newCases = 0;
+    if (countryData && timeSeriesData) {
+      countryData?.forEach((d) => {
+        active = active + (d.Active ?? 0);
+        deaths = deaths + (d.Deaths ?? 0);
+        recovered = recovered + (d.Recovered ?? 0);
+      });
+      timeSeriesData?.forEach((d) => {
+        const { data } = d;
+        const lastInx = data.length - 1;
+        const currentCases = data[lastInx].count;
+        const prevCases = data[lastInx - 1].count;
+        const newCasesPerCountry =
+          currentCases && prevCases ? currentCases - prevCases : null;
+        newCases = newCases + (newCasesPerCountry ?? 0);
+      });
+      return { active, deaths, recovered, newCases };
+    } else {
+      return null;
+    }
+  }, [countryData, timeSeriesData]);
 
-  const newConfirmedData = useMemo(() => {
-    return timeSeriesData?.map((country) => {
-      const { CountryRegion, data } = country;
-      const lastInx = data.length - 1;
-      const currentConfirmed = data[lastInx].count;
-      const prevConfirmed = data[lastInx - 1].count;
-      const newConfirmed =
-        currentConfirmed && prevConfirmed
-          ? currentConfirmed - prevConfirmed
-          : -1;
+  const compare = (a: number | null, b: number | null) => {
+    if (a && b) {
+      return b - a;
+    } else if (a && !b) {
+      return -1;
+    } else if (!a && b) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
+  const sortedData = useMemo(() => {
+    if (countryData && timeSeriesData) {
+      const date = countryData[0].Last_Update;
+      const active = countryData
+        .map((d) => ({ country: d.Country_Region, count: d.Active }))
+        .sort((a, b) => compare(a.count, b.count));
+      const deaths = countryData
+        .map((d) => ({ country: d.Country_Region, count: d.Deaths }))
+        .sort((a, b) => compare(a.count, b.count));
+      const recovered = countryData
+        .map((d) => ({ country: d.Country_Region, count: d.Recovered }))
+        .sort((a, b) => compare(a.count, b.count));
+      const newCases = timeSeriesData
+        .map((d) => {
+          const { CountryRegion, data } = d;
+          const lastInx = data.length - 1;
+          const currentCases = data[lastInx].count;
+          const prevCases = data[lastInx - 1].count;
+          const newCases =
+            currentCases && prevCases ? currentCases - prevCases : null;
+          return {
+            country: CountryRegion,
+            count: newCases,
+            date: data[lastInx].date,
+          };
+        })
+        .sort((a, b) => compare(a.count, b.count));
       return {
-        CountryRegion,
-        date: data[lastInx].date,
-        newConfirmed,
+        active,
+        deaths,
+        recovered,
+        date,
+        newCases,
       };
-    });
-  }, [timeSeriesData]);
+    } else {
+      return null;
+    }
+  }, [countryData, timeSeriesData]);
 
-  // console.log("newConfirmed: ", newConfirmedData);
+  const getLineChartData = () => {
+    const countryD = timeSeriesData?.find((d) => d.CountryRegion === selected);
+    if (countryD) {
+      return countryD.data;
+    } else {
+      return null;
+    }
+  };
 
-  let globalNewConfirmed = 0;
-  newConfirmedData?.forEach((d) => {
-    globalNewConfirmed = globalNewConfirmed + d.newConfirmed;
-  });
+  const targetData = useMemo(() => {
+    const targetData = countryData?.find((d) => d.Country_Region === selected);
+    return targetData ?? null;
+  }, [selected, countryData]);
 
+  const lineChartData = getLineChartData();
+
+  console.log("RightColumn Rendering...");
   return (
     <Grid
       gridArea="right"
@@ -80,100 +137,75 @@ const RightColumn: React.FC<RightColumnProps> = ({
                     "graph graph" 4fr / 1fr 1fr`,
       }}
     >
-      <Grid gridArea="global" bg="red.300" gridTemplateRows="1fr 5fr" p={5}>
-        <Flex mb={5} direction="column" align="center" justify="center">
-          <Heading size="md">Active Cases</Heading>
-          <Heading size="lg">{selected ? selected : "Global"}</Heading>
-          <Text fontSize="sm">
-            ({countryData && countryData[0].Last_Update})
-          </Text>
-          <Heading size="xl" color="red.600">
-            {selected === ""
-              ? totalActive.toLocaleString()
-              : countryData
-                  ?.filter((d) => d.Country_Region === selected)[0]
-                  .Deaths?.toLocaleString() ?? "No data"}
-          </Heading>
-        </Flex>
-        <Box overflowY="scroll" ref={deathsBoxRef}>
-          <List spacing={1}>
-            {countryData
-              ?.filter((d) => d.Deaths)
-              .sort((a, b) => b.Deaths! - a.Deaths!)
-              .map((d, i) => {
-                const li = (
-                  <ListItem
-                    key={i}
-                    id={i.toString()}
-                    cursor="pointer"
-                    onClick={() => handleLiClick(d.Country_Region)}
-                    bg={selected === d.Country_Region ? "blue.300" : "none"}
-                  >
-                    <Text fontWeight={600} color="gray.200">
-                      {d.Deaths
-                        ? `${d.Deaths?.toLocaleString()} deaths`
-                        : "No data"}
-                    </Text>
-                    <Text id={d.Country_Region.replace(/\s+/g, "")}>
-                      {d.Country_Region}
-                    </Text>
-                    <Divider />
-                  </ListItem>
-                );
-                return li;
-              })}
-          </List>
-        </Box>
+      <Grid gridArea="global" bg="red.300" gridTemplateRows="1fr 5fr">
+        <Select
+          size="sm"
+          backgroundColor="black"
+          color="white"
+          placeholder="Select option"
+          defaultValue="active"
+          onChange={(e) => {
+            if (
+              e.currentTarget.value === "active" ||
+              e.currentTarget.value === "deaths" ||
+              e.currentTarget.value === "recovered" ||
+              e.currentTarget.value === "new cases"
+            ) {
+              setTabL(e.currentTarget.value);
+            }
+          }}
+        >
+          <option value="active">Active</option>
+          <option value="new cases">New Cases</option>
+          <option value="deaths">Total Deaths</option>
+          <option value="recovered">Total Recovered</option>
+        </Select>
+        <RightColumnList
+          selected={selected}
+          tab={tabL}
+          totalCount={totalCount}
+          targetData={targetData}
+          sortedData={sortedData}
+          listContainerRef={listContainerRefL}
+          handleLiClick={handleLiClick}
+        />
       </Grid>
-      <Grid gridArea="today" bg="red.300" gridTemplateRows="1fr 5fr" p={5}>
-        <Flex mb={5} direction="column" align="center" justify="center">
-          <Heading size="md">New Cases</Heading>
-          <Heading size="lg">{selected ? selected : "Global"}</Heading>
-          <Text fontSize="sm">
-            (
-            {newConfirmedData
-              ? new Date(newConfirmedData[0].date).toLocaleString()
-              : "No data"}
-            )
-          </Text>
-          <Heading size="xl" color="red.600">
-            {selected
-              ? newConfirmedData
-                  ?.filter((d) => d.CountryRegion === selected)[0]
-                  .newConfirmed.toLocaleString()
-              : globalNewConfirmed?.toLocaleString()}
-          </Heading>
-        </Flex>
-        <Box overflowY="scroll" ref={newCasesBoxRef}>
-          <List spacing={1}>
-            {newConfirmedData
-              ?.sort((a, b) => b.newConfirmed - a.newConfirmed)
-              .map((country, i) => (
-                <ListItem
-                  key={i}
-                  id={i.toString()}
-                  cursor="pointer"
-                  onClick={() => handleLiClick(country.CountryRegion)}
-                  bg={selected === country.CountryRegion ? "blue.300" : "none"}
-                >
-                  <Text fontWeight={600} color="gray.200">
-                    {country.newConfirmed.toLocaleString()} new cases
-                  </Text>
-                  <Text id={country.CountryRegion.replace(/\s+/g, "")}>
-                    {country.CountryRegion}
-                  </Text>
-                  <Divider />
-                </ListItem>
-              ))}
-          </List>
-        </Box>
+      <Grid gridArea="today" bg="red.300" gridTemplateRows="1fr 5fr">
+        <Select
+          size="sm"
+          backgroundColor="black"
+          color="white"
+          placeholder="Select option"
+          defaultValue="new cases"
+          onChange={(e) => {
+            if (
+              e.currentTarget.value === "active" ||
+              e.currentTarget.value === "deaths" ||
+              e.currentTarget.value === "recovered" ||
+              e.currentTarget.value === "new cases"
+            ) {
+              setTabR(e.currentTarget.value);
+            }
+          }}
+        >
+          <option value="active">Active</option>
+          <option value="new cases">New Cases</option>
+          <option value="deaths">Total Deaths</option>
+          <option value="recovered">Total Recovered</option>
+        </Select>
+        <RightColumnList
+          selected={selected}
+          tab={tabR}
+          totalCount={totalCount}
+          targetData={targetData}
+          sortedData={sortedData}
+          listContainerRef={listContainerRefR}
+          handleLiClick={handleLiClick}
+        />
       </Grid>
       <Box ref={svgContainerRef} gridArea="graph" bg="red.500">
-        {timeSeriesData && (
-          <LineChart
-            data={timeSeriesData[0].data}
-            svgContainerRef={svgContainerRef}
-          />
+        {lineChartData && (
+          <LineChart data={lineChartData} svgContainerRef={svgContainerRef} />
         )}
       </Box>
     </Grid>

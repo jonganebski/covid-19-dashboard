@@ -171,6 +171,6 @@ export const getTimeSeriesData = async (fileName: string) => {
     return acc;
   }, data[0]);
 
-  // console.log("countryWise: ", countryWise);
+  console.log("timeSeries data: ", countryWise);
   return countryWise;
 };

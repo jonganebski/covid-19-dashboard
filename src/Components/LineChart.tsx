@@ -5,7 +5,7 @@ import { IDateCount } from "../types";
 import { getMonthName } from "../utils/utils";
 
 interface LineChartProps {
-  data: Array<IDateCount>;
+  data: Array<IDateCount> | null;
   svgContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 

@@ -24,6 +24,7 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
   scrollList,
 }) => {
   const listBoxRef = useRef<HTMLDivElement | null>(null);
+
   const totalCount = useMemo(() => {
     let confirmed = 0;
     let deaths = 0;
@@ -35,6 +36,7 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
     });
     return { confirmed, deaths, recovered };
   }, [countryData]);
+
   const changeBg = (countryName: string) =>
     selected === countryName ? "red.100" : "none";
 

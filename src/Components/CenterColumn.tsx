@@ -47,32 +47,44 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
         <ButtonGroup>
           <Button
             size="sm"
+            borderTop="none"
             borderTopLeftRadius={0}
             borderTopRightRadius={0}
+            variant="outline"
+            variantColor={dataClass === "Confirmed" ? "red" : "gray"}
             onClick={() => handleBtnClick("Confirmed")}
           >
             Cumulative Cases
           </Button>
           <Button
             size="sm"
+            borderTop="none"
             borderTopLeftRadius={0}
             borderTopRightRadius={0}
+            variant="outline"
+            variantColor={dataClass === "Active" ? "red" : "gray"}
             onClick={() => handleBtnClick("Active")}
           >
             Active Cases
           </Button>
           <Button
             size="sm"
+            borderTop="none"
             borderTopLeftRadius={0}
             borderTopRightRadius={0}
+            variant="outline"
+            variantColor={dataClass === "Deaths" ? "red" : "gray"}
             onClick={() => handleBtnClick("Deaths")}
           >
             Cumulative Deaths
           </Button>
           <Button
             size="sm"
+            borderTop="none"
             borderTopLeftRadius={0}
             borderTopRightRadius={0}
+            variant="outline"
+            variantColor={dataClass === "CaseFatality_Ratio" ? "red" : "gray"}
             onClick={() => handleBtnClick("CaseFatality_Ratio")}
           >
             Case-Fatality Radio

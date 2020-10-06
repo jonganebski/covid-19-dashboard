@@ -55,13 +55,13 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
 
   const pickColor = () => {
     return dataClass === "Confirmed"
-      ? theme.colors.red[800]
+      ? theme.colors.red[900]
       : dataClass === "Active"
-      ? theme.colors.orange[800]
+      ? theme.colors.green[900]
       : dataClass === "Deaths"
-      ? theme.colors.gray[800]
+      ? theme.colors.gray[900]
       : dataClass === "CaseFatality_Ratio"
-      ? theme.colors.yellow[800]
+      ? theme.colors.blue[900]
       : "none";
   };
 
