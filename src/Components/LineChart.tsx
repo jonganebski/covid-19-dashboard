@@ -1,11 +1,11 @@
 import * as d3 from "d3";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import { IDateCount } from "../types";
+import { TDateCount } from "../types";
 import { getMonthName } from "../utils/utils";
 
 interface LineChartProps {
-  data: Array<IDateCount> | null;
+  data: Array<TDateCount> | null;
   svgContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
@@ -19,8 +19,8 @@ const TooltipRect = styled.rect``;
 
 // d3.extent() 에서 [undefined, undefined]가 나오는 경우를 배제하는 함수다.
 const getDomainArray = (
-  data: Array<IDateCount>,
-  xValue: (d: IDateCount) => number
+  data: Array<TDateCount>,
+  xValue: (d: TDateCount) => number
 ) => {
   const arr = d3.extent(data, xValue);
   if (!arr[0] || !arr[1]) {
@@ -31,7 +31,7 @@ const getDomainArray = (
 };
 
 // d3.max() 에서 undefined가 나오는 경우를 배제하는 함수다.
-const getMax = (data: Array<IDateCount>, yValue: (d: IDateCount) => number) => {
+const getMax = (data: Array<TDateCount>, yValue: (d: TDateCount) => number) => {
   const max = d3.max(data, yValue);
   if (typeof max !== "number") {
     throw Error("Unable to make y scale.");
@@ -41,7 +41,7 @@ const getMax = (data: Array<IDateCount>, yValue: (d: IDateCount) => number) => {
 };
 
 const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
-  const [dataPiece, setDataPiece] = useState<IDateCount | null>(null);
+  const [dataPiece, setDataPiece] = useState<TDateCount | null>(null);
   const [coord, setCoord] = useState<{ x: number; y: number } | null>(null);
   const [svgW, setSvgW] = useState(0);
   const [svgH, setSvgH] = useState(0);
@@ -51,8 +51,8 @@ const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
   const margin = { top: 50, right: 20, bottom: 50, left: 50 };
   const innerW = svgW - margin.left - margin.right;
   const innerH = svgH - margin.top - margin.bottom;
-  const xValue = (d: IDateCount) => d.date;
-  const yValue = (d: IDateCount) => d.count;
+  const xValue = (d: TDateCount) => d.date;
+  const yValue = (d: TDateCount) => d.count;
   const xScaleRef = useRef<d3.ScaleTime<number, number> | null>(null);
   const yScaleRef = useRef<d3.ScaleLinear<number, number> | null>(null);
 
@@ -110,7 +110,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
   }, [data, innerH]);
 
   const lineGenerator = d3
-    .line<IDateCount>()
+    .line<TDateCount>()
     .x((d) => xScaleRef.current!(xValue(d)) ?? 0)
     .y((d) => yScaleRef.current!(yValue(d)) ?? 0)
     .curve(d3.curveBasis);
@@ -121,7 +121,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
       const hoveredDate = xScaleRef.current
         .invert(e.clientX - elementCoord.x)
         .getTime();
-      const bs = d3.bisector((d: IDateCount) => d.date);
+      const bs = d3.bisector((d: TDateCount) => d.date);
       const i = bs.left(data, hoveredDate, 1);
       const x = e.clientX - elementCoord.x;
       const y = yScaleRef.current(data[i].count);

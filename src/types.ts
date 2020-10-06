@@ -1,14 +1,11 @@
-export interface IDateCount {
+export type TDateCount = {
   date: number;
   count: number;
-}
+};
 
-export type TMainD = {
-  CountryRegion: string;
-  ProvinceState: string;
-  Lat: number | null;
-  Long: number | null;
-  data: IDateCount[];
+export type TTimeseriesD = {
+  country: string;
+  data: TDateCount[];
 };
 
 export type TDailyD = {

@@ -1,17 +1,29 @@
 import { Flex, Grid, Heading } from "@chakra-ui/core";
 import React, { useEffect, useState } from "react";
-import { TDailyD, TMainD } from "../types";
-import { getDailyData, getTimeSeriesData } from "../utils/data";
+import { TDailyD, TDateCount, TTimeseriesD } from "../types";
+import { getDailyData } from "../api/dailyData";
+import { getTimeSeriesData } from "../api/timeData";
 import CenterColumn from "./CenterColumn";
 import LeftColumn from "./LeftColumn";
 import RightColumn from "./RightColumn";
 
+interface TTimeDataState {
+  confirmed: { countries: TTimeseriesD[] | null; global: TDateCount[] | null };
+  deaths: { countries: TTimeseriesD[] | null; global: TDateCount[] | null };
+  recovered: { countries: TTimeseriesD[] | null; global: TDateCount[] | null };
+}
+
 const Dashboard = () => {
-  const [timeSeriesData, setTimeSeriesData] = useState<TMainD[] | null>(null);
+  const [timeData, setTimeData] = useState<TTimeDataState>({
+    confirmed: { countries: null, global: null },
+    deaths: { countries: null, global: null },
+    recovered: { countries: null, global: null },
+  });
+
   const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
   const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
   const [selected, setSelected] = useState("");
-
+  console.log(timeData);
   console.log("selected: ", selected);
 
   const handleLiClick = (countryName: string) => {
@@ -41,9 +53,27 @@ const Dashboard = () => {
 
   // ----------- 데이터 로드 -----------
   useEffect(() => {
-    getTimeSeriesData("time_series_covid19_confirmed_global.csv").then((data) =>
-      setTimeSeriesData(data)
-    );
+    // Promise.all([
+    //   getTimeSeriesData("time_series_covid19_confirmed_global.csv"),
+    //   getTimeSeriesData("time_series_covid19_deaths_global.csv"),
+    //   getTimeSeriesData("time_series_covid19_recovered_global.csv"),
+    // ]).then(([confirmed, deaths, recovered]) => {
+    //   setTimeData({
+    //     confirmed: {
+    //       countries: confirmed.countryTimeData,
+    //       global: confirmed.globalTimeData,
+    //     },
+    //     deaths: {
+    //       countries: deaths.countryTimeData,
+    //       global: deaths.globalTimeData,
+    //     },
+    //     recovered: {
+    //       countries: recovered.countryTimeData,
+    //       global: recovered.globalTimeData,
+    //     },
+    //   });
+    // });
+
     getDailyData("10-02-2020.csv").then(({ countryWise, provinceWise }) => {
       setCountryData(countryWise);
       setProvinceData(provinceWise);
@@ -60,7 +90,7 @@ const Dashboard = () => {
         display: "flex",
       }}
     >
-      <Grid
+      {/* <Grid
         w="100%"
         gap={1}
         style={{
@@ -90,7 +120,7 @@ const Dashboard = () => {
           handleLiClick={handleLiClick}
           scrollList={scrollList}
         />
-      </Grid>
+      </Grid> */}
     </div>
   );
 };

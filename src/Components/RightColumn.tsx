@@ -1,12 +1,12 @@
 import { Box, Grid, Select } from "@chakra-ui/core";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { TDailyD, TMainD } from "../types";
+import { TDailyD, TTimeseriesD } from "../types";
 import LineChart from "./LineChart";
 import RightColumnList from "./RightColumnList";
 
 interface RightColumnProps {
   countryData: TDailyD[] | null;
-  timeSeriesData: TMainD[] | null;
+  timeSeriesData: TTimeseriesD[] | null;
   selected: string;
   handleLiClick: (countryName: string) => void;
   scrollList: (ref: React.MutableRefObject<HTMLDivElement | null>) => void;
@@ -84,14 +84,14 @@ const RightColumn: React.FC<RightColumnProps> = ({
         .sort((a, b) => compare(a.count, b.count));
       const newCases = timeSeriesData
         .map((d) => {
-          const { CountryRegion, data } = d;
+          const { country, data } = d;
           const lastInx = data.length - 1;
           const currentCases = data[lastInx].count;
           const prevCases = data[lastInx - 1].count;
           const newCases =
             currentCases && prevCases ? currentCases - prevCases : null;
           return {
-            country: CountryRegion,
+            country,
             count: newCases,
             date: data[lastInx].date,
           };
@@ -110,7 +110,7 @@ const RightColumn: React.FC<RightColumnProps> = ({
   }, [countryData, timeSeriesData]);
 
   const getLineChartData = () => {
-    const countryD = timeSeriesData?.find((d) => d.CountryRegion === selected);
+    const countryD = timeSeriesData?.find((d) => d.country === selected);
     if (countryD) {
       return countryD.data;
     } else {

@@ -1,4 +1,4 @@
-import { TReferenceD, TMainD, IDateCount, TDailyD } from "../types";
+import { TReferenceD, TTimeseriesD, TDateCount, TDailyD } from "../types";
 import * as d3 from "d3";
 
 export const getDailyData = async (filename: string) => {
@@ -118,59 +118,4 @@ export const getDailyData = async (filename: string) => {
     referenceData.filter((d) => d.Country_Region === "France")
   );
   return { countryWise, provinceWise };
-};
-
-export const getTimeSeriesData = async (fileName: string) => {
-  const loadedData = await d3.csv(fileName);
-  const D: TMainD = {
-    CountryRegion: "",
-    ProvinceState: "",
-    Lat: 0,
-    Long: 0,
-    data: [],
-  };
-  const data = loadedData.map((d) => {
-    const timeData: IDateCount[] = [];
-    Object.entries(d).forEach(([key, value]) => {
-      if (key === "Country/Region") {
-        D.CountryRegion = value ?? "";
-      } else if (key === "Province/State") {
-        D.ProvinceState = value ?? "";
-      } else if (key === "Lat") {
-        D.Lat = value ? +value : null;
-      } else if (key === "Long") {
-        D.Long = value ? +value : null;
-      } else {
-        timeData.push({
-          date: new Date(key).getTime() ?? null,
-          count: value ? +value : 0,
-        });
-      }
-    });
-    return { ...D, data: [...timeData] };
-  });
-  const countryWise: any = [];
-  data.push({
-    ProvinceState: "",
-    CountryRegion: "",
-    Lat: null,
-    Long: null,
-    data: [],
-  });
-  data.reduce((acc, d) => {
-    if (acc.CountryRegion === d.CountryRegion) {
-      // console.log("same");
-      acc.ProvinceState = "";
-      d.data.forEach((d, i) => {
-        acc.data[i].count = (acc.data[i].count ?? 0) + (d.count ?? 0);
-      });
-    } else {
-      countryWise.push(acc);
-      acc = d;
-    }
-    return acc;
-  }, data[0]);
-
-  console.log("timeSeries data: ", countryWise);
-  return countryWise;
 };
