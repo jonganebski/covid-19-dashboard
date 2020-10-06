@@ -36,10 +36,10 @@ const RightColumn: React.FC<RightColumnProps> = ({
     scrollList(newCasesBoxRef);
   }, [selected, scrollList]);
 
-  const totalDeaths = useMemo(() => {
+  const totalActive = useMemo(() => {
     let count = 0;
     countryData?.forEach((d) => {
-      count = count + (d.Deaths ?? 0);
+      count = count + (d.Active ?? 0);
     });
     return count;
   }, [countryData]);
@@ -82,12 +82,14 @@ const RightColumn: React.FC<RightColumnProps> = ({
     >
       <Grid gridArea="global" bg="red.300" gridTemplateRows="1fr 5fr" p={5}>
         <Flex mb={5} direction="column" align="center" justify="center">
-          <Heading size="md">Total Deaths</Heading>
+          <Heading size="md">Active Cases</Heading>
           <Heading size="lg">{selected ? selected : "Global"}</Heading>
-          <Text fontSize="sm">(cumulative)</Text>
+          <Text fontSize="sm">
+            ({countryData && countryData[0].Last_Update})
+          </Text>
           <Heading size="xl" color="red.600">
             {selected === ""
-              ? totalDeaths.toLocaleString()
+              ? totalActive.toLocaleString()
               : countryData
                   ?.filter((d) => d.Country_Region === selected)[0]
                   .Deaths?.toLocaleString() ?? "No data"}

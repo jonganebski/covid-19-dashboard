@@ -1,6 +1,7 @@
 import React from "react";
 import { Circle, Popup } from "react-leaflet";
 import { TDailyD } from "../types";
+import { TMapDataClass } from "./CenterColumn";
 
 interface LCProps {
   d: TDailyD;
@@ -14,39 +15,36 @@ interface LCProps {
       zoom: number;
     }>
   >;
+  dataClass: TMapDataClass;
+  color: string;
 }
 
 class LeafletCircle extends React.Component<LCProps> {
-  lat = this.props.d.Lat;
-  lng = this.props.d.Long_;
-  confirmed = this.props.d.Confirmed;
-  countryName = this.props.d.Country_Region;
-  provinceName = this.props.d.Province_State;
-  admin2 = this.props.d.Admin2;
-  selected = this.props.selected;
-  radius = this.props.radius;
+  pickOpacity = () =>
+    this.props.selected && this.props.selected === this.props.d.Country_Region
+      ? 0.7
+      : !this.props.selected
+      ? 0.6
+      : 0.1;
 
   render() {
-    if (this.lat && this.lng && this.confirmed) {
+    if (this.props.d.Lat && this.props.d.Long_ && this.props.d.Confirmed) {
       return (
         <Circle
-          center={{ lat: this.lat, lng: this.lng }}
-          radius={this.radius}
+          center={{ lat: this.props.d.Lat, lng: this.props.d.Long_ }}
+          radius={this.props.radius}
           stroke={false}
-          fillColor="tomato"
-          fillOpacity={
-            this.selected && this.selected === this.countryName
-              ? 0.8
-              : !this.selected
-              ? 0.6
-              : 0.2
-          }
-          onClick={() => this.props.setSelected(this.countryName)}
+          fillColor={this.props.color}
+          fillOpacity={this.pickOpacity()}
+          onClick={() => this.props.setSelected(this.props.d.Country_Region)}
         >
           <Popup>
-            {this.admin2 ? this.admin2 + ", " : ""}
-            {this.provinceName ? this.provinceName + ", " : ""}
-            {this.countryName}: {this.confirmed.toLocaleString()} cases.
+            {this.props.d.Admin2 ? this.props.d.Admin2 + ", " : ""}
+            {this.props.d.Province_State
+              ? this.props.d.Province_State + ", "
+              : ""}
+            {this.props.d.Country_Region}:{" "}
+            {this.props.d.Confirmed.toLocaleString()} cases.
           </Popup>
         </Circle>
       );

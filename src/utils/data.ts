@@ -5,6 +5,7 @@ export const getDailyData = async (filename: string) => {
   const loadedData = await d3.csv(filename);
   const lookUpTable = await d3.csv("UID_ISO_FIPS_LookUp_Table.csv");
 
+  console.log("loadedData: ", loadedData);
   const mixedCountries: Set<string> = new Set();
   const numOrNull = (value: string | undefined) => (value ? +value : null);
 
@@ -69,20 +70,22 @@ export const getDailyData = async (filename: string) => {
     }
   };
 
-  const coordOrNull = (
+  const getCoordOrNull = (
     reference: TReferenceD[],
     targetCountry: string,
     type: "Lat" | "Long_"
   ) => {
-    const row = reference.find(
+    const targetRow = reference.find(
       (d) => d.Country_Region === targetCountry && d.Province_State === ""
     );
-    if (row) {
-      return row[type];
+    if (targetRow) {
+      return targetRow[type];
     } else {
-      throw Error("Reference data has some missing information.");
+      console.log("Some missing coords...");
+      return null;
     }
   };
+
   const cleanedData = Array.from(mixedCountries).map((countryName) => {
     return dirtyData
       .filter((d) => d.Country_Region === countryName)
@@ -94,8 +97,8 @@ export const getDailyData = async (filename: string) => {
           Deaths: sumValueOrNull(acc.Deaths, d.Deaths),
           Recovered: sumValueOrNull(acc.Recovered, d.Recovered),
           Last_Update: d.Last_Update,
-          Lat: coordOrNull(referenceData, d.Country_Region, "Lat"),
-          Long_: coordOrNull(referenceData, d.Country_Region, "Long_"),
+          Lat: getCoordOrNull(referenceData, d.Country_Region, "Lat"),
+          Long_: getCoordOrNull(referenceData, d.Country_Region, "Long_"),
           FIPS: "",
           Incidence_Rate: null,
           CaseFatality_Ratio: null,
@@ -110,6 +113,10 @@ export const getDailyData = async (filename: string) => {
   const countryWise = cleanData.concat(cleanedData);
   console.log("getting countryWise data...: ", countryWise);
   console.log("getting provinceWise data...: ", provinceWise);
+  console.log(
+    "reference data-france: ",
+    referenceData.filter((d) => d.Country_Region === "France")
+  );
   return { countryWise, provinceWise };
 };
 

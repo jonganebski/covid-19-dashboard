@@ -24,12 +24,16 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
   scrollList,
 }) => {
   const listBoxRef = useRef<HTMLDivElement | null>(null);
-  const totalConfirmed = useMemo(() => {
-    let count = 0;
+  const totalCount = useMemo(() => {
+    let confirmed = 0;
+    let deaths = 0;
+    let recovered = 0;
     countryData?.forEach((d) => {
-      count = count + (d.Confirmed ?? 0);
+      confirmed = confirmed + (d.Confirmed ?? 0);
+      deaths = deaths + (d.Deaths ?? 0);
+      recovered = recovered + (d.Recovered ?? 0);
     });
-    return count;
+    return { confirmed, deaths, recovered };
   }, [countryData]);
   const changeBg = (countryName: string) =>
     selected === countryName ? "red.100" : "none";
@@ -51,7 +55,7 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
         <Text fontSize="sm">(cumulative)</Text>
         <Heading size="xl" color="red.600">
           {selected === ""
-            ? totalConfirmed.toLocaleString()
+            ? totalCount.confirmed.toLocaleString()
             : countryData
                 ?.filter((d) => d.Country_Region === selected)[0]
                 .Confirmed?.toLocaleString() ?? "No data"}

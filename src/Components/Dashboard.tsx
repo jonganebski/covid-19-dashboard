@@ -78,6 +78,7 @@ const Dashboard = () => {
           scrollList={scrollList}
         />
         <CenterColumn
+          countryData={countryData}
           provinceData={provinceData}
           selected={selected}
           setSelected={setSelected}
