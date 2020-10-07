@@ -7,21 +7,19 @@ import {
   ListItem,
   Text,
 } from "@chakra-ui/core";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { TDailyD } from "../types";
 
 interface LeftColumnProps {
   countryData: TDailyD[] | null;
   selected: string;
   handleLiClick: (countryName: string) => void;
-  scrollList: (ref: React.MutableRefObject<HTMLDivElement | null>) => void;
 }
 
 const LeftColumn: React.FC<LeftColumnProps> = ({
   countryData,
   selected,
   handleLiClick,
-  scrollList,
 }) => {
   const listBoxRef = useRef<HTMLDivElement | null>(null);
 
@@ -39,10 +37,6 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
 
   const changeBg = (countryName: string) =>
     selected === countryName ? "red.100" : "none";
-
-  useEffect(() => {
-    scrollList(listBoxRef);
-  }, [selected, scrollList]);
 
   return (
     <Grid
@@ -74,8 +68,7 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
                   display="flex"
                   key={i}
                   id={i.toString()}
-                  pt={2}
-                  pb={2}
+                  paddingY={2}
                   m={0}
                   borderBottom="1px solid"
                   borderBottomColor="gray.50"

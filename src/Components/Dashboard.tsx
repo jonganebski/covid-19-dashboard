@@ -1,8 +1,8 @@
 import { Flex, Grid, Heading } from "@chakra-ui/core";
 import React, { useEffect, useState } from "react";
-import { ITimeDataState, TDailyD, TDateCount, TTimeseriesD } from "../types";
 import { getDailyData } from "../api/dailyData";
 import { getTimeSeriesData } from "../api/timeData";
+import { ITimeDataState, TDailyD } from "../types";
 import CenterColumn from "./CenterColumn";
 import LeftColumn from "./LeftColumn";
 import RightColumn from "./RightColumn";
@@ -16,32 +16,9 @@ const Dashboard = () => {
   const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
   const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
   const [selected, setSelected] = useState("");
-  console.log(timeData);
-  // console.log("selected: ", selected);
 
   const handleLiClick = (countryName: string) => {
     setSelected((prev) => (prev === countryName ? "" : countryName));
-  };
-
-  const scrollList = (ref: React.MutableRefObject<HTMLDivElement | null>) => {
-    if (selected) {
-      const target = ref.current?.querySelector(
-        `#${selected.replace(/\s+/g, "")}`
-      );
-      const parent = target?.parentElement;
-      const parentID = parent?.id;
-      const scrollHeight =
-        parentID && parent?.scrollHeight
-          ? (+parentID - 1) * parent.scrollHeight
-          : 0;
-
-      ref.current?.scrollTo({
-        top: scrollHeight < 0 ? 0 : scrollHeight,
-        behavior: "smooth",
-      });
-    } else {
-      ref.current?.scrollTo({ top: 0, behavior: "smooth" });
-    }
   };
 
   // ----------- 데이터 로드 -----------
@@ -49,7 +26,8 @@ const Dashboard = () => {
     Promise.all([
       getTimeSeriesData("time_series_covid19_confirmed_global.csv"),
       getTimeSeriesData("time_series_covid19_deaths_global.csv"),
-    ]).then(([confirmed, deaths]) => {
+      getDailyData("10-02-2020.csv"),
+    ]).then(([confirmed, deaths, dailyData]) => {
       setTimeData({
         confirmed: {
           countries: confirmed.countryData,
@@ -64,11 +42,8 @@ const Dashboard = () => {
           global: null,
         },
       });
-    });
-
-    getDailyData("10-02-2020.csv").then(({ countryWise, provinceWise }) => {
-      setCountryData(countryWise);
-      setProvinceData(provinceWise);
+      setCountryData(dailyData.countryWise);
+      setProvinceData(dailyData.provinceWise);
     });
   }, []);
 
@@ -97,7 +72,6 @@ const Dashboard = () => {
           countryData={countryData}
           selected={selected}
           handleLiClick={handleLiClick}
-          scrollList={scrollList}
         />
         <CenterColumn
           countryData={countryData}
@@ -110,7 +84,6 @@ const Dashboard = () => {
           timeData={timeData}
           selected={selected}
           handleLiClick={handleLiClick}
-          scrollList={scrollList}
         />
       </Grid>
     </div>

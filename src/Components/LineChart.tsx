@@ -1,3 +1,4 @@
+import { Box, Heading } from "@chakra-ui/core";
 import * as d3 from "d3";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
@@ -5,6 +6,7 @@ import { TDateCount } from "../types";
 import { getMonthName } from "../utils/utils";
 
 interface LineChartProps {
+  selected: string;
   data: Array<TDateCount> | null;
   svgContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
@@ -40,7 +42,11 @@ const getMax = (data: Array<TDateCount>, yValue: (d: TDateCount) => number) => {
   }
 };
 
-const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
+const LineChart: React.FC<LineChartProps> = ({
+  selected,
+  data,
+  svgContainerRef,
+}) => {
   const [dataPiece, setDataPiece] = useState<TDateCount | null>(null);
   const [coord, setCoord] = useState<{ x: number; y: number } | null>(null);
   const [svgW, setSvgW] = useState(0);
@@ -48,7 +54,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const tooltipG = d3.select("#tooltip-group");
 
-  const margin = { top: 50, right: 20, bottom: 50, left: 50 };
+  const margin = { top: 20, right: 20, bottom: 20, left: 60 };
   const innerW = svgW - margin.left - margin.right;
   const innerH = svgH - margin.top - margin.bottom;
   const xValue = (d: TDateCount) => d.date;
@@ -237,7 +243,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, svgContainerRef }) => {
                     {getMonthName(new Date(dataPiece.date).getMonth())}
                   </text>
                   <text transform="translate(5, 40)" fontSize="12px">
-                    {dataPiece.count}
+                    {dataPiece.count.toLocaleString()}
                   </text>
                 </TooltipGroup>
               </g>

@@ -6,8 +6,10 @@ import { TDailyD, TReferenceD } from "../types";
 const numOrNull = (value: string | undefined) => (value ? +value : null);
 
 const sumValueOrNull = (a: number | null, b: number | null) => {
-  if (a === null || b === null) {
-    return null;
+  if (a === null) {
+    return b;
+  } else if (b === null) {
+    return a;
   } else {
     return a + b;
   }
@@ -138,11 +140,5 @@ export const getDailyData = async (filename: string) => {
   // 나라별로 정리된 데이터
   const countryWise = getCountryWise(provinceWise, referenceData, blackSwans);
 
-  console.log("getting countryWise data...: ", countryWise);
-  console.log("getting provinceWise data...: ", provinceWise);
-  console.log(
-    "reference data-france: ",
-    referenceData.filter((d) => d.country === "France")
-  );
   return { countryWise, provinceWise };
 };
