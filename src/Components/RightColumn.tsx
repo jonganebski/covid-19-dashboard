@@ -1,22 +1,40 @@
 import { Box, Grid, Select } from "@chakra-ui/core";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { TDailyD, TTimeseriesD } from "../types";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { ITimeDataState, TDailyD, TListD, TTimeseriesD } from "../types";
 import LineChart from "./LineChart";
 import RightColumnList from "./RightColumnList";
 
 interface RightColumnProps {
   countryData: TDailyD[] | null;
-  timeSeriesData: TTimeseriesD[] | null;
+  timeData: ITimeDataState;
   selected: string;
   handleLiClick: (countryName: string) => void;
   scrollList: (ref: React.MutableRefObject<HTMLDivElement | null>) => void;
 }
 
+const compare = (a: number | null, b: number | null) => {
+  if (a && b) {
+    return b - a;
+  } else if (a && !b) {
+    return -1;
+  } else if (!a && b) {
+    return 1;
+  } else {
+    return 0;
+  }
+};
+
 export type TTab = "active" | "deaths" | "recovered" | "new cases";
 
 const RightColumn: React.FC<RightColumnProps> = ({
   countryData,
-  timeSeriesData,
+  timeData,
   selected,
   handleLiClick,
   scrollList,
@@ -32,100 +50,142 @@ const RightColumn: React.FC<RightColumnProps> = ({
     scrollList(listContainerRefR);
   }, [selected, scrollList]);
 
-  const totalCount = useMemo(() => {
-    let active = 0;
-    let deaths = 0;
-    let recovered = 0;
-    let newCases = 0;
-    if (countryData && timeSeriesData) {
-      countryData?.forEach((d) => {
-        active = active + (d.Active ?? 0);
-        deaths = deaths + (d.Deaths ?? 0);
-        recovered = recovered + (d.Recovered ?? 0);
-      });
-      timeSeriesData?.forEach((d) => {
-        const { data } = d;
-        const lastInx = data.length - 1;
-        const currentCases = data[lastInx].count;
-        const prevCases = data[lastInx - 1].count;
-        const newCasesPerCountry =
-          currentCases && prevCases ? currentCases - prevCases : null;
-        newCases = newCases + (newCasesPerCountry ?? 0);
-      });
-      return { active, deaths, recovered, newCases };
-    } else {
-      return null;
-    }
-  }, [countryData, timeSeriesData]);
+  const {
+    activeData,
+    deathsData,
+    recoveredData,
+    newCasesData,
+    globalCount,
+    dailyDataDate,
+    timeDataDate,
+  } = useMemo(() => {
+    const activeData: TListD[] = [];
+    const deathsData: TListD[] = [];
+    const recoveredData: TListD[] = [];
+    const newCasesData: TListD[] = [];
+    const globalCount = { active: 0, deaths: 0, recovered: 0, newCases: 0 };
+    let dailyDataDate = 0;
+    let timeDataDate = 0;
+    if (countryData) {
+      dailyDataDate = new Date(countryData[0].lastUpdate).getTime();
+      countryData.forEach((d) => {
+        const country = d.country;
+        const activeCount = d.active ?? null;
+        const deathsCount = d.deaths ?? null;
+        const recoveredCount = d.recovered ?? null;
 
-  const compare = (a: number | null, b: number | null) => {
-    if (a && b) {
-      return b - a;
-    } else if (a && !b) {
-      return -1;
-    } else if (!a && b) {
-      return 1;
-    } else {
-      return 0;
-    }
-  };
+        globalCount.active = globalCount.active + (d.active ?? 0);
+        globalCount.deaths = globalCount.deaths + (d.deaths ?? 0);
+        globalCount.recovered = globalCount.recovered + (d.recovered ?? 0);
 
-  const sortedData = useMemo(() => {
-    if (countryData && timeSeriesData) {
-      const date = countryData[0].Last_Update;
-      const active = countryData
-        .map((d) => ({ country: d.Country_Region, count: d.Active }))
-        .sort((a, b) => compare(a.count, b.count));
-      const deaths = countryData
-        .map((d) => ({ country: d.Country_Region, count: d.Deaths }))
-        .sort((a, b) => compare(a.count, b.count));
-      const recovered = countryData
-        .map((d) => ({ country: d.Country_Region, count: d.Recovered }))
-        .sort((a, b) => compare(a.count, b.count));
-      const newCases = timeSeriesData
-        .map((d) => {
-          const { country, data } = d;
-          const lastInx = data.length - 1;
-          const currentCases = data[lastInx].count;
-          const prevCases = data[lastInx - 1].count;
-          const newCases =
-            currentCases && prevCases ? currentCases - prevCases : null;
-          return {
-            country,
-            count: newCases,
-            date: data[lastInx].date,
-          };
-        })
-        .sort((a, b) => compare(a.count, b.count));
-      return {
-        active,
-        deaths,
-        recovered,
-        date,
-        newCases,
-      };
-    } else {
-      return null;
+        activeData.push({ country, count: activeCount });
+        deathsData.push({ country, count: deathsCount });
+        recoveredData.push({ country, count: recoveredCount });
+      });
     }
-  }, [countryData, timeSeriesData]);
+
+    if (timeData.confirmed.countries) {
+      timeData.confirmed.countries.forEach((d) => {
+        const country = d.country;
+        const lastIndex = d.data.length - 1;
+        const count = d.data[lastIndex].count - d.data[lastIndex - 1].count;
+        newCasesData.push({ country, count });
+      });
+    }
+    if (timeData.confirmed.global) {
+      const lastIndex = timeData.confirmed.global.length - 1;
+      timeDataDate = timeData.confirmed.global[lastIndex].date;
+      globalCount.newCases =
+        timeData.confirmed.global[lastIndex].count -
+        timeData.confirmed.global[lastIndex - 1].count;
+    }
+    return {
+      activeData: activeData.sort((a, b) => compare(a.count, b.count)),
+      deathsData: deathsData.sort((a, b) => compare(a.count, b.count)),
+      recoveredData: recoveredData.sort((a, b) => compare(a.count, b.count)),
+      newCasesData: newCasesData.sort((a, b) => compare(a.count, b.count)),
+      globalCount,
+      dailyDataDate,
+      timeDataDate,
+    };
+  }, [countryData, timeData.confirmed.countries, timeData.confirmed.global]);
 
   const getLineChartData = () => {
-    const countryD = timeSeriesData?.find((d) => d.country === selected);
-    if (countryD) {
-      return countryD.data;
+    if (selected) {
+      const countryD = timeData?.confirmed.countries?.find(
+        (d) => d.country === selected
+      );
+      if (countryD) {
+        console.log(countryD);
+        return countryD.data;
+      } else {
+        console.log("no countryD");
+        return null;
+      }
     } else {
-      return null;
+      const globalD = timeData.confirmed.global;
+      if (globalD) {
+        return globalD;
+      } else {
+        return null;
+      }
     }
   };
 
-  const targetData = useMemo(() => {
-    const targetData = countryData?.find((d) => d.Country_Region === selected);
-    return targetData ?? null;
-  }, [selected, countryData]);
-
-  const lineChartData = getLineChartData();
+  // const targetData = useMemo(() => {
+  //   const targetData = countryData?.find((d) => d.country === selected);
+  //   return targetData ?? null;
+  // }, [selected, countryData]);
 
   console.log("RightColumn Rendering...");
+  let sortedDataL: TListD[] = [];
+  let sortedDataR: TListD[] = [];
+  let countL: number | null = null;
+  let countR: number | null = null;
+  let lastUpdateL = 0;
+  let lastUpdateR = 0;
+  switch (tabL) {
+    case "active":
+      sortedDataL = activeData;
+      countL = globalCount.active;
+      lastUpdateL = dailyDataDate;
+      break;
+    case "deaths":
+      sortedDataL = deathsData;
+      countL = globalCount.deaths;
+      lastUpdateL = dailyDataDate;
+      break;
+    case "recovered":
+      sortedDataL = recoveredData;
+      countL = globalCount.recovered;
+      lastUpdateL = dailyDataDate;
+      break;
+    case "new cases":
+      sortedDataL = newCasesData;
+      countL = globalCount.newCases;
+      lastUpdateL = timeDataDate;
+  }
+  switch (tabR) {
+    case "active":
+      sortedDataR = activeData;
+      countR = globalCount.active;
+      lastUpdateR = dailyDataDate;
+      break;
+    case "deaths":
+      sortedDataR = deathsData;
+      countR = globalCount.deaths;
+      lastUpdateR = dailyDataDate;
+      break;
+    case "recovered":
+      sortedDataR = recoveredData;
+      countR = globalCount.recovered;
+      lastUpdateR = dailyDataDate;
+      break;
+    case "new cases":
+      sortedDataR = newCasesData;
+      countR = globalCount.newCases;
+      lastUpdateR = timeDataDate;
+  }
   return (
     <Grid
       gridArea="right"
@@ -155,17 +215,17 @@ const RightColumn: React.FC<RightColumnProps> = ({
             }
           }}
         >
-          <option value="active">Active</option>
+          <option value="active">active</option>
           <option value="new cases">New Cases</option>
-          <option value="deaths">Total Deaths</option>
-          <option value="recovered">Total Recovered</option>
+          <option value="deaths">Total deaths (cumulative)</option>
+          <option value="recovered">Total recovered (cumulative)</option>
         </Select>
         <RightColumnList
           selected={selected}
           tab={tabL}
-          totalCount={totalCount}
-          targetData={targetData}
-          sortedData={sortedData}
+          globalCount={countL}
+          lastUpdate={lastUpdateL}
+          sortedData={sortedDataL}
           listContainerRef={listContainerRefL}
           handleLiClick={handleLiClick}
         />
@@ -188,25 +248,26 @@ const RightColumn: React.FC<RightColumnProps> = ({
             }
           }}
         >
-          <option value="active">Active</option>
+          <option value="active">active</option>
           <option value="new cases">New Cases</option>
-          <option value="deaths">Total Deaths</option>
-          <option value="recovered">Total Recovered</option>
+          <option value="deaths">Total deaths (cumulative)</option>
+          <option value="recovered">Total recovered (cumulative)</option>
         </Select>
         <RightColumnList
           selected={selected}
           tab={tabR}
-          totalCount={totalCount}
-          targetData={targetData}
-          sortedData={sortedData}
+          globalCount={countR}
+          lastUpdate={lastUpdateR}
+          sortedData={sortedDataR}
           listContainerRef={listContainerRefR}
           handleLiClick={handleLiClick}
         />
       </Grid>
       <Box ref={svgContainerRef} gridArea="graph" bg="red.500">
-        {lineChartData && (
-          <LineChart data={lineChartData} svgContainerRef={svgContainerRef} />
-        )}
+        <LineChart
+          data={getLineChartData()}
+          svgContainerRef={svgContainerRef}
+        />
       </Box>
     </Grid>
   );

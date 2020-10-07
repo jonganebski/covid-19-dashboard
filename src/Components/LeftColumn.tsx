@@ -30,9 +30,9 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
     let deaths = 0;
     let recovered = 0;
     countryData?.forEach((d) => {
-      confirmed = confirmed + (d.Confirmed ?? 0);
-      deaths = deaths + (d.Deaths ?? 0);
-      recovered = recovered + (d.Recovered ?? 0);
+      confirmed = confirmed + (d.confirmed ?? 0);
+      deaths = deaths + (d.deaths ?? 0);
+      recovered = recovered + (d.recovered ?? 0);
     });
     return { confirmed, deaths, recovered };
   }, [countryData]);
@@ -59,15 +59,15 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
           {selected === ""
             ? totalCount.confirmed.toLocaleString()
             : countryData
-                ?.filter((d) => d.Country_Region === selected)[0]
-                .Confirmed?.toLocaleString() ?? "No data"}
+                ?.filter((d) => d.country === selected)[0]
+                .confirmed?.toLocaleString() ?? "No data"}
         </Heading>
       </Flex>
       <Box bg="blue.400" overflowY="scroll" p={5} ref={listBoxRef}>
         <List spacing={1}>
           {countryData
-            ?.filter((d) => d.Confirmed)
-            .sort((a, b) => b.Confirmed! - a.Confirmed!)
+            ?.filter((d) => d.confirmed)
+            .sort((a, b) => b.confirmed! - a.confirmed!)
             .map((d, i) => {
               return (
                 <ListItem
@@ -80,15 +80,13 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
                   borderBottom="1px solid"
                   borderBottomColor="gray.50"
                   cursor="pointer"
-                  onClick={() => handleLiClick(d.Country_Region)}
-                  bg={changeBg(d.Country_Region)}
+                  onClick={() => handleLiClick(d.country)}
+                  bg={changeBg(d.country)}
                 >
                   <Text fontWeight={600} color="red.600" mr={2}>
-                    {d.Confirmed?.toLocaleString() ?? "No data"}
+                    {d.confirmed?.toLocaleString() ?? "No data"}
                   </Text>
-                  <Text id={d.Country_Region.replace(/\s+/g, "")}>
-                    {d.Country_Region}
-                  </Text>
+                  <Text id={d.country.replace(/\s+/g, "")}>{d.country}</Text>
                 </ListItem>
               );
             })}
@@ -97,7 +95,7 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
       <Flex direction="column" align="center" justify="center" bg="blue.500">
         <Text>Last Updated at</Text>
         <Text fontSize="2xl" fontWeight={500}>
-          {countryData && new Date(countryData[0].Last_Update).toLocaleString()}
+          {countryData && new Date(countryData[0].lastUpdate).toLocaleString()}
         </Text>
       </Flex>
     </Grid>

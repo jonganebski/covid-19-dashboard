@@ -1,20 +1,14 @@
 import { Flex, Grid, Heading } from "@chakra-ui/core";
 import React, { useEffect, useState } from "react";
-import { TDailyD, TDateCount, TTimeseriesD } from "../types";
+import { ITimeDataState, TDailyD, TDateCount, TTimeseriesD } from "../types";
 import { getDailyData } from "../api/dailyData";
 import { getTimeSeriesData } from "../api/timeData";
 import CenterColumn from "./CenterColumn";
 import LeftColumn from "./LeftColumn";
 import RightColumn from "./RightColumn";
 
-interface TTimeDataState {
-  confirmed: { countries: TTimeseriesD[] | null; global: TDateCount[] | null };
-  deaths: { countries: TTimeseriesD[] | null; global: TDateCount[] | null };
-  recovered: { countries: TTimeseriesD[] | null; global: TDateCount[] | null };
-}
-
 const Dashboard = () => {
-  const [timeData, setTimeData] = useState<TTimeDataState>({
+  const [timeData, setTimeData] = useState<ITimeDataState>({
     confirmed: { countries: null, global: null },
     deaths: { countries: null, global: null },
     recovered: { countries: null, global: null },
@@ -58,12 +52,12 @@ const Dashboard = () => {
     ]).then(([confirmed, deaths]) => {
       setTimeData({
         confirmed: {
-          countries: confirmed.countryTimeData,
-          global: confirmed.globalTimeData,
+          countries: confirmed.countryData,
+          global: confirmed.globalData,
         },
         deaths: {
-          countries: deaths.countryTimeData,
-          global: deaths.globalTimeData,
+          countries: deaths.countryData,
+          global: deaths.globalData,
         },
         recovered: {
           countries: null,
@@ -72,10 +66,10 @@ const Dashboard = () => {
       });
     });
 
-    // getDailyData("10-02-2020.csv").then(({ countryWise, provinceWise }) => {
-    //   setCountryData(countryWise);
-    //   setProvinceData(provinceWise);
-    // });
+    getDailyData("10-02-2020.csv").then(({ countryWise, provinceWise }) => {
+      setCountryData(countryWise);
+      setProvinceData(provinceWise);
+    });
   }, []);
 
   return (
@@ -88,7 +82,7 @@ const Dashboard = () => {
         display: "flex",
       }}
     >
-      {/* <Grid
+      <Grid
         w="100%"
         gap={1}
         style={{
@@ -113,12 +107,12 @@ const Dashboard = () => {
         />
         <RightColumn
           countryData={countryData}
-          timeSeriesData={timeSeriesData}
+          timeData={timeData}
           selected={selected}
           handleLiClick={handleLiClick}
           scrollList={scrollList}
         />
-      </Grid> */}
+      </Grid>
     </div>
   );
 };

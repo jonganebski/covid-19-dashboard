@@ -1,121 +1,148 @@
-import { TReferenceD, TTimeseriesD, TDateCount, TDailyD } from "../types";
 import * as d3 from "d3";
+import { TDailyD, TReferenceD } from "../types";
 
-export const getDailyData = async (filename: string) => {
-  const loadedData = await d3.csv(filename);
-  const lookUpTable = await d3.csv("UID_ISO_FIPS_LookUp_Table.csv");
+// ------------- SUB FUNCTION -------------
 
-  console.log("loadedData: ", loadedData);
-  const mixedCountries: Set<string> = new Set();
-  const numOrNull = (value: string | undefined) => (value ? +value : null);
+const numOrNull = (value: string | undefined) => (value ? +value : null);
 
-  const referenceData: TReferenceD[] = lookUpTable.map((d) => {
-    const Country_Region = d.Country_Region ?? "";
-    const Province_State = d.Province_State ?? "";
-    const Admin2 = d.Admin2 ?? "";
-    const iso2 = d.iso2 ?? "";
-    const Lat = numOrNull(d.Lat);
-    const Long_ = numOrNull(d.Long_);
-    const Population = numOrNull(d.Population);
-    const UID = numOrNull(d.UID);
-    return {
-      Country_Region,
-      Province_State,
-      Admin2,
-      iso2,
-      Lat,
-      Long_,
-      Population,
-      UID,
-    };
-  });
+const sumValueOrNull = (a: number | null, b: number | null) => {
+  if (a === null || b === null) {
+    return null;
+  } else {
+    return a + b;
+  }
+};
 
-  const provinceWise = loadedData.map((d, i, arr) => {
-    if (0 < i && d.Country_Region === arr[i - 1].Country_Region) {
-      mixedCountries.add(d.Country_Region ?? "");
-    }
-    return {
-      Country_Region: d.Country_Region ?? "",
-      Last_Update: d.Last_Update ?? "",
-      Admin2: d.Admin2 ?? "",
-      Combined_Key: d.Combined_Key ?? "",
-      FIPS: d.FIPS ?? "",
-      Province_State: d.Province_State ?? "",
-      Active: numOrNull(d.Active),
-      Confirmed: numOrNull(d.Confirmed),
-      Deaths: numOrNull(d.Deaths),
-      Recovered: numOrNull(d.Recovered),
-      Lat: numOrNull(d.Lat),
-      Long_: numOrNull(d.Long_),
-      CaseFatality_Ratio: numOrNull(d["Case-Fatality_Ratio"]),
-      Incidence_Rate: numOrNull(d.Incident_Rate),
-    };
-  });
+const getCoordOrNull = (
+  reference: TReferenceD[],
+  targetCountry: string,
+  type: "lat" | "lon"
+) => {
+  const targetRow = reference.find(
+    (d) => d.country === targetCountry && d.province === ""
+  );
+  if (targetRow) {
+    return targetRow[type];
+  } else {
+    console.error("Some missing coords...");
+    return null;
+  }
+};
 
+const getCountryWise = (
+  provinceWise: TDailyD[],
+  referenceData: TReferenceD[],
+  blackSwans: Set<string>
+) => {
+  // 전체 데이터를 두 종류로 분류한다. 깔끔한 데이터 / 더러운 데이터.
   const cleanData: TDailyD[] = [];
   const dirtyData: TDailyD[] = [];
   provinceWise.forEach((d) => {
-    if (mixedCountries.has(d.Country_Region)) {
+    if (blackSwans.has(d.country)) {
       dirtyData.push(d);
     } else {
       cleanData.push(d);
     }
   });
 
-  const sumValueOrNull = (a: number | null, b: number | null) => {
-    if (a === null || b === null) {
-      return null;
-    } else {
-      return a + b;
-    }
-  };
-
-  const getCoordOrNull = (
-    reference: TReferenceD[],
-    targetCountry: string,
-    type: "Lat" | "Long_"
-  ) => {
-    const targetRow = reference.find(
-      (d) => d.Country_Region === targetCountry && d.Province_State === ""
-    );
-    if (targetRow) {
-      return targetRow[type];
-    } else {
-      console.log("Some missing coords...");
-      return null;
-    }
-  };
-
-  const cleanedData = Array.from(mixedCountries).map((countryName) => {
+  // 지역별로 나뉜 데이터를 나라별로 묶는다. 더러운 데이터를 씻긴다.
+  const washedData = Array.from(blackSwans).map((countryName) => {
     return dirtyData
-      .filter((d) => d.Country_Region === countryName)
+      .filter((d) => d.country === countryName)
       .reduce((acc, d) => {
         acc = {
-          Country_Region: d.Country_Region,
-          Active: sumValueOrNull(acc.Active, d.Active),
-          Confirmed: sumValueOrNull(acc.Confirmed, d.Confirmed),
-          Deaths: sumValueOrNull(acc.Deaths, d.Deaths),
-          Recovered: sumValueOrNull(acc.Recovered, d.Recovered),
-          Last_Update: d.Last_Update,
-          Lat: getCoordOrNull(referenceData, d.Country_Region, "Lat"),
-          Long_: getCoordOrNull(referenceData, d.Country_Region, "Long_"),
+          country: d.country,
+          active: sumValueOrNull(acc.active, d.active),
+          confirmed: sumValueOrNull(acc.confirmed, d.confirmed),
+          deaths: sumValueOrNull(acc.deaths, d.deaths),
+          recovered: sumValueOrNull(acc.recovered, d.recovered),
+          lastUpdate: d.lastUpdate,
+          lat: getCoordOrNull(referenceData, d.country, "lat"),
+          lon: getCoordOrNull(referenceData, d.country, "lon"),
           FIPS: "",
-          Incidence_Rate: null,
-          CaseFatality_Ratio: null,
-          Combined_Key: "",
-          Admin2: "",
-          Province_State: "",
+          incidenceRate: null,
+          caseFatalityRatio: null,
+          combinedKey: "",
+          admin2: "",
+          province: "",
         };
         return acc;
       });
   });
 
-  const countryWise = cleanData.concat(cleanedData);
+  // 원래 깔끔했던 데이터와 이제 깔끔해진 데이터를 합침.
+  const countryWise = cleanData.concat(washedData);
+
+  return countryWise;
+};
+
+// ------------- MAIN FUNCTION -------------
+
+export const getDailyData = async (filename: string) => {
+  // 참고: 이 데이터는 리스트(new cases 제외)와 지도에 사용된다.
+  //      리스트에서는 나라별로 정리된 데이터가 필요하고, 지도에서는 지역별로 정리된(원본) 데이터가 필요하다.
+
+  const loadedData = await d3.csv(filename);
+
+  // 각 지역 좌표만 있고 나라의 좌표가 없는 경우 좌표를 붙여주기 위한 csv 파일이다.
+  const lookUpTable = await d3.csv("UID_ISO_FIPS_LookUp_Table.csv");
+
+  // 지역별 데이터만 있는 나라들의 리스트. 중복 제거를 위해 set 사용.
+  const blackSwans: Set<string> = new Set();
+
+  // 큰 변화는 없다. 타입을 입히기 위한 작업이다.
+  const referenceData: TReferenceD[] = lookUpTable.map((d) => {
+    const country = d.Country_Region ?? "";
+    const province = d.Province_State ?? "";
+    const admin2 = d.Admin2 ?? "";
+    const iso2 = d.iso2 ?? "";
+    const lat = numOrNull(d.Lat);
+    const lon = numOrNull(d.Long_);
+    const population = numOrNull(d.Population);
+    const UID = numOrNull(d.UID);
+    return {
+      country,
+      province,
+      admin2,
+      iso2,
+      lat,
+      lon,
+      population,
+      UID,
+    };
+  });
+
+  // 타입을 입히기 위한 작업을 하면서 지역별로만 정리된 나라들의 이름을 적어둔다.
+  const provinceWise: TDailyD[] = loadedData.map((d, i, arr) => {
+    if (0 < i && d.Country_Region === arr[i - 1].Country_Region) {
+      blackSwans.add(d.Country_Region ?? "");
+    }
+    return {
+      country: d.Country_Region ?? "",
+      lastUpdate: d.Last_Update ?? "",
+      admin2: d.Admin2 ?? "",
+      combinedKey: d.Combined_Key ?? "",
+      FIPS: d.FIPS ?? "",
+      province: d.Province_State ?? "",
+      active: numOrNull(d.Active),
+      confirmed: numOrNull(d.Confirmed),
+      deaths: numOrNull(d.Deaths),
+      recovered: numOrNull(d.Recovered),
+      lat: numOrNull(d.Lat),
+      lon: numOrNull(d.Long_),
+      caseFatalityRatio: numOrNull(d["Case-Fatality_Ratio"]),
+      incidenceRate: numOrNull(d.Incident_Rate),
+    };
+  });
+
+  // 나라별로 정리된 데이터
+  const countryWise = getCountryWise(provinceWise, referenceData, blackSwans);
+
   console.log("getting countryWise data...: ", countryWise);
   console.log("getting provinceWise data...: ", provinceWise);
   console.log(
     "reference data-france: ",
-    referenceData.filter((d) => d.Country_Region === "France")
+    referenceData.filter((d) => d.country === "France")
   );
   return { countryWise, provinceWise };
 };

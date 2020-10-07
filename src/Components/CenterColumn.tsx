@@ -18,10 +18,10 @@ interface CenterColumnProps {
   setSelected: React.Dispatch<React.SetStateAction<string>>;
 }
 export type TMapDataClass =
-  | "Confirmed"
-  | "Active"
-  | "Deaths"
-  | "CaseFatality_Ratio";
+  | "confirmed"
+  | "active"
+  | "deaths"
+  | "caseFatalityRatio";
 
 const CenterColumn: React.FC<CenterColumnProps> = ({
   countryData,
@@ -29,7 +29,7 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
   selected,
   setSelected,
 }) => {
-  const [dataClass, setDataClass] = useState<TMapDataClass>("Confirmed");
+  const [dataClass, setDataClass] = useState<TMapDataClass>("confirmed");
   const handleBtnClick = (type: TMapDataClass) => setDataClass(type);
 
   return (
@@ -51,8 +51,8 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
             borderTopLeftRadius={0}
             borderTopRightRadius={0}
             variant="outline"
-            variantColor={dataClass === "Confirmed" ? "red" : "gray"}
-            onClick={() => handleBtnClick("Confirmed")}
+            variantColor={dataClass === "confirmed" ? "red" : "gray"}
+            onClick={() => handleBtnClick("confirmed")}
           >
             Cumulative Cases
           </Button>
@@ -62,8 +62,8 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
             borderTopLeftRadius={0}
             borderTopRightRadius={0}
             variant="outline"
-            variantColor={dataClass === "Active" ? "red" : "gray"}
-            onClick={() => handleBtnClick("Active")}
+            variantColor={dataClass === "active" ? "red" : "gray"}
+            onClick={() => handleBtnClick("active")}
           >
             Active Cases
           </Button>
@@ -73,8 +73,8 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
             borderTopLeftRadius={0}
             borderTopRightRadius={0}
             variant="outline"
-            variantColor={dataClass === "Deaths" ? "red" : "gray"}
-            onClick={() => handleBtnClick("Deaths")}
+            variantColor={dataClass === "deaths" ? "red" : "gray"}
+            onClick={() => handleBtnClick("deaths")}
           >
             Cumulative Deaths
           </Button>
@@ -84,8 +84,8 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
             borderTopLeftRadius={0}
             borderTopRightRadius={0}
             variant="outline"
-            variantColor={dataClass === "CaseFatality_Ratio" ? "red" : "gray"}
-            onClick={() => handleBtnClick("CaseFatality_Ratio")}
+            variantColor={dataClass === "caseFatalityRatio" ? "red" : "gray"}
+            onClick={() => handleBtnClick("caseFatalityRatio")}
           >
             Case-Fatality Radio
           </Button>

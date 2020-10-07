@@ -20,8 +20,8 @@ export const getTimeSeriesData = async (fileName: string) => {
   const loadedData = await d3.csv(fileName);
 
   // 가공하여 최종적으로 출력할 두 배열이다.
-  let countryTimeData: TCountryTimedata[] = [];
-  let globalTimeData: TDateCount[] = [];
+  let countryData: TCountryTimedata[] = [];
+  let globalData: TDateCount[] = [];
 
   // 1. 지역별로 나눠져 있는 데이터는 한 나라의 데이터로 합친다.
   // 2. 그러면서 모든 날짜의 데이터를 수집하여 글로벌 단위의 데이터를 만든다.
@@ -74,8 +74,8 @@ export const getTimeSeriesData = async (fileName: string) => {
 
   // console.log("reduced: ", reduced);
 
-  countryTimeData = reduced.countries;
-  globalTimeData = reduced.global;
+  countryData = reduced.countries;
+  globalData = reduced.global;
 
-  return { countryTimeData, globalTimeData };
+  return { countryData, globalData };
 };

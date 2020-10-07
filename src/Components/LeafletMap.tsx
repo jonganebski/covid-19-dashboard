@@ -34,9 +34,9 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     if (!selected) {
       setViewport(initialViewport);
     } else {
-      const countryD = countryData?.find((D) => D.Country_Region === selected);
-      const lat = countryD?.Lat;
-      const lng = countryD?.Long_;
+      const countryD = countryData?.find((D) => D.country === selected);
+      const lat = countryD?.lat;
+      const lng = countryD?.lon;
       const zoom = selected === "Russia" ? 3 : 4;
       if (lat && lng) {
         setViewport({ lat, lng, zoom });
@@ -45,7 +45,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   }, [selected, countryData]);
 
   const getMax = (data: TDailyD[]) => {
-    const max = d3.max(data, (D) => D.Confirmed ?? 0);
+    const max = d3.max(data, (D) => D.confirmed ?? 0);
     if (max) {
       return max;
     } else {
@@ -54,13 +54,13 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   };
 
   const pickColor = () => {
-    return dataClass === "Confirmed"
+    return dataClass === "confirmed"
       ? theme.colors.red[900]
-      : dataClass === "Active"
+      : dataClass === "active"
       ? theme.colors.green[900]
-      : dataClass === "Deaths"
+      : dataClass === "deaths"
       ? theme.colors.gray[900]
-      : dataClass === "CaseFatality_Ratio"
+      : dataClass === "caseFatalityRatio"
       ? theme.colors.blue[900]
       : "none";
   };
