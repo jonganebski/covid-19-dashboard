@@ -1,5 +1,18 @@
 import * as d3 from "d3";
-import { TDateCount } from "../types";
+import { TCountryTimedata, TDateCount } from "../types";
+
+// ------------- SUB FUNCTIONS -------------
+
+const sumDateCount = (data: TDateCount[], date: number, count: number) => {
+  const dateData = data.find((d) => d.date === date);
+  if (dateData) {
+    dateData.count = dateData.count + count;
+  } else {
+    data.push({ date, count });
+  }
+};
+
+// ------------- MAIN FUNCTION -------------
 
 export const getTimeSeriesData = async (fileName: string) => {
   // 참고: 이 시간대별 데이터는 그래프를 만들 때 주로 소비된다. 따라서 만약 값이 없는 데이터가 있다면 null이 아니라 0으로 처리한다.
@@ -7,55 +20,62 @@ export const getTimeSeriesData = async (fileName: string) => {
   const loadedData = await d3.csv(fileName);
 
   // 가공하여 최종적으로 출력할 두 배열이다.
+  let countryTimeData: TCountryTimedata[] = [];
   let globalTimeData: TDateCount[] = [];
-  const countryTimeData: {
-    country: string;
-    data: TDateCount[];
-  }[] = [];
 
-  // 나라명을 비롯한 다른 정보들이 날짜-숫자 데이터와 혼재되어 있어서 이를 구별한다.
-  const reorderedData = loadedData.map((d) => {
-    let country = "";
-    let timeData: TDateCount[] = [];
-    Object.entries(d).forEach(([key, value]) => {
-      const dateObj = new Date(key);
-      const date = dateObj.getTime();
-      if (!isNaN(date)) {
-        timeData.push({
-          date,
-          count: value ? parseInt(value, 10) : 0,
+  // 1. 지역별로 나눠져 있는 데이터는 한 나라의 데이터로 합친다.
+  // 2. 그러면서 모든 날짜의 데이터를 수집하여 글로벌 단위의 데이터를 만든다.
+  const reduced = loadedData.reduce(
+    (acc, D) => {
+      let country: TCountryTimedata = { country: "", data: [] };
+
+      const { countries, global } = acc;
+      const prevCountry = countries[countries.length - 1]?.country ?? "";
+      const currCountry = D["Country/Region"] ?? "";
+      const prevCountryData = countries[countries.length - 1]?.data ?? [];
+      const arrayedObj = Object.entries(D);
+
+      if (prevCountry !== currCountry) {
+        // 이미 나라별로 정리가 된 경우.
+        arrayedObj.forEach(([key, value]) => {
+          const dateObj = new Date(key);
+          const date = dateObj.getTime();
+          const count = value ? parseInt(value) : 0;
+          if (!isNaN(date)) {
+            // countries
+            country.country = currCountry;
+            country.data.push({ date, count });
+            // global
+            sumDateCount(global, date, count);
+          }
+        });
+        countries.push(country);
+      } else {
+        // 나라는 같은데 지역별로 나뉜 경우.
+        arrayedObj.forEach(([key, value]) => {
+          const dateObj = new Date(key);
+          const date = dateObj.getTime();
+          const count = value ? parseInt(value) : 0;
+          if (!isNaN(date)) {
+            // countries
+            sumDateCount(prevCountryData, date, count);
+            // global
+            sumDateCount(global, date, count);
+          }
         });
       }
-      if (key === "Country/Region") {
-        country = value ?? "";
-      }
-    });
-    return { country, data: [...timeData] };
-  });
-
-  // 더미데이터. 아래 reduce에서 마지막 나라인 짐바브웨까지 accumulator로 읽기 위함이다.
-  reorderedData.push({ country: "", data: [] });
-
-  // 지역별로 나눠서 보고하는 나라가 있기 때문에 이를 합친다.
-  reorderedData.reduce((acc, d) => {
-    if (acc.country === d.country) {
-      d.data.forEach((d, i) => {
-        acc.data[i].count = (acc.data[i].count ?? 0) + (d.count ?? 0);
-      });
-    } else {
-      countryTimeData.push(acc);
-      acc = d;
+      return acc;
+    },
+    {
+      countries: [] as TCountryTimedata[],
+      global: [] as TDateCount[],
     }
-    return acc;
-  }, reorderedData[0]);
+  );
 
-  // 모두 합쳐서 전세계 날짜별 데이터를 만든다.
-  globalTimeData = reorderedData.reduce((acc, d) => {
-    d.data.forEach((d, i) => {
-      acc.data[i].count = (acc.data[i].count ?? 0) + (d.count ?? 0);
-    });
-    return acc;
-  }, reorderedData[0]).data;
+  // console.log("reduced: ", reduced);
+
+  countryTimeData = reduced.countries;
+  globalTimeData = reduced.global;
 
   return { countryTimeData, globalTimeData };
 };

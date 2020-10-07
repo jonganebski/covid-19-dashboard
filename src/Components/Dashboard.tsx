@@ -19,12 +19,11 @@ const Dashboard = () => {
     deaths: { countries: null, global: null },
     recovered: { countries: null, global: null },
   });
-
   const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
   const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
   const [selected, setSelected] = useState("");
   console.log(timeData);
-  console.log("selected: ", selected);
+  // console.log("selected: ", selected);
 
   const handleLiClick = (countryName: string) => {
     setSelected((prev) => (prev === countryName ? "" : countryName));
@@ -53,31 +52,30 @@ const Dashboard = () => {
 
   // ----------- 데이터 로드 -----------
   useEffect(() => {
-    // Promise.all([
-    //   getTimeSeriesData("time_series_covid19_confirmed_global.csv"),
-    //   getTimeSeriesData("time_series_covid19_deaths_global.csv"),
-    //   getTimeSeriesData("time_series_covid19_recovered_global.csv"),
-    // ]).then(([confirmed, deaths, recovered]) => {
-    //   setTimeData({
-    //     confirmed: {
-    //       countries: confirmed.countryTimeData,
-    //       global: confirmed.globalTimeData,
-    //     },
-    //     deaths: {
-    //       countries: deaths.countryTimeData,
-    //       global: deaths.globalTimeData,
-    //     },
-    //     recovered: {
-    //       countries: recovered.countryTimeData,
-    //       global: recovered.globalTimeData,
-    //     },
-    //   });
-    // });
-
-    getDailyData("10-02-2020.csv").then(({ countryWise, provinceWise }) => {
-      setCountryData(countryWise);
-      setProvinceData(provinceWise);
+    Promise.all([
+      getTimeSeriesData("time_series_covid19_confirmed_global.csv"),
+      getTimeSeriesData("time_series_covid19_deaths_global.csv"),
+    ]).then(([confirmed, deaths]) => {
+      setTimeData({
+        confirmed: {
+          countries: confirmed.countryTimeData,
+          global: confirmed.globalTimeData,
+        },
+        deaths: {
+          countries: deaths.countryTimeData,
+          global: deaths.globalTimeData,
+        },
+        recovered: {
+          countries: null,
+          global: null,
+        },
+      });
     });
+
+    // getDailyData("10-02-2020.csv").then(({ countryWise, provinceWise }) => {
+    //   setCountryData(countryWise);
+    //   setProvinceData(provinceWise);
+    // });
   }, []);
 
   return (

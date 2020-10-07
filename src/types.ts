@@ -3,6 +3,11 @@ export type TDateCount = {
   count: number;
 };
 
+export type TCountryTimedata = {
+  country: string;
+  data: TDateCount[];
+};
+
 export type TTimeseriesD = {
   country: string;
   data: TDateCount[];
