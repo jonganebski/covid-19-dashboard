@@ -91,14 +91,14 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
           </Button>
         </ButtonGroup>
       </Stack>
-      <Box bg="green.700">
-        <Text>
+      <Box bg="gray.800">
+        <Text color="gray.400">
           This page is a result of clone coding following webpage:
           <Link href="https://bit.ly/31YewhF" target="_blank">
             https://bit.ly/31YewhF
           </Link>
         </Text>
-        <Text>
+        <Text color="gray.400">
           Data source:{" "}
           <Link
             href="https://github.com/CSSEGISandData/COVID-19"

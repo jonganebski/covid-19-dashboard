@@ -76,6 +76,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       <TileLayer
         attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        maxZoom={8}
+        minZoom={2}
       />
       {provinceData
         ?.filter((d) => d[dataClass])

@@ -1,5 +1,6 @@
+import { Box, Heading, Text } from "@chakra-ui/core";
 import React from "react";
-import { Circle, Popup } from "react-leaflet";
+import { Circle, Popup, Marker, Tooltip } from "react-leaflet";
 import { TDailyD } from "../types";
 import { TMapDataClass } from "./CenterColumn";
 
@@ -20,12 +21,19 @@ interface LCProps {
 }
 
 class LeafletCircle extends React.Component<LCProps> {
-  pickOpacity = () =>
+  pickFillOpacity = () =>
     this.props.selected && this.props.selected === this.props.d.country
       ? 0.7
       : !this.props.selected
-      ? 0.6
+      ? 0.1
       : 0.1;
+
+  pickOpacity = () =>
+    this.props.selected && this.props.selected === this.props.d.country
+      ? 1
+      : !this.props.selected
+      ? 1
+      : 0.7;
 
   render() {
     if (this.props.d.lat && this.props.d.lon && this.props.d.confirmed) {
@@ -33,17 +41,39 @@ class LeafletCircle extends React.Component<LCProps> {
         <Circle
           center={{ lat: this.props.d.lat, lng: this.props.d.lon }}
           radius={this.props.radius}
-          stroke={false}
-          fillColor={this.props.color}
-          fillOpacity={this.pickOpacity()}
-          onClick={() => this.props.setSelected(this.props.d.country)}
+          stroke={true}
+          color={this.props.color}
+          opacity={this.pickOpacity()}
+          weight={0.5}
+          fillOpacity={this.pickFillOpacity()}
+          onmousedown={() => this.props.setSelected(this.props.d.country)}
+          onmouseover={(e) => e.sourceTarget.setStyle({ fillOpacity: 0.5 })}
+          onmouseout={(e) => e.sourceTarget.setStyle({ fillOpacity: 0.1 })}
         >
-          <Popup>
-            {this.props.d.admin2 ? this.props.d.admin2 + ", " : ""}
-            {this.props.d.province ? this.props.d.province + ", " : ""}
-            {this.props.d.country}: {this.props.d.confirmed.toLocaleString()}{" "}
-            cases.
-          </Popup>
+          <Tooltip
+            className="meow"
+            sticky={true}
+            direction="left"
+            offset={[-2, 0]}
+          >
+            <Heading size="sm" color="gray.400">
+              {this.props.d.admin2 ? this.props.d.admin2 + "," : ""}{" "}
+              {this.props.d.province ? this.props.d.province + "," : ""}{" "}
+              {this.props.d.country}
+            </Heading>
+            <Text color="gray.400">
+              Total Cases: {this.props.d.confirmed.toLocaleString()}
+            </Text>
+            <Text color="gray.400">
+              Total Deaths: {this.props.d.deaths?.toLocaleString()}
+            </Text>
+            <Text color="gray.400">
+              Active cases: {this.props.d.active?.toLocaleString()}
+            </Text>
+            <Text color="gray.400">
+              Case-Fatality Ratio: {this.props.d.caseFatalityRatio?.toFixed(3)}
+            </Text>
+          </Tooltip>
         </Circle>
       );
     } else {

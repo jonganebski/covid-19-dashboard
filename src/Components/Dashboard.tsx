@@ -1,4 +1,4 @@
-import { Flex, Grid, Heading } from "@chakra-ui/core";
+import { Flex, Grid, Heading, Box } from "@chakra-ui/core";
 import React, { useEffect, useState } from "react";
 import { getDailyData } from "../api/dailyData";
 import { getTimeSeriesData } from "../api/timeData";
@@ -48,15 +48,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div
-      className="App"
-      style={{
-        padding: "5px",
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-      }}
-    >
+    <Flex className="App" p={1} w="100vw" h="100vh" bg="black">
       <Grid
         w="100%"
         gap={1}
@@ -65,7 +57,7 @@ const Dashboard = () => {
                           "left center right" 94vh / 3fr 9fr 5fr`,
         }}
       >
-        <Flex gridArea="header" justify="center" bg="blue.500">
+        <Flex gridArea="header" justify="center" bg="gray.800" color="gray.400">
           <Heading> Covid-19 Information Dashboard</Heading>
         </Flex>
         <LeftColumn
@@ -86,7 +78,7 @@ const Dashboard = () => {
           handleLiClick={handleLiClick}
         />
       </Grid>
-    </div>
+    </Flex>
   );
 };
 

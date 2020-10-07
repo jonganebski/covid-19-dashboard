@@ -15,3 +15,6 @@ export const getMonthName = (i: number) => {
   ];
   return months[i];
 };
+
+export const changeBg = (selected: string, countryName: string) =>
+  selected === countryName ? "black" : "none";

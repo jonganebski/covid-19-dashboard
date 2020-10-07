@@ -226,14 +226,14 @@ const RightColumn: React.FC<RightColumnProps> = ({
     <Grid
       gridArea="right"
       gap={1}
-      bg="red.200"
+      bg="black"
       style={{
         gridTemplate: `"Left Right" 3fr
                       "Left Right" 3fr
                       "Graph Graph" 4fr / 1fr 1fr`,
       }}
     >
-      <Grid gridArea="Left" bg="red.300" gridTemplateRows="1fr 5fr">
+      <Grid gridArea="Left" bg="black" gridTemplateRows="1fr 5fr">
         <Select
           size="sm"
           backgroundColor="black"
@@ -266,7 +266,7 @@ const RightColumn: React.FC<RightColumnProps> = ({
           handleLiClick={handleLiClick}
         />
       </Grid>
-      <Grid gridArea="Right" bg="red.300" gridTemplateRows="1fr 5fr">
+      <Grid gridArea="Right" bg="black" gridTemplateRows="1fr 5fr">
         <Select
           size="sm"
           backgroundColor="black"
