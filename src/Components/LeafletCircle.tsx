@@ -1,7 +1,7 @@
-import { Box, Heading, Text, theme, useTheme } from "@chakra-ui/core";
+import { Heading, Text } from "@chakra-ui/core";
 import { LeafletMouseEvent } from "leaflet";
 import React from "react";
-import { Circle, Popup, Marker, Tooltip } from "react-leaflet";
+import { Circle, Tooltip } from "react-leaflet";
 import { TDailyD } from "../types";
 import { TMapDataClass } from "./CenterColumn";
 
@@ -20,6 +20,8 @@ interface LCProps {
   dataClass: TMapDataClass;
   color: string;
 }
+
+// ------------- COMPONENT -------------
 
 class LeafletCircle extends React.Component<LCProps> {
   fillOpacity = { clicked: 0.1, notClicked: 0.1, normal: 0.1 };
@@ -75,7 +77,7 @@ class LeafletCircle extends React.Component<LCProps> {
               {this.props.d.country}
             </Heading>
             <Text
-              color="red.300"
+              color="red.500"
               opacity={this.props.dataClass === "confirmed" ? 1 : 0.5}
               fontSize={this.props.dataClass === "confirmed" ? "sm" : "xs"}
             >
@@ -90,20 +92,18 @@ class LeafletCircle extends React.Component<LCProps> {
               Total Deaths: {this.props.d.deaths?.toLocaleString()}
             </Text>
             <Text
-              color="yellow.300"
+              color="orange.300"
               opacity={this.props.dataClass === "active" ? 1 : 0.5}
               fontSize={this.props.dataClass === "active" ? "sm" : "xs"}
             >
               Active cases: {this.props.d.active?.toLocaleString()}
             </Text>
             <Text
-              color="purple.300"
-              opacity={this.props.dataClass === "caseFatalityRatio" ? 1 : 0.5}
-              fontSize={
-                this.props.dataClass === "caseFatalityRatio" ? "sm" : "xs"
-              }
+              color="pink.300"
+              opacity={this.props.dataClass === "newCases" ? 1 : 0.5}
+              fontSize={this.props.dataClass === "newCases" ? "sm" : "xs"}
             >
-              Case-Fatality Ratio: {this.props.d.caseFatalityRatio?.toFixed(3)}
+              New Cases: {this.props.d.newCases?.toLocaleString()}
             </Text>
           </Tooltip>
         </Circle>

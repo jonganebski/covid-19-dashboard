@@ -1,4 +1,3 @@
-import { useTheme } from "@chakra-ui/core";
 import * as d3 from "d3";
 import React, { useEffect, useState } from "react";
 import { Map, TileLayer } from "react-leaflet";
@@ -14,11 +13,44 @@ interface LeafletMapProps {
   dataClass: TMapDataClass;
 }
 
+// ------------- CONSTANT -------------
+
 const initialViewport = {
   lat: 20,
   lng: 10,
   zoom: 2,
 };
+
+// ------------- FUNCTION -------------
+
+const getMax = (data: TDailyD[] | null, dataClass: TMapDataClass) => {
+  // confirmed, active, deaths 의 반지름은 confirmed 수를 기준으로 정해져야 한다.
+  if (data) {
+    return dataClass === "confirmed"
+      ? d3.max(data, (D) => D.confirmed ?? 0) ?? 0
+      : dataClass === "deaths"
+      ? d3.max(data, (D) => D.deaths ?? 0) ?? 0
+      : dataClass === "active"
+      ? d3.max(data, (D) => D.active ?? 0) ?? 0
+      : d3.max(data, (D) => D.newCases ?? 0) ?? 0;
+  } else {
+    return 0;
+  }
+};
+
+const pickColor = (dataClass: TMapDataClass) => {
+  return dataClass === "confirmed"
+    ? "red"
+    : dataClass === "active"
+    ? "orange"
+    : dataClass === "deaths"
+    ? "whitesmoke"
+    : dataClass === "newCases"
+    ? "deeppink"
+    : "none";
+};
+
+// ------------- SUB FUNCTION -------------
 
 const LeafletMap: React.FC<LeafletMapProps> = ({
   countryData,
@@ -28,8 +60,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   dataClass,
 }) => {
   const [viewport, setViewport] = useState(initialViewport);
-  const theme = useTheme();
-  console.log("LeafletMap Rendering...");
+
   useEffect(() => {
     if (!selected) {
       setViewport(initialViewport);
@@ -44,30 +75,14 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     }
   }, [selected, countryData]);
 
-  const getMax = (data: TDailyD[]) => {
-    // confirmed, active, deaths 의 반지름은 confirmed 수를 기준으로 정해져야 한다.
-    return dataClass === "caseFatalityRatio"
-      ? d3.max(data, (D) => D.caseFatalityRatio ?? 0) ?? 0
-      : d3.max(data, (D) => D.confirmed ?? 0) ?? 0;
-  };
-
-  const pickColor = () => {
-    return dataClass === "confirmed"
-      ? "indianred"
-      : dataClass === "active"
-      ? "orange"
-      : dataClass === "deaths"
-      ? "whitesmoke"
-      : dataClass === "caseFatalityRatio"
-      ? theme.colors.purple[200]
-      : "none";
-  };
-
-  const position = { lat: viewport.lat, lng: viewport.lng };
+  const getRadius = d3
+    .scaleSqrt()
+    .domain([0, getMax(provinceData, dataClass)])
+    .range([0, 430000]);
 
   return (
     <Map
-      center={position}
+      center={{ lat: viewport.lat, lng: viewport.lng }}
       zoom={viewport.zoom}
       style={{ width: "100%", height: "100%", fill: "black" }}
     >
@@ -83,22 +98,17 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         ?.filter((d) => d[dataClass])
         .sort((a, b) => b[dataClass]! - a[dataClass]!)
         .map((d, i) => {
-          // 여기 이상함
-          const getRadius = d3
-            .scaleSqrt()
-            .domain([0, getMax(provinceData)])
-            .range([0, 430000]);
-          const radius = getRadius(d[dataClass] ?? 0) ?? 0;
+          const radius = getRadius(d[dataClass] ?? 0);
           return (
             <LeafletCircle
               key={i}
               d={d}
-              radius={radius > 0 ? radius : 0}
+              radius={radius && radius > 0 ? radius : 0}
               selected={selected}
               setSelected={setSelected}
               setViewport={setViewport}
               dataClass={dataClass}
-              color={pickColor()}
+              color={pickColor(dataClass)}
             />
           );
         })}

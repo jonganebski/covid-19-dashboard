@@ -18,3 +18,15 @@ export const getMonthName = (i: number) => {
 
 export const changeBg = (selected: string, countryName: string) =>
   selected === countryName ? "black" : "none";
+
+export const compare = (a: number | null, b: number | null) => {
+  if (a && b) {
+    return b - a;
+  } else if (a && !b) {
+    return -1;
+  } else if (!a && b) {
+    return 1;
+  } else {
+    return 0;
+  }
+};

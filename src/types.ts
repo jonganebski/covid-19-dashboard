@@ -30,10 +30,12 @@ export type TDailyD = {
   combinedKey: string;
   FIPS: string;
   lastUpdate: string;
+  newCasesLastUpdate: string;
   active: number | null;
   confirmed: number | null;
   deaths: number | null;
   recovered: number | null;
+  newCases: number | null;
   lat: number | null;
   lon: number | null;
   province: string;

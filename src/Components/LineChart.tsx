@@ -11,6 +11,9 @@ interface LineChartProps {
   svgContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
+// ----------- STYLED COMPONENT -----------
+// 하지만 가독성을 위해서만 사용됐다.
+
 const BoundGroup = styled.g``;
 const MouseListener = styled.rect``;
 const XAxisGroup = styled.g``;
@@ -18,6 +21,8 @@ const YAxisGroup = styled.g``;
 const LineGraphGroup = styled.g``;
 const TooltipGroup = styled.g``;
 const TooltipRect = styled.rect``;
+
+// ----------- FUNCTION -----------
 
 const numberToKMB = (num: number) => {
   if (num < 10 ** 3) {
@@ -53,6 +58,8 @@ const getMax = (data: Array<TDateCount>, yValue: (d: TDateCount) => number) => {
     return max;
   }
 };
+
+// ----------- COMPONENT-----------
 
 const LineChart: React.FC<LineChartProps> = ({
   selected,
@@ -124,7 +131,6 @@ const LineChart: React.FC<LineChartProps> = ({
       const ticksArr = yScaleRef.current
         .ticks(5)
         .map((v) => ({ v, yOffset: yScaleRef.current!(v) }));
-      console.log(ticksArr);
       return ticksArr;
     }
   }, [data, innerH]);
@@ -145,7 +151,6 @@ const LineChart: React.FC<LineChartProps> = ({
       const i = bs.left(data, hoveredDate, 1);
       const x = e.clientX - elementCoord.x;
       const y = yScaleRef.current(data[i].count);
-      console.log(y);
       if (y) {
         setCoord({ x, y });
         setDataPiece(data[i]);
@@ -213,7 +218,6 @@ const LineChart: React.FC<LineChartProps> = ({
             <path d={`M 0 0 L 0 ${innerH}`} stroke="white" />
             {yTicks &&
               yTicks.map(({ v, yOffset }, i, arr) => {
-                console.log("v: ", v);
                 const lastIndex = arr.length - 1;
                 return (
                   i !== lastIndex && (
