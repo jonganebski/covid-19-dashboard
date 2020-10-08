@@ -24,6 +24,15 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
   handleLiClick,
 }) => {
   const countryCount = targetData?.count;
+  const pickColor = () =>
+    tab === "active"
+      ? "yellow.500"
+      : tab === "deaths"
+      ? "gray.500"
+      : tab === "recovered"
+      ? "green.500"
+      : "pink.500";
+
   return (
     <>
       <Flex
@@ -33,13 +42,13 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
         justify="center"
         bg="gray.700"
       >
-        <Heading size="lg" color="gray.400">
+        <Heading size="lg" color="white">
           {selected ? selected : "Global"}
         </Heading>
         <Text fontSize="xs" color="gray.400">
           ({new Date(lastUpdate).toLocaleString()})
         </Text>
-        <Heading size="xl" color="red.500">
+        <Heading size="xl" color={pickColor()}>
           {selected
             ? countryCount === null || countryCount === undefined
               ? "No data"
@@ -62,12 +71,12 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
                   onClick={() => handleLiClick(d.country)}
                   bg={changeBg(selected, d.country)}
                 >
-                  <Text fontWeight={600} color="red.500">
+                  <Text fontWeight={600} color={pickColor()}>
                     {d.count === null
                       ? "No data"
                       : `${d.count.toLocaleString()} ${tab}`}
                   </Text>
-                  <Text color="gray.400">{d.country}</Text>
+                  <Text color="gray.100">{d.country}</Text>
                 </ListItem>
               );
               return li;

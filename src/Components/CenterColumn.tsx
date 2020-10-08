@@ -56,17 +56,7 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
           >
             Cumulative Cases
           </Button>
-          <Button
-            size="sm"
-            borderTop="none"
-            borderTopLeftRadius={0}
-            borderTopRightRadius={0}
-            variant="outline"
-            variantColor={dataClass === "active" ? "red" : "gray"}
-            onClick={() => handleBtnClick("active")}
-          >
-            Active Cases
-          </Button>
+
           <Button
             size="sm"
             borderTop="none"
@@ -77,6 +67,17 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
             onClick={() => handleBtnClick("deaths")}
           >
             Cumulative Deaths
+          </Button>
+          <Button
+            size="sm"
+            borderTop="none"
+            borderTopLeftRadius={0}
+            borderTopRightRadius={0}
+            variant="outline"
+            variantColor={dataClass === "active" ? "red" : "gray"}
+            onClick={() => handleBtnClick("active")}
+          >
+            Active Cases
           </Button>
           <Button
             size="sm"

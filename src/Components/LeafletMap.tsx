@@ -45,23 +45,21 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   }, [selected, countryData]);
 
   const getMax = (data: TDailyD[]) => {
-    const max = d3.max(data, (D) => D.confirmed ?? 0);
-    if (max) {
-      return max;
-    } else {
-      throw Error("Failed to make radius of the circles.");
-    }
+    // confirmed, active, deaths 의 반지름은 confirmed 수를 기준으로 정해져야 한다.
+    return dataClass === "caseFatalityRatio"
+      ? d3.max(data, (D) => D.caseFatalityRatio ?? 0) ?? 0
+      : d3.max(data, (D) => D.confirmed ?? 0) ?? 0;
   };
 
   const pickColor = () => {
     return dataClass === "confirmed"
-      ? theme.colors.red[900]
+      ? "indianred"
       : dataClass === "active"
-      ? theme.colors.green[900]
+      ? "orange"
       : dataClass === "deaths"
-      ? theme.colors.gray[900]
+      ? "whitesmoke"
       : dataClass === "caseFatalityRatio"
-      ? theme.colors.blue[900]
+      ? theme.colors.purple[200]
       : "none";
   };
 
@@ -74,8 +72,10 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       style={{ width: "100%", height: "100%", fill: "black" }}
     >
       <TileLayer
-        attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        // attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution={`&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>`}
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         maxZoom={8}
         minZoom={2}
       />
@@ -83,10 +83,11 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         ?.filter((d) => d[dataClass])
         .sort((a, b) => b[dataClass]! - a[dataClass]!)
         .map((d, i) => {
+          // 여기 이상함
           const getRadius = d3
             .scaleSqrt()
             .domain([0, getMax(provinceData)])
-            .range([0, 400000]);
+            .range([0, 430000]);
           const radius = getRadius(d[dataClass] ?? 0) ?? 0;
           return (
             <LeafletCircle

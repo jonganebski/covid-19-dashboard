@@ -1,4 +1,5 @@
-import { Box, Heading, Text } from "@chakra-ui/core";
+import { Box, Heading, Text, theme, useTheme } from "@chakra-ui/core";
+import { LeafletMouseEvent } from "leaflet";
 import React from "react";
 import { Circle, Popup, Marker, Tooltip } from "react-leaflet";
 import { TDailyD } from "../types";
@@ -21,19 +22,31 @@ interface LCProps {
 }
 
 class LeafletCircle extends React.Component<LCProps> {
+  fillOpacity = { clicked: 0.1, notClicked: 0.1, normal: 0.1 };
+  opacity = { clicked: 0.8, notClicked: 0.1, normal: 0.7 };
+
   pickFillOpacity = () =>
-    this.props.selected && this.props.selected === this.props.d.country
-      ? 0.7
-      : !this.props.selected
-      ? 0.1
-      : 0.1;
+    this.props.selected
+      ? this.props.selected === this.props.d.country
+        ? this.fillOpacity.clicked
+        : this.fillOpacity.notClicked
+      : this.fillOpacity.normal;
 
   pickOpacity = () =>
-    this.props.selected && this.props.selected === this.props.d.country
-      ? 1
-      : !this.props.selected
-      ? 1
-      : 0.7;
+    this.props.selected
+      ? this.props.selected === this.props.d.country
+        ? this.opacity.clicked
+        : this.opacity.notClicked
+      : this.opacity.normal;
+
+  handleMouseOverOut = (e: LeafletMouseEvent) => {
+    if (e.type !== "mouseover" && e.type !== "mouseout") {
+      return;
+    }
+    e.type === "mouseover" && e.sourceTarget.setStyle({ fillOpacity: 0.5 });
+    e.type === "mouseout" &&
+      e.sourceTarget.setStyle({ fillOpacity: this.fillOpacity.normal });
+  };
 
   render() {
     if (this.props.d.lat && this.props.d.lon && this.props.d.confirmed) {
@@ -44,11 +57,11 @@ class LeafletCircle extends React.Component<LCProps> {
           stroke={true}
           color={this.props.color}
           opacity={this.pickOpacity()}
-          weight={0.5}
+          weight={1}
           fillOpacity={this.pickFillOpacity()}
           onmousedown={() => this.props.setSelected(this.props.d.country)}
-          onmouseover={(e) => e.sourceTarget.setStyle({ fillOpacity: 0.5 })}
-          onmouseout={(e) => e.sourceTarget.setStyle({ fillOpacity: 0.1 })}
+          onmouseover={this.handleMouseOverOut}
+          onmouseout={this.handleMouseOverOut}
         >
           <Tooltip
             className="meow"
@@ -56,21 +69,40 @@ class LeafletCircle extends React.Component<LCProps> {
             direction="left"
             offset={[-2, 0]}
           >
-            <Heading size="sm" color="gray.400">
+            <Heading size="sm" color="gray.200">
               {this.props.d.admin2 ? this.props.d.admin2 + "," : ""}{" "}
               {this.props.d.province ? this.props.d.province + "," : ""}{" "}
               {this.props.d.country}
             </Heading>
-            <Text color="gray.400">
+            <Text
+              color="red.300"
+              opacity={this.props.dataClass === "confirmed" ? 1 : 0.5}
+              fontSize={this.props.dataClass === "confirmed" ? "sm" : "xs"}
+            >
               Total Cases: {this.props.d.confirmed.toLocaleString()}
             </Text>
-            <Text color="gray.400">
+
+            <Text
+              color="gray.300"
+              opacity={this.props.dataClass === "deaths" ? 1 : 0.5}
+              fontSize={this.props.dataClass === "deaths" ? "sm" : "xs"}
+            >
               Total Deaths: {this.props.d.deaths?.toLocaleString()}
             </Text>
-            <Text color="gray.400">
+            <Text
+              color="yellow.300"
+              opacity={this.props.dataClass === "active" ? 1 : 0.5}
+              fontSize={this.props.dataClass === "active" ? "sm" : "xs"}
+            >
               Active cases: {this.props.d.active?.toLocaleString()}
             </Text>
-            <Text color="gray.400">
+            <Text
+              color="purple.300"
+              opacity={this.props.dataClass === "caseFatalityRatio" ? 1 : 0.5}
+              fontSize={
+                this.props.dataClass === "caseFatalityRatio" ? "sm" : "xs"
+              }
+            >
               Case-Fatality Ratio: {this.props.d.caseFatalityRatio?.toFixed(3)}
             </Text>
           </Tooltip>

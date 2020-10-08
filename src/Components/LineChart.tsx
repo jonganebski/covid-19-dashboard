@@ -1,4 +1,4 @@
-import { Box, Heading } from "@chakra-ui/core";
+import { Box, Heading, useTheme } from "@chakra-ui/core";
 import * as d3 from "d3";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
@@ -18,6 +18,18 @@ const YAxisGroup = styled.g``;
 const LineGraphGroup = styled.g``;
 const TooltipGroup = styled.g``;
 const TooltipRect = styled.rect``;
+
+const numberToKMB = (num: number) => {
+  if (num < 10 ** 3) {
+    return num;
+  } else if (10 ** 3 <= num && num < 10 ** 6) {
+    return (num / 10 ** 3).toString() + "K";
+  } else if (10 ** 6 <= num && num < 10 ** 9) {
+    return (num / 10 ** 6).toString() + "M";
+  } else {
+    return (num / 10 ** 9).toString() + "B";
+  }
+};
 
 // d3.extent() 에서 [undefined, undefined]가 나오는 경우를 배제하는 함수다.
 const getDomainArray = (
@@ -47,6 +59,7 @@ const LineChart: React.FC<LineChartProps> = ({
   data,
   svgContainerRef,
 }) => {
+  const theme = useTheme();
   const [dataPiece, setDataPiece] = useState<TDateCount | null>(null);
   const [coord, setCoord] = useState<{ x: number; y: number } | null>(null);
   const [svgW, setSvgW] = useState(0);
@@ -106,11 +119,12 @@ const LineChart: React.FC<LineChartProps> = ({
       yScaleRef.current = d3
         .scaleLinear()
         .domain([getMax(data, yValue), 0])
-        .range([0, innerH])
-        .nice();
+        .nice()
+        .range([0, innerH]);
       const ticksArr = yScaleRef.current
-        .ticks()
+        .ticks(5)
         .map((v) => ({ v, yOffset: yScaleRef.current!(v) }));
+      console.log(ticksArr);
       return ticksArr;
     }
   }, [data, innerH]);
@@ -131,6 +145,7 @@ const LineChart: React.FC<LineChartProps> = ({
       const i = bs.left(data, hoveredDate, 1);
       const x = e.clientX - elementCoord.x;
       const y = yScaleRef.current(data[i].count);
+      console.log(y);
       if (y) {
         setCoord({ x, y });
         setDataPiece(data[i]);
@@ -139,6 +154,9 @@ const LineChart: React.FC<LineChartProps> = ({
         tooltipG.attr("transform", "translate(20, -60)");
       } else if (100 <= x) {
         tooltipG.attr("transform", "translate(-80, -60)");
+      }
+      if (y && y <= 60) {
+        tooltipG.attr("transform", "translate(-80, 0)");
       }
     }
     return;
@@ -159,18 +177,18 @@ const LineChart: React.FC<LineChartProps> = ({
             onMouseMove={handleMouseMove}
           />
           <XAxisGroup transform={`translate(0, ${innerH})`}>
-            <path d={`M 0 0 L ${innerW} 0`} stroke="currentColor" />
+            <path d={`M 0 0 L ${innerW} 0`} stroke="white" />
             {xTicks &&
               xTicks.map(({ v, xOffset }, i) => (
                 <g key={i} transform={`translate(${xOffset}, 0)`}>
-                  <line y2="6" stroke="currentColor" />
+                  <line y2="6" stroke="white" />
                   <line
                     y2={-innerH}
-                    stroke="lightgray"
+                    stroke={theme.colors.gray[600]}
                     strokeDasharray="5, 5"
                   />
                   <text
-                    key={i}
+                    fill={theme.colors.gray[200]}
                     style={{
                       fontSize: "10px",
                       textAnchor: "middle",
@@ -187,45 +205,51 @@ const LineChart: React.FC<LineChartProps> = ({
                 x2={coord.x}
                 y1="0"
                 y2={-innerH}
-                stroke="currentColor"
+                stroke={theme.colors.gray[200]}
               />
             )}
           </XAxisGroup>
           <YAxisGroup>
-            <path d={`M 0 0 L 0 ${innerH}`} stroke="currentColor" />
+            <path d={`M 0 0 L 0 ${innerH}`} stroke="white" />
             {yTicks &&
-              yTicks.map(({ v, yOffset }, i) => (
-                <g key={i} transform={`translate(0, ${yOffset})`}>
-                  <line x2="-6" stroke="currentColor" />
-                  <line x2={innerW} stroke="lightgray" strokeDasharray="5, 5" />
-                  <text
-                    style={{
-                      fontSize: "10px",
-                      textAnchor: "middle",
-                      transform: "translate(-25px, 3px)",
-                    }}
-                  >
-                    {v}
-                  </text>
-                </g>
-              ))}
+              yTicks.map(({ v, yOffset }, i, arr) => {
+                console.log("v: ", v);
+                const lastIndex = arr.length - 1;
+                return (
+                  i !== lastIndex && (
+                    <g key={i} transform={`translate(0, ${yOffset})`}>
+                      <line x2="-6" stroke="white" />
+                      <line
+                        x2={innerW}
+                        stroke={theme.colors.gray[600]}
+                        strokeDasharray="5, 5"
+                      />
+                      <text
+                        fill={theme.colors.gray[200]}
+                        style={{
+                          fontSize: "10px",
+                          textAnchor: "middle",
+                          transform: "translate(-25px, 3px)",
+                        }}
+                      >
+                        {numberToKMB(v)}
+                      </text>
+                    </g>
+                  )
+                );
+              })}
           </YAxisGroup>
           <LineGraphGroup>
             {data && lineGenerator(data) && (
               <path
                 d={lineGenerator(data) as string}
-                stroke="currentColor"
+                stroke={theme.colors.yellow[200]}
                 fill="none"
               />
             )}
             {coord && dataPiece && (
               <g transform={`translate(${coord.x}, ${coord.y})`}>
-                <circle
-                  r="6"
-                  fill="none"
-                  stroke="steelblue"
-                  strokeWidth="3"
-                ></circle>
+                <circle r="4" fill="yellow"></circle>
                 <TooltipGroup
                   id="tooltip-group"
                   transform="translate(-80, -60)"
@@ -234,15 +258,23 @@ const LineChart: React.FC<LineChartProps> = ({
                   <TooltipRect
                     width="70"
                     height="50"
-                    fill="tomato"
-                    opacity="0.5"
+                    fill="black"
+                    opacity="0.8"
                     rx="5"
                   ></TooltipRect>
-                  <text transform="translate(5, 20)" fontSize="12px">
+                  <text
+                    transform="translate(5, 20)"
+                    fontSize="12px"
+                    fill="white"
+                  >
                     {new Date(dataPiece.date).getDate()}{" "}
                     {getMonthName(new Date(dataPiece.date).getMonth())}
                   </text>
-                  <text transform="translate(5, 40)" fontSize="12px">
+                  <text
+                    transform="translate(5, 40)"
+                    fontSize="12px"
+                    fill="white"
+                  >
                     {dataPiece.count.toLocaleString()}
                   </text>
                 </TooltipGroup>

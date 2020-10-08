@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Heading, Select } from "@chakra-ui/core";
+import { Box, Flex, Grid, Heading, Select, Text } from "@chakra-ui/core";
 import React, { useMemo, useRef, useState } from "react";
 import { ITimeDataState, TDailyD, TListD } from "../types";
 import LineChart from "./LineChart";
@@ -299,7 +299,7 @@ const RightColumn: React.FC<RightColumnProps> = ({
           handleLiClick={handleLiClick}
         />
       </Grid>
-      <Box gridArea="Graph" bg="red.500">
+      <Box gridArea="Graph" bg="gray.700">
         <Flex>
           <Select
             w="50%"
@@ -321,7 +321,9 @@ const RightColumn: React.FC<RightColumnProps> = ({
             <option value="deaths">Deaths</option>
           </Select>
           <Flex w="50%" justifyContent="center">
-            <Heading size="lg">{selected ? selected : "Global"}</Heading>
+            <Heading size="lg" color="white">
+              {selected ? selected : "Global"}
+            </Heading>
           </Flex>
         </Flex>
         <Box ref={svgContainerRef} w="100%" h="100%" maxH="300px">

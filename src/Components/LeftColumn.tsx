@@ -39,13 +39,15 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
   return (
     <Grid gridArea="left" bg="black" gridTemplateRows="2fr 12fr 1.5fr" gap={1}>
       <Flex direction="column" align="center" justify="center" bg="gray.700">
-        <Heading size="md" color="gray.400">
-          Total Cases
-        </Heading>
-        <Text fontSize="xs" color="gray.400">
-          (cumulative)
-        </Text>
-        <Heading size="lg" color="gray.400">
+        <Flex alignItems="flex-end">
+          <Heading size="lg" color="gray.400" mr={1}>
+            Total Cases
+          </Heading>
+          <Text fontSize="xs" color="gray.400">
+            (cumulative)
+          </Text>
+        </Flex>
+        <Heading size="lg" color="white">
           {selected ? selected : "Global"}
         </Heading>
         <Heading size="xl" color="red.500">
@@ -77,7 +79,7 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
                   <Text fontWeight={600} color="red.500" mr={2}>
                     {d.confirmed?.toLocaleString() ?? "No data"}
                   </Text>
-                  <Text color="gray.400">{d.country}</Text>
+                  <Text color="gray.100">{d.country}</Text>
                 </ListItem>
               );
             })}
