@@ -86,12 +86,18 @@ const Dashboard = () => {
           }
           D.newCasesLastUpdate = yesterdayDate ?? "";
         });
-
         setCountryData(todayData.countryWise);
         setProvinceData(todayData.provinceWise);
       }
     );
-    console.log(process.env.REACT_APP_NAVER_CLIENT_SECRET);
+    fetch("https://openapi.naver.com/v1/search/news.json?query=코로나", {
+      headers: {
+        "X-Naver-Client-Id": process.env.REACT_APP_NAVER_CLIENT_ID,
+        "X-Naver-Client-Secret": process.env.REACT_APP_NAVER_CLIENT_SECRET,
+      },
+    })
+      .then((response) => response.json())
+      .then((d) => console.log(d));
   }, []);
 
   return (
