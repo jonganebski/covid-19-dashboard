@@ -24,8 +24,7 @@ const Dashboard = () => {
   };
 
   // ----------- 데이터 로드 -----------
-  // 그냥 daily data 하나 더 로드해서 new cases를 계산하는게 좋겠다. 리스트 중에서 다른 출처의 데이터가 있는게 혼란스럽고 일관성도 없다.
-  // timeseries 데이터는 순수하게 그래프에서만 사용하도록 고칠 필요가 있다. 또 삽질했다..
+
   useEffect(() => {
     Promise.all([
       getTimeSeriesData("time_series_covid19_confirmed_global.csv"),
@@ -92,6 +91,7 @@ const Dashboard = () => {
         setProvinceData(todayData.provinceWise);
       }
     );
+    console.log(process.env.REACT_APP_NAVER_CLIENT_SECRET);
   }, []);
 
   return (

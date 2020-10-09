@@ -2,6 +2,7 @@
 
 # Custom
 *.csv
+*.env
 
 # dependencies
 /node_modules
