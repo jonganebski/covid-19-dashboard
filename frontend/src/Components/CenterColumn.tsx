@@ -2,19 +2,22 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Flex,
   Grid,
+  Heading,
   Link,
   Stack,
   Text,
 } from "@chakra-ui/core";
 import React, { useState } from "react";
-import { TDailyD } from "../types";
+import { TDailyD, TNewsData } from "../types";
 import LeafletMap from "./LeafletMap";
 import Loading from "./Loading";
 
 interface CenterColumnProps {
   countryData: TDailyD[] | null;
   provinceData: TDailyD[] | null;
+  newsData: TNewsData[] | null;
   selected: string;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -25,6 +28,7 @@ export type TMapDataClass = "confirmed" | "active" | "deaths" | "newCases";
 const CenterColumn: React.FC<CenterColumnProps> = ({
   countryData,
   provinceData,
+  newsData,
   selected,
   setSelected,
 }) => {
@@ -32,7 +36,7 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
   const handleBtnClick = (type: TMapDataClass) => setDataClass(type);
 
   return (
-    <Grid gridArea="center" gridTemplateRows="5fr 1fr" gap={1}>
+    <Grid gridArea="center" gridTemplateRows="auto 250px" gap={1}>
       <Stack spacing={0} pb={2}>
         <Box h="100%">
           {!countryData && !provinceData ? (
@@ -97,23 +101,43 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
           </ButtonGroup>
         )}
       </Stack>
-      <Box bg="gray.800">
-        <Text color="gray.400">
-          This page is a result of clone coding following webpage:
-          <Link href="https://bit.ly/31YewhF" target="_blank">
-            https://bit.ly/31YewhF
-          </Link>
-        </Text>
-        <Text color="gray.400">
-          Data source:{" "}
-          <Link
-            href="https://github.com/CSSEGISandData/COVID-19"
-            target="_blank"
-          >
-            https://github.com/CSSEGISandData/COVID-19
-          </Link>{" "}
-        </Text>
-      </Box>
+      <Flex bg="gray.800">
+        {!newsData ? (
+          <Loading />
+        ) : (
+          <>
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              w="130px"
+              color="gray.300"
+              marginX={1}
+            >
+              <Text fontSize={20} textAlign="center" mb={1}>
+                Recent COVID-19 News
+              </Text>
+              <Text fontSize={15} textAlign="center">
+                ({selected ? selected : "Global"})
+              </Text>
+            </Flex>
+            <Stack w="100%" overflowY="scroll">
+              {newsData.map((news, i) => (
+                <Link key={i} href={news.link} target="_blank" mr={1}>
+                  <Box border="1px gray solid" borderRadius="5px" p={5}>
+                    <Heading size="md" color="gray.400" mb={1}>
+                      {news.title}
+                    </Heading>
+                    <Text fontSize="xs" color="gray.500">
+                      {news.source} | {news.date}
+                    </Text>
+                  </Box>
+                </Link>
+              ))}
+            </Stack>
+          </>
+        )}
+      </Flex>
     </Grid>
   );
 };

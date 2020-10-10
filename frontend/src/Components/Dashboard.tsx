@@ -3,10 +3,11 @@ import React, { useEffect, useState } from "react";
 import { getDailyData } from "../api/dailyData";
 import webScraper from "../api/newsData";
 import { getTimeSeriesData } from "../api/timeData";
-import { ITimeDataState, TDailyD } from "../types";
+import { ITimeDataState, TDailyD, TNewsData } from "../types";
 import CenterColumn from "./CenterColumn";
 import LeftColumn from "./LeftColumn";
-import RightColumn from "./RightColumn";
+import RightColumn from "./RightColumn"; 
+import axios from "axios"
 
 // -----------  COMPONENT  -----------
 
@@ -18,6 +19,7 @@ const Dashboard = () => {
   });
   const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
   const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
+  const [newsData, setNewsData] = useState<TNewsData [] | null>(null);
   const [selected, setSelected] = useState("");
 
   const handleLiClick = (countryName: string) => {
@@ -90,9 +92,24 @@ const Dashboard = () => {
         setProvinceData(todayData.provinceWise);
       }
     );
-    const newsData = webScraper()
-    console.log("newsData: ", newsData)
+    // webScraper().then(data=> console.log("newsData: ", data) )
+    
   }, []);
+
+  useEffect(()=>{
+    axios.post("http://localhost:4000", {country: selected}).then(res => {
+      console.log(res);
+      let result:TNewsData[] = []
+      res.data.forEach((d:any)=> {
+        const title = d.title ?? ""
+        const source = d.source ?? ""
+        const date = d.date ??""
+        const link = d.link ??""
+        result.push({title, source, date, link})
+      })
+      setNewsData(result)
+    })
+  }, [selected])
 
   return (
     <Flex className="App" p={1} w="100vw" h="100vh" bg="black">
@@ -115,6 +132,7 @@ const Dashboard = () => {
         <CenterColumn
           countryData={countryData}
           provinceData={provinceData}
+          newsData={newsData}
           selected={selected}
           setSelected={setSelected}
         />

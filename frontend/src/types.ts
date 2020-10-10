@@ -53,3 +53,10 @@ export type TReferenceD = {
   UID: number | null;
   iso2: string;
 };
+
+export type TNewsData = {
+  title: string;
+  source: string;
+  date: string;
+  link: string
+}
