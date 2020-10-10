@@ -22,7 +22,6 @@ const Dashboard = () => {
   const handleLiClick = (countryName: string) => {
     setSelected((prev) => (prev === countryName ? "" : countryName));
   };
-
   // ----------- 데이터 로드 -----------
 
   useEffect(() => {
@@ -90,14 +89,6 @@ const Dashboard = () => {
         setProvinceData(todayData.provinceWise);
       }
     );
-    fetch("https://openapi.naver.com/v1/search/news.json?query=코로나", {
-      headers: {
-        "X-Naver-Client-Id": process.env.REACT_APP_NAVER_CLIENT_ID,
-        "X-Naver-Client-Secret": process.env.REACT_APP_NAVER_CLIENT_SECRET,
-      },
-    })
-      .then((response) => response.json())
-      .then((d) => console.log(d));
   }, []);
 
   return (
