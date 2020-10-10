@@ -6,8 +6,9 @@ import { getTimeSeriesData } from "../api/timeData";
 import { ITimeDataState, TDailyD, TNewsData } from "../types";
 import CenterColumn from "./CenterColumn";
 import LeftColumn from "./LeftColumn";
-import RightColumn from "./RightColumn"; 
-import axios from "axios"
+import RightColumn from "./RightColumn";
+import axios from "axios";
+import Header from "./Header";
 
 // -----------  COMPONENT  -----------
 
@@ -19,12 +20,12 @@ const Dashboard = () => {
   });
   const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
   const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
-  const [newsData, setNewsData] = useState<TNewsData [] | null>(null);
+  const [newsData, setNewsData] = useState<TNewsData[] | null>(null);
   const [selected, setSelected] = useState("");
 
   const handleLiClick = (countryName: string) => {
     setSelected((prev) => (prev === countryName ? "" : countryName));
-  }; 
+  };
   // ----------- 데이터 로드 -----------
 
   useEffect(() => {
@@ -92,24 +93,22 @@ const Dashboard = () => {
         setProvinceData(todayData.provinceWise);
       }
     );
-    // webScraper().then(data=> console.log("newsData: ", data) )
-    
   }, []);
 
-  useEffect(()=>{
-    axios.post("http://localhost:4000", {country: selected}).then(res => {
-      console.log(res);
-      let result:TNewsData[] = []
-      res.data.forEach((d:any)=> {
-        const title = d.title ?? ""
-        const source = d.source ?? ""
-        const date = d.date ??""
-        const link = d.link ??""
-        result.push({title, source, date, link})
-      })
-      setNewsData(result)
-    })
-  }, [selected])
+  // useEffect(() => {
+  //   axios.post("http://localhost:4000", { country: selected }).then((res) => {
+  //     console.log(res);
+  //     let result: TNewsData[] = [];
+  //     res.data.forEach((d: any) => {
+  //       const title = d.title ?? "";
+  //       const source = d.source ?? "";
+  //       const date = d.date ?? "";
+  //       const link = d.link ?? "";
+  //       result.push({ title, source, date, link });
+  //     });
+  //     setNewsData(result);
+  //   });
+  // }, [selected]);
 
   return (
     <Flex className="App" p={1} w="100vw" h="100vh" bg="black">
@@ -121,9 +120,7 @@ const Dashboard = () => {
                           "left center right" 94vh / 3fr 9fr 5fr`,
         }}
       >
-        <Flex gridArea="header" justify="center" bg="gray.800" color="gray.400">
-          <Heading> Covid-19 Information Dashboard</Heading>
-        </Flex>
+        <Header />
         <LeftColumn
           countryData={countryData}
           selected={selected}
