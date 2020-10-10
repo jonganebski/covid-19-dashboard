@@ -1,10 +1,8 @@
 import {
   Box,
-  Button,
   Flex,
   Heading,
   Icon,
-  IconButton,
   Link,
   Modal,
   ModalBody,
@@ -13,8 +11,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  useDisclosure,
   Text,
+  useDisclosure,
 } from "@chakra-ui/core";
 import React from "react";
 
