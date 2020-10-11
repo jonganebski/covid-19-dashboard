@@ -3,7 +3,7 @@ import { TNewsData } from "../types";
 
 export const newsApi = async (selected: string) => {
   let result: TNewsData[] = [];
-  const { data } = await axios.post("http://localhost:4000", {
+  const { data } = await axios.post("/api/news", {
     country: selected,
   });
   data.forEach((d: any) => {
