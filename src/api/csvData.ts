@@ -33,33 +33,14 @@ const getFileNames = () => {
 const getTargetUrls = async (files: string[]) => {
   let targets: string[] = [];
   let success = 0;
-  // for (const file of files) {
-  //   try {
-  //     const url = DAILY_BASE_URL + file;
-  //     const res = await axios.get(url);
-  //     const status = res.status;
-  //     console.log(res);
-  //     if (status === 200) {
-  //       targets.push(url);
-  //       success++;
-  //     }
-  //     if (status !== 200 && success !== 0) {
-  //       success = 3;
-  //     }
-  //   } catch {}
-  //   if (success === 3) {
-  //     break;
-  //   }
-  // }
-
-  // DEV
   for (const file of files) {
     try {
-      const res = await axios.get(file);
+      const url = DAILY_BASE_URL + file;
+      const res = await axios.get(url);
       const status = res.status;
       console.log(res);
       if (status === 200) {
-        targets.push(file);
+        targets.push(url);
         success++;
       }
       if (status !== 200 && success !== 0) {
@@ -145,10 +126,8 @@ const csvApi = async () => {
     yesterdayData,
     twoDaysBeforeData,
   ] = await Promise.all([
-    getTimeSeriesData("time_series_covid19_confirmed_global.csv"),
-    getTimeSeriesData("time_series_covid19_deaths_global.csv"),
-    // getTimeSeriesData(TIMESERIES_CSV_URL.CONFIRMED),
-    // getTimeSeriesData(TIMESERIES_CSV_URL.DEATHS),
+    getTimeSeriesData(TIMESERIES_CSV_URL.CONFIRMED),
+    getTimeSeriesData(TIMESERIES_CSV_URL.DEATHS),
     getDailyData(targetUrls[0]),
     getDailyData(targetUrls[1]),
     getDailyData(targetUrls[2]),

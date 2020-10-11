@@ -3,10 +3,11 @@
 # Custom
 *.csv
 *.env
+/backend/node_modules
+/backend/dist
 
 # dependencies
 /node_modules
-/backend/node_modules
 /.pnp
 .pnp.js
 

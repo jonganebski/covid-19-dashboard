@@ -2,6 +2,9 @@ import * as d3 from "d3";
 import { TDailyD, TReferenceD } from "../types";
 import { getCountryWise, numOrNull } from "./dailyDataFns";
 
+const referenceCsvUrl =
+  "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv";
+
 // ------------- MAIN FUNCTION -------------
 
 export const getDailyData = async (filename: string) => {
@@ -40,7 +43,7 @@ export const getDailyData = async (filename: string) => {
 
   // 2. Gettting referenceWise
   await d3
-    .csv("UID_ISO_FIPS_LookUp_Table.csv", (row) => {
+    .csv(referenceCsvUrl, (row) => {
       return {
         country: row.Country_Region ?? "",
         province: row.Province_State ?? "",
