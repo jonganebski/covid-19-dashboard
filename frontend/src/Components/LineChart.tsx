@@ -1,7 +1,6 @@
-import { Box, Heading, useTheme } from "@chakra-ui/core";
+import { useTheme } from "@chakra-ui/core";
 import * as d3 from "d3";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
 import { TDateCount } from "../types";
 import { getMonthName } from "../utils/utils";
 
@@ -10,17 +9,6 @@ interface LineChartProps {
   data: Array<TDateCount> | null;
   svgContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
-
-// ----------- STYLED COMPONENT -----------
-// 하지만 가독성을 위해서만 사용됐다.
-
-const BoundGroup = styled.g``;
-const MouseListener = styled.rect``;
-const XAxisGroup = styled.g``;
-const YAxisGroup = styled.g``;
-const LineGraphGroup = styled.g``;
-const TooltipGroup = styled.g``;
-const TooltipRect = styled.rect``;
 
 // ----------- FUNCTION -----------
 
@@ -170,18 +158,20 @@ const LineChart: React.FC<LineChartProps> = ({
   return (
     <>
       <svg ref={svgRef} viewBox={`0 0 ${svgW} ${svgH}`}>
-        <BoundGroup
+        <g
+          className="bound-group"
           width={innerW}
           height={innerH}
           transform={`translate(${margin.left}, ${margin.top})`}
         >
-          <MouseListener
+          <rect
+            className="mouse-listener"
             width={Math.abs(innerW)}
             height={Math.abs(innerH)}
             opacity="0"
             onMouseMove={handleMouseMove}
           />
-          <XAxisGroup transform={`translate(0, ${innerH})`}>
+          <g className="x-axis-group" transform={`translate(0, ${innerH})`}>
             <path d={`M 0 0 L ${innerW} 0`} stroke="white" />
             {xTicks &&
               xTicks.map(({ v, xOffset }, i) => (
@@ -213,8 +203,8 @@ const LineChart: React.FC<LineChartProps> = ({
                 stroke={theme.colors.gray[200]}
               />
             )}
-          </XAxisGroup>
-          <YAxisGroup>
+          </g>
+          <g className="y-axis-group">
             <path d={`M 0 0 L 0 ${innerH}`} stroke="white" />
             {yTicks &&
               yTicks.map(({ v, yOffset }, i, arr) => {
@@ -242,8 +232,8 @@ const LineChart: React.FC<LineChartProps> = ({
                   )
                 );
               })}
-          </YAxisGroup>
-          <LineGraphGroup>
+          </g>
+          <g className="linegraph-group">
             {data && lineGenerator(data) && (
               <path
                 d={lineGenerator(data) as string}
@@ -254,18 +244,20 @@ const LineChart: React.FC<LineChartProps> = ({
             {coord && dataPiece && (
               <g transform={`translate(${coord.x}, ${coord.y})`}>
                 <circle r="4" fill="yellow"></circle>
-                <TooltipGroup
+                <g
+                  className="tooltip-group"
                   id="tooltip-group"
                   transform="translate(-80, -60)"
                   pointerEvents="none"
                 >
-                  <TooltipRect
+                  <rect
+                    className="tooltip-rect"
                     width="70"
                     height="50"
                     fill="black"
                     opacity="0.8"
                     rx="5"
-                  ></TooltipRect>
+                  ></rect>
                   <text
                     transform="translate(5, 20)"
                     fontSize="12px"
@@ -281,11 +273,11 @@ const LineChart: React.FC<LineChartProps> = ({
                   >
                     {dataPiece.count.toLocaleString()}
                   </text>
-                </TooltipGroup>
+                </g>
               </g>
             )}
-          </LineGraphGroup>
-        </BoundGroup>
+          </g>
+        </g>
       </svg>
     </>
   );

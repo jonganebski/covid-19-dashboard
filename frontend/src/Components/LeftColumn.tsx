@@ -20,6 +20,8 @@ interface LeftColumnProps {
   handleLiClick: (countryName: string) => void;
 }
 
+// ------------- COMPONENT -------------
+
 const LeftColumn: React.FC<LeftColumnProps> = ({
   countryData,
   isCsvLoading,
@@ -29,6 +31,7 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
   const listBoxRef = useRef<HTMLDivElement | null>(null);
 
   let totalCount = 0;
+
   countryData?.forEach((d) => {
     totalCount = totalCount + (d.confirmed ?? 0);
   });

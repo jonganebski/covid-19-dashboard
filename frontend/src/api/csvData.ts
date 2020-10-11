@@ -135,7 +135,7 @@ const computeNewCasesProvince = (
 
 // -----------  MAIN FUNCTION  -----------
 
-const api = async () => {
+const csvApi = async () => {
   const files = getFileNames();
   const targetUrls = await getTargetUrls(files);
   const [
@@ -145,10 +145,10 @@ const api = async () => {
     yesterdayData,
     twoDaysBeforeData,
   ] = await Promise.all([
-    // getTimeSeriesData("time_series_covid19_confirmed_global.csv"),
-    // getTimeSeriesData("time_series_covid19_deaths_global.csv"),
-    getTimeSeriesData(TIMESERIES_CSV_URL.CONFIRMED),
-    getTimeSeriesData(TIMESERIES_CSV_URL.DEATHS),
+    getTimeSeriesData("time_series_covid19_confirmed_global.csv"),
+    getTimeSeriesData("time_series_covid19_deaths_global.csv"),
+    // getTimeSeriesData(TIMESERIES_CSV_URL.CONFIRMED),
+    // getTimeSeriesData(TIMESERIES_CSV_URL.DEATHS),
     getDailyData(targetUrls[0]),
     getDailyData(targetUrls[1]),
     getDailyData(targetUrls[2]),
@@ -161,4 +161,4 @@ const api = async () => {
   return { confirmed, deaths, todayData };
 };
 
-export default api;
+export default csvApi;

@@ -16,6 +16,8 @@ import {
 } from "@chakra-ui/core";
 import React from "react";
 
+// ------------- COMPONENT -------------
+
 const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
@@ -58,14 +60,15 @@ const Header = () => {
               <Link href="https://news.google.com/" target="_blank">
                 Google News
               </Link>
-              <Text mt={4} mb={1}>
+            </ModalBody>
+            <ModalFooter display="block">
+              <Text>
                 <Icon name="email" /> jon.ganebski@gmail.com
               </Text>
               <Link>
                 <Icon name="view" /> See code in Github
               </Link>
-            </ModalBody>
-            <ModalFooter></ModalFooter>
+            </ModalFooter>
           </ModalContent>
         </Modal>
       </Box>

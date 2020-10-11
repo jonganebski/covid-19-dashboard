@@ -65,12 +65,7 @@ class LeafletCircle extends React.Component<LCProps> {
           onmouseover={this.handleMouseOverOut}
           onmouseout={this.handleMouseOverOut}
         >
-          <Tooltip
-            className="meow"
-            sticky={true}
-            direction="left"
-            offset={[-2, 0]}
-          >
+          <Tooltip sticky={true} direction="left" offset={[-2, 0]}>
             <Heading size="sm" color="gray.200">
               {this.props.d.admin2 ? this.props.d.admin2 + "," : ""}{" "}
               {this.props.d.province ? this.props.d.province + "," : ""}{" "}

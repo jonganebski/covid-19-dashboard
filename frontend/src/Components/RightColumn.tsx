@@ -1,11 +1,19 @@
 import { Box, Flex, Grid, Heading, Select } from "@chakra-ui/core";
 import React, { useRef, useState } from "react";
-import { ITimeDataState, TDailyD, TListD } from "../types";
+import {
+  ITimeDataState,
+  TChartTab,
+  TDailyD,
+  TDateCount,
+  TListD,
+  TTab,
+} from "../types";
 import { compare } from "../utils/utils";
 import LineChart from "./LineChart";
 import Loading from "./Loading";
 import LoadingFailed from "./LoadingFailed";
 import RightColumnList from "./RightColumnList";
+import RightColumnListSelect from "./RightColumnSelect";
 
 interface RightColumnProps {
   countryData: TDailyD[] | null;
@@ -15,8 +23,42 @@ interface RightColumnProps {
   handleLiClick: (countryName: string) => void;
 }
 
-export type TTab = "active" | "deaths" | "recovered" | "new cases";
-export type TChartTab = "confirmed" | "deaths";
+// ----------- SUB FUNCTIONS -----------
+
+const getTabDataAndGlobalCount = (countryData: TDailyD[] | null, tab: TTab) => {
+  const data: TListD[] = [];
+  let globalCount = 0;
+  countryData?.forEach((d) => {
+    const country = d.country;
+    const count =
+      tab === "active"
+        ? d.active
+        : tab === "deaths"
+        ? d.deaths
+        : tab === "recovered"
+        ? d.recovered
+        : d.newCases;
+    globalCount = globalCount + (count ?? 0);
+    data.push({ country, count: count });
+  });
+  data.sort((a, b) => compare(a.count, b.count));
+  return { data, globalCount };
+};
+
+const getLineChartData = (
+  selected: string,
+  chartTab: TChartTab,
+  timeData: ITimeDataState
+): TDateCount[] | null => {
+  if (!selected) {
+    return timeData[chartTab].global ?? null;
+  } else {
+    return (
+      timeData[chartTab].countries?.find((d) => d.country === selected)?.data ??
+      null
+    );
+  }
+};
 
 // ----------- COMPONENT -----------
 
@@ -32,115 +74,19 @@ const RightColumn: React.FC<RightColumnProps> = ({
   const [tabR, setTabR] = useState<TTab>("new cases");
   const [chartTab, setChartTab] = useState<TChartTab>("confirmed");
 
-  const activeData: TListD[] = [];
-  const deathsData: TListD[] = [];
-  const recoveredData: TListD[] = [];
-  const newCasesData: TListD[] = [];
-  const globalCount = { active: 0, deaths: 0, recovered: 0, newCases: 0 };
+  // For list on the left
+  const sortedDataL = getTabDataAndGlobalCount(countryData, tabL).data;
+  const targetDataL = sortedDataL.find((d) => d.country === selected) ?? null;
+  const countL = getTabDataAndGlobalCount(countryData, tabL).globalCount;
 
-  if (countryData) {
-    countryData.forEach((d) => {
-      const country = d.country;
-      const activeCount = d.active;
-      const deathsCount = d.deaths;
-      const recoveredCount = d.recovered;
-      const newCasesCount = d.newCases;
+  // For list on the right
+  const sortedDataR = getTabDataAndGlobalCount(countryData, tabR).data;
+  const targetDataR = sortedDataR.find((d) => d.country === selected) ?? null;
+  const countR = getTabDataAndGlobalCount(countryData, tabR).globalCount;
 
-      globalCount.active = globalCount.active + (activeCount ?? 0);
-      globalCount.deaths = globalCount.deaths + (deathsCount ?? 0);
-      globalCount.recovered = globalCount.recovered + (recoveredCount ?? 0);
-      globalCount.newCases = globalCount.newCases + (newCasesCount ?? 0);
+  // For chart on the bottom
+  const lineChartData = getLineChartData(selected, chartTab, timeData);
 
-      activeData.push({ country, count: activeCount });
-      deathsData.push({ country, count: deathsCount });
-      recoveredData.push({ country, count: recoveredCount });
-      newCasesData.push({ country, count: newCasesCount });
-    });
-  }
-
-  const getLineChartData = () => {
-    if (selected) {
-      let countryD;
-      if (chartTab === "confirmed") {
-        countryD = timeData?.confirmed.countries?.find(
-          (d) => d.country === selected
-        );
-      } else {
-        countryD = timeData?.deaths.countries?.find(
-          (d) => d.country === selected
-        );
-      }
-      if (countryD) {
-        return countryD.data;
-      } else {
-        return null;
-      }
-    } else {
-      let globalD;
-      if (chartTab === "confirmed") {
-        globalD = timeData.confirmed.global;
-      } else {
-        globalD = timeData.deaths.global;
-      }
-      if (globalD) {
-        return globalD;
-      } else {
-        return null;
-      }
-    }
-  };
-
-  let sortedDataL: TListD[] = [];
-  let targetDataL: TListD | null = null;
-  let countL: number | null = null;
-
-  switch (tabL) {
-    case "active":
-      sortedDataL = activeData.sort((a, b) => compare(a.count, b.count));
-      targetDataL = activeData.find((d) => d.country === selected) ?? null;
-      countL = globalCount.active;
-      break;
-    case "deaths":
-      sortedDataL = deathsData.sort((a, b) => compare(a.count, b.count));
-      targetDataL = deathsData.find((d) => d.country === selected) ?? null;
-      countL = globalCount.deaths;
-      break;
-    case "recovered":
-      sortedDataL = recoveredData.sort((a, b) => compare(a.count, b.count));
-      targetDataL = recoveredData.find((d) => d.country === selected) ?? null;
-      countL = globalCount.recovered;
-      break;
-    case "new cases":
-      sortedDataL = newCasesData.sort((a, b) => compare(a.count, b.count));
-      targetDataL = newCasesData.find((d) => d.country === selected) ?? null;
-      countL = globalCount.newCases;
-  }
-
-  let sortedDataR: TListD[] = [];
-  let targetDataR: TListD | null = null;
-  let countR: number | null = null;
-
-  switch (tabR) {
-    case "active":
-      sortedDataR = activeData.sort((a, b) => compare(a.count, b.count));
-      targetDataR = activeData.find((d) => d.country === selected) ?? null;
-      countR = globalCount.active;
-      break;
-    case "deaths":
-      sortedDataR = deathsData.sort((a, b) => compare(a.count, b.count));
-      targetDataR = deathsData.find((d) => d.country === selected) ?? null;
-      countR = globalCount.deaths;
-      break;
-    case "recovered":
-      sortedDataR = recoveredData.sort((a, b) => compare(a.count, b.count));
-      targetDataR = recoveredData.find((d) => d.country === selected) ?? null;
-      countR = globalCount.recovered;
-      break;
-    case "new cases":
-      sortedDataR = newCasesData.sort((a, b) => compare(a.count, b.count));
-      targetDataR = newCasesData.find((d) => d.country === selected) ?? null;
-      countR = globalCount.newCases;
-  }
   return (
     <Grid
       gridArea="right"
@@ -153,77 +99,33 @@ const RightColumn: React.FC<RightColumnProps> = ({
       }}
     >
       <Grid gridArea="Left" bg="black" gridTemplateRows="auto 2fr 6fr">
-        <Select
-          size="sm"
-          backgroundColor="black"
-          color="white"
-          placeholder="Select option"
+        <RightColumnListSelect
+          countryData={countryData}
+          setTab={setTabL}
           defaultValue="active"
-          onChange={(e) => {
-            if (
-              e.currentTarget.value === "active" ||
-              e.currentTarget.value === "deaths" ||
-              e.currentTarget.value === "recovered" ||
-              e.currentTarget.value === "new cases"
-            ) {
-              setTabL(e.currentTarget.value);
-            }
-          }}
-        >
-          <option value="active">
-            Active ({countryData && countryData[0].lastUpdate})
-          </option>
-          <option value="new cases">
-            New Cases ({countryData && countryData[0].newCasesLastUpdate})
-          </option>
-          <option value="deaths">Total deaths (cumulative)</option>
-          <option value="recovered">Total recovered (cumulative)</option>
-        </Select>
+        />
         <RightColumnList
           selected={selected}
           tab={tabL}
           globalCount={countL}
           targetData={targetDataL}
           sortedData={sortedDataL}
-          countryData={countryData}
           isCsvLoading={isCsvLoading}
           handleLiClick={handleLiClick}
         />
       </Grid>
       <Grid gridArea="Right" bg="black" gridTemplateRows="auto 2fr 6fr">
-        <Select
-          size="sm"
-          backgroundColor="black"
-          color="white"
-          placeholder="Select option"
+        <RightColumnListSelect
+          countryData={countryData}
+          setTab={setTabR}
           defaultValue="new cases"
-          onChange={(e) => {
-            if (
-              e.currentTarget.value === "active" ||
-              e.currentTarget.value === "deaths" ||
-              e.currentTarget.value === "recovered" ||
-              e.currentTarget.value === "new cases"
-            ) {
-              setTabR(e.currentTarget.value);
-            }
-          }}
-        >
-          <option value="active">
-            Active ({countryData && countryData[0].lastUpdate})
-          </option>
-          <option value="new cases">
-            New Cases ({countryData && countryData[0].newCasesLastUpdate})
-          </option>
-          <option value="deaths">Total deaths (cumulative)</option>
-          <option value="recovered">Total recovered (cumulative)</option>
-        </Select>
+        />
         <RightColumnList
           selected={selected}
           tab={tabR}
           globalCount={countR}
           targetData={targetDataR}
           sortedData={sortedDataR}
-          countryData={countryData}
           isCsvLoading={isCsvLoading}
           handleLiClick={handleLiClick}
         />
@@ -249,7 +151,7 @@ const RightColumn: React.FC<RightColumnProps> = ({
             <option value="confirmed">Confirmed (cumulative)</option>
             <option value="deaths">Deaths (cumulative)</option>
           </Select>
-          <Flex w="50%" justifyContent="center">
+          <Flex w="50%" justify="center">
             <Heading size="lg" color="white">
               {selected ? selected : "Global"}
             </Heading>
@@ -258,10 +160,10 @@ const RightColumn: React.FC<RightColumnProps> = ({
         <Box ref={svgContainerRef} w="100%" h="100%" maxH="300px">
           {isCsvLoading ? (
             <Loading />
-          ) : getLineChartData() ? (
+          ) : lineChartData ? (
             <LineChart
               selected={selected}
-              data={getLineChartData()}
+              data={lineChartData}
               svgContainerRef={svgContainerRef}
             />
           ) : (

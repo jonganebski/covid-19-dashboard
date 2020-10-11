@@ -21,10 +21,9 @@ const initialViewport = {
   zoom: 2,
 };
 
-// ------------- FUNCTION -------------
+// ------------- SUB FUNCTIONS -------------
 
 const getMax = (data: TDailyD[] | null, dataClass: TMapDataClass) => {
-  // confirmed, active, deaths 의 반지름은 confirmed 수를 기준으로 정해져야 한다.
   if (data) {
     return dataClass === "confirmed"
       ? d3.max(data, (D) => D.confirmed ?? 0) ?? 0
@@ -50,7 +49,7 @@ const pickColor = (dataClass: TMapDataClass) => {
     : "none";
 };
 
-// ------------- SUB FUNCTION -------------
+// ------------- COMPONENT -------------
 
 const LeafletMap: React.FC<LeafletMapProps> = ({
   countryData,
@@ -61,6 +60,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
 }) => {
   const [viewport, setViewport] = useState(initialViewport);
 
+  // Viewport changes when user selects country or when data is reloaded.
   useEffect(() => {
     if (!selected) {
       setViewport(initialViewport);
@@ -71,10 +71,13 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       const zoom = selected === "Russia" ? 3 : 4;
       if (lat && lng) {
         setViewport({ lat, lng, zoom });
+      } else {
+        setViewport(initialViewport);
       }
     }
   }, [selected, countryData]);
 
+  // Function that gets the radius.
   const getRadius = d3
     .scaleSqrt()
     .domain([0, getMax(provinceData, dataClass)])

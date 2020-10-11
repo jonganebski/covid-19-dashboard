@@ -39,7 +39,6 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
 }) => {
   const [dataClass, setDataClass] = useState<TMapDataClass>("confirmed");
   const handleBtnClick = (type: TMapDataClass) => setDataClass(type);
-
   return (
     <Grid gridArea="center" gridTemplateRows="auto 250px" gap={1}>
       <Stack spacing={0} pb={2}>
@@ -115,8 +114,8 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
           <>
             <Flex
               flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
+              align="center"
+              justify="center"
               w="130px"
               color="gray.300"
               marginX={1}

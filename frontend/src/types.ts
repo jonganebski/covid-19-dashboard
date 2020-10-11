@@ -58,5 +58,9 @@ export type TNewsData = {
   title: string;
   source: string;
   date: string;
-  link: string
-}
+  link: string;
+};
+
+export type TTab = "active" | "deaths" | "recovered" | "new cases";
+
+export type TChartTab = "confirmed" | "deaths";

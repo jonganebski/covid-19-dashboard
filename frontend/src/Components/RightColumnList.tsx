@@ -1,28 +1,27 @@
 import { Box, Flex, Heading, List, ListItem, Text } from "@chakra-ui/core";
 import React from "react";
-import { TDailyD, TListD } from "../types";
+import { TListD, TTab } from "../types";
 import { changeBg } from "../utils/utils";
 import Loading from "./Loading";
 import LoadingFailed from "./LoadingFailed";
-import { TTab } from "./RightColumn";
 
 interface RightColumnListProps {
   selected: string;
   globalCount: number;
   targetData: TListD | null;
   sortedData: TListD[];
-  countryData: TDailyD[] | null;
   isCsvLoading: boolean;
   tab: TTab;
   handleLiClick: (countryName: string) => void;
 }
+
+// -----------  COMPONENT -----------
 
 const RightColumnList: React.FC<RightColumnListProps> = ({
   selected,
   globalCount,
   targetData,
   sortedData,
-  countryData,
   isCsvLoading,
   tab,
   handleLiClick,
@@ -49,7 +48,7 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
       >
         {isCsvLoading ? (
           <Loading />
-        ) : countryData ? (
+        ) : sortedData.length > 0 ? (
           <>
             <Heading size="lg" color="white">
               {selected ? selected : "Global"}
@@ -69,7 +68,7 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
       <Box overflowY="scroll" paddingX={5} bg="gray.800">
         {isCsvLoading ? (
           <Loading />
-        ) : countryData ? (
+        ) : sortedData.length > 0 ? (
           <List spacing={1}>
             {sortedData &&
               sortedData.map((d, i) => {

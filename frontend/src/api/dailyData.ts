@@ -1,11 +1,6 @@
 import * as d3 from "d3";
 import { TDailyD, TReferenceD } from "../types";
-import {
-  sumValueOrNull,
-  getCoordOrNull,
-  numOrNull,
-  getCountryWise,
-} from "./dailyDataFns";
+import { getCountryWise, numOrNull } from "./dailyDataFns";
 
 // ------------- MAIN FUNCTION -------------
 

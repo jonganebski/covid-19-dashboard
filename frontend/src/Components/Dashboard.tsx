@@ -1,8 +1,7 @@
 import { Flex, Grid } from "@chakra-ui/core";
 import React, { useEffect, useState } from "react";
-import api from "../api";
-import { getDailyData } from "../api/dailyData";
-import { getTimeSeriesData } from "../api/timeData";
+import csvApi from "../api/csvData";
+import { newsApi } from "../api/newsApi";
 import { ITimeDataState, TDailyD, TNewsData } from "../types";
 import CenterColumn from "./CenterColumn";
 import Header from "./Header";
@@ -24,18 +23,20 @@ const Dashboard = () => {
   const [isNewsLoading, setIsNewsLoading] = useState(false);
   const [selected, setSelected] = useState("");
 
+  // console.log("Dashboard Rendering");
   // console.log("timeData", timeData);
   // console.log("countryData", countryData);
   // console.log("provinceData", provinceData);
+  // console.log("Dashboard newsData: ", newsData);
 
   const handleLiClick = (countryName: string) => {
     setSelected((prev) => (prev === countryName ? "" : countryName));
   };
-  // ----------- 데이터 로드 -----------
 
+  // Gets csv data
   useEffect(() => {
     setIsCsvLoading(true);
-    api()
+    csvApi()
       .then((results) => {
         const { confirmed, deaths, todayData } = results;
         setCountryData(todayData.countryWise);
@@ -58,23 +59,14 @@ const Dashboard = () => {
       .finally(() => setIsCsvLoading(false));
   }, []);
 
-  // useEffect(() => {
-  //   setIsNewsLoading(true);
-  //   axios
-  //     .post("http://localhost:4000", { country: selected })
-  //     .then((res) => {
-  //       let result: TNewsData[] = [];
-  //       res.data.forEach((d: any) => {
-  //         const title = d.title;
-  //         const source = d.source;
-  //         const date = d.date;
-  //         const link = d.link;
-  //         result.push({ title, source, date, link });
-  //       });
-  //       setNewsData(result);
-  //     })
-  //     .finally(() => setIsNewsLoading(false));
-  // }, [selected]);
+  // Gets news data
+  useEffect(() => {
+    setIsNewsLoading(true);
+    console.log("Calling news api");
+    newsApi(selected)
+      .then((result) => setNewsData(result))
+      .finally(() => setIsNewsLoading(false));
+  }, [selected]);
 
   return (
     <Flex className="App" p={1} w="100vw" h="100vh" bg="black">
