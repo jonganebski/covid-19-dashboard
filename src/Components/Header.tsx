@@ -65,7 +65,10 @@ const Header = () => {
               <Text>
                 <Icon name="email" /> jon.ganebski@gmail.com
               </Text>
-              <Link>
+              <Link
+                href="https://github.com/jonganebski/covid-19-dashboard"
+                target="_blank"
+              >
                 <Icon name="view" /> See code in Github
               </Link>
             </ModalFooter>
