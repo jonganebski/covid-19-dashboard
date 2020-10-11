@@ -1,14 +1,13 @@
-import { Flex, Grid, Heading } from "@chakra-ui/core";
+import { Flex, Grid } from "@chakra-ui/core";
 import React, { useEffect, useState } from "react";
+import api from "../api";
 import { getDailyData } from "../api/dailyData";
-import webScraper from "../api/newsData";
 import { getTimeSeriesData } from "../api/timeData";
 import { ITimeDataState, TDailyD, TNewsData } from "../types";
 import CenterColumn from "./CenterColumn";
+import Header from "./Header";
 import LeftColumn from "./LeftColumn";
 import RightColumn from "./RightColumn";
-import axios from "axios";
-import Header from "./Header";
 
 // -----------  COMPONENT  -----------
 
@@ -21,7 +20,13 @@ const Dashboard = () => {
   const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
   const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
   const [newsData, setNewsData] = useState<TNewsData[] | null>(null);
+  const [isCsvLoading, setIsCsvLoading] = useState(false);
+  const [isNewsLoading, setIsNewsLoading] = useState(false);
   const [selected, setSelected] = useState("");
+
+  // console.log("timeData", timeData);
+  // console.log("countryData", countryData);
+  // console.log("provinceData", provinceData);
 
   const handleLiClick = (countryName: string) => {
     setSelected((prev) => (prev === countryName ? "" : countryName));
@@ -29,23 +34,12 @@ const Dashboard = () => {
   // ----------- 데이터 로드 -----------
 
   useEffect(() => {
-    Promise.all([
-      getTimeSeriesData("time_series_covid19_confirmed_global.csv"),
-      getTimeSeriesData("time_series_covid19_deaths_global.csv"),
-      getDailyData("10-07-2020.csv"),
-      getDailyData("10-06-2020.csv"),
-      getDailyData("10-05-2020.csv"),
-      // getTimeSeriesData(
-      //   "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
-      // ),
-      // getTimeSeriesData(
-      //   "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
-      // ),
-      // getDailyData(
-      //   "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/10-07-2020.csv"
-      // ),
-    ]).then(
-      ([confirmed, deaths, todayData, yesterdayData, twoDaysBeforeData]) => {
+    setIsCsvLoading(true);
+    api()
+      .then((results) => {
+        const { confirmed, deaths, todayData } = results;
+        setCountryData(todayData.countryWise);
+        setProvinceData(todayData.provinceWise);
         setTimeData({
           confirmed: {
             countries: confirmed.countryData,
@@ -60,54 +54,26 @@ const Dashboard = () => {
             global: null,
           },
         });
-        todayData.countryWise.forEach((D) => {
-          const country = D.country;
-          const yesterdayConfirmed = yesterdayData.countryWise.find(
-            (d) => d.country === country
-          )?.confirmed;
-          const twoDaysBeforeConfirmed = twoDaysBeforeData.countryWise.find(
-            (d) => d.country === country
-          )?.confirmed;
-          if (yesterdayConfirmed && twoDaysBeforeConfirmed) {
-            D.newCases = yesterdayConfirmed - twoDaysBeforeConfirmed;
-          }
-        });
-
-        todayData.provinceWise.forEach((D) => {
-          const key = D.combinedKey;
-          const yesterday = yesterdayData.provinceWise.find(
-            (d) => d.combinedKey === key
-          );
-          const yesterdayConfirmed = yesterday?.confirmed;
-          const yesterdayDate = yesterday?.lastUpdate;
-          const twoDaysBeforeConfirmed = twoDaysBeforeData.provinceWise.find(
-            (d) => d.combinedKey === key
-          )?.confirmed;
-
-          if (yesterdayConfirmed && twoDaysBeforeConfirmed) {
-            D.newCases = yesterdayConfirmed - twoDaysBeforeConfirmed;
-          }
-          D.newCasesLastUpdate = yesterdayDate ?? "";
-        });
-        setCountryData(todayData.countryWise);
-        setProvinceData(todayData.provinceWise);
-      }
-    );
+      })
+      .finally(() => setIsCsvLoading(false));
   }, []);
 
   // useEffect(() => {
-  //   axios.post("http://localhost:4000", { country: selected }).then((res) => {
-  //     console.log(res);
-  //     let result: TNewsData[] = [];
-  //     res.data.forEach((d: any) => {
-  //       const title = d.title ?? "";
-  //       const source = d.source ?? "";
-  //       const date = d.date ?? "";
-  //       const link = d.link ?? "";
-  //       result.push({ title, source, date, link });
-  //     });
-  //     setNewsData(result);
-  //   });
+  //   setIsNewsLoading(true);
+  //   axios
+  //     .post("http://localhost:4000", { country: selected })
+  //     .then((res) => {
+  //       let result: TNewsData[] = [];
+  //       res.data.forEach((d: any) => {
+  //         const title = d.title;
+  //         const source = d.source;
+  //         const date = d.date;
+  //         const link = d.link;
+  //         result.push({ title, source, date, link });
+  //       });
+  //       setNewsData(result);
+  //     })
+  //     .finally(() => setIsNewsLoading(false));
   // }, [selected]);
 
   return (
@@ -123,6 +89,7 @@ const Dashboard = () => {
         <Header />
         <LeftColumn
           countryData={countryData}
+          isCsvLoading={isCsvLoading}
           selected={selected}
           handleLiClick={handleLiClick}
         />
@@ -130,12 +97,15 @@ const Dashboard = () => {
           countryData={countryData}
           provinceData={provinceData}
           newsData={newsData}
+          isNewsLoading={isNewsLoading}
+          isCsvLoading={isCsvLoading}
           selected={selected}
           setSelected={setSelected}
         />
         <RightColumn
           countryData={countryData}
           timeData={timeData}
+          isCsvLoading={isCsvLoading}
           selected={selected}
           handleLiClick={handleLiClick}
         />

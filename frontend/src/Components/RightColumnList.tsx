@@ -3,6 +3,7 @@ import React from "react";
 import { TDailyD, TListD } from "../types";
 import { changeBg } from "../utils/utils";
 import Loading from "./Loading";
+import LoadingFailed from "./LoadingFailed";
 import { TTab } from "./RightColumn";
 
 interface RightColumnListProps {
@@ -11,6 +12,7 @@ interface RightColumnListProps {
   targetData: TListD | null;
   sortedData: TListD[];
   countryData: TDailyD[] | null;
+  isCsvLoading: boolean;
   tab: TTab;
   handleLiClick: (countryName: string) => void;
 }
@@ -21,6 +23,7 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
   targetData,
   sortedData,
   countryData,
+  isCsvLoading,
   tab,
   handleLiClick,
 }) => {
@@ -44,9 +47,9 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
         borderBottomWidth={1}
         borderBottom="solid black"
       >
-        {!countryData ? (
+        {isCsvLoading ? (
           <Loading />
-        ) : (
+        ) : countryData ? (
           <>
             <Heading size="lg" color="white">
               {selected ? selected : "Global"}
@@ -59,12 +62,14 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
                 : globalCount.toLocaleString()}
             </Heading>{" "}
           </>
+        ) : (
+          <LoadingFailed />
         )}
       </Flex>
       <Box overflowY="scroll" paddingX={5} bg="gray.800">
-        {!countryData ? (
+        {isCsvLoading ? (
           <Loading />
-        ) : (
+        ) : countryData ? (
           <List spacing={1}>
             {sortedData &&
               sortedData.map((d, i) => {
@@ -90,6 +95,8 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
                 return li;
               })}
           </List>
+        ) : (
+          <LoadingFailed />
         )}
       </Box>
     </>

@@ -4,11 +4,13 @@ import { ITimeDataState, TDailyD, TListD } from "../types";
 import { compare } from "../utils/utils";
 import LineChart from "./LineChart";
 import Loading from "./Loading";
+import LoadingFailed from "./LoadingFailed";
 import RightColumnList from "./RightColumnList";
 
 interface RightColumnProps {
   countryData: TDailyD[] | null;
   timeData: ITimeDataState;
+  isCsvLoading: boolean;
   selected: string;
   handleLiClick: (countryName: string) => void;
 }
@@ -21,6 +23,7 @@ export type TChartTab = "confirmed" | "deaths";
 const RightColumn: React.FC<RightColumnProps> = ({
   countryData,
   timeData,
+  isCsvLoading,
   selected,
   handleLiClick,
 }) => {
@@ -183,6 +186,7 @@ const RightColumn: React.FC<RightColumnProps> = ({
           targetData={targetDataL}
           sortedData={sortedDataL}
           countryData={countryData}
+          isCsvLoading={isCsvLoading}
           handleLiClick={handleLiClick}
         />
       </Grid>
@@ -220,6 +224,7 @@ const RightColumn: React.FC<RightColumnProps> = ({
           targetData={targetDataR}
           sortedData={sortedDataR}
           countryData={countryData}
+          isCsvLoading={isCsvLoading}
           handleLiClick={handleLiClick}
         />
       </Grid>
@@ -251,14 +256,16 @@ const RightColumn: React.FC<RightColumnProps> = ({
           </Flex>
         </Flex>
         <Box ref={svgContainerRef} w="100%" h="100%" maxH="300px">
-          {!getLineChartData() ? (
+          {isCsvLoading ? (
             <Loading />
-          ) : (
+          ) : getLineChartData() ? (
             <LineChart
               selected={selected}
               data={getLineChartData()}
               svgContainerRef={svgContainerRef}
             />
+          ) : (
+            <LoadingFailed />
           )}
         </Box>
       </Box>

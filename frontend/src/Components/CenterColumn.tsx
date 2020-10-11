@@ -13,11 +13,14 @@ import React, { useState } from "react";
 import { TDailyD, TNewsData } from "../types";
 import LeafletMap from "./LeafletMap";
 import Loading from "./Loading";
+import LoadingFailed from "./LoadingFailed";
 
 interface CenterColumnProps {
   countryData: TDailyD[] | null;
   provinceData: TDailyD[] | null;
   newsData: TNewsData[] | null;
+  isNewsLoading: boolean;
+  isCsvLoading: boolean;
   selected: string;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -29,6 +32,8 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
   countryData,
   provinceData,
   newsData,
+  isNewsLoading,
+  isCsvLoading,
   selected,
   setSelected,
 }) => {
@@ -39,9 +44,9 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
     <Grid gridArea="center" gridTemplateRows="auto 250px" gap={1}>
       <Stack spacing={0} pb={2}>
         <Box h="100%">
-          {!countryData && !provinceData ? (
+          {isCsvLoading ? (
             <Loading />
-          ) : (
+          ) : countryData && provinceData ? (
             <LeafletMap
               countryData={countryData}
               provinceData={provinceData}
@@ -49,6 +54,8 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
               setSelected={setSelected}
               dataClass={dataClass}
             />
+          ) : (
+            <LoadingFailed />
           )}
         </Box>
         {countryData && provinceData && (
@@ -102,7 +109,7 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
         )}
       </Stack>
       <Flex bg="gray.800">
-        {!newsData ? (
+        {isNewsLoading ? (
           <Loading />
         ) : (
           <>
@@ -121,20 +128,24 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
                 ({selected ? selected : "Global"})
               </Text>
             </Flex>
-            <Stack w="100%" overflowY="scroll">
-              {newsData.map((news, i) => (
-                <Link key={i} href={news.link} target="_blank" mr={1}>
-                  <Box border="1px gray solid" borderRadius="5px" p={5}>
-                    <Heading size="md" color="gray.400" mb={1}>
-                      {news.title}
-                    </Heading>
-                    <Text fontSize="xs" color="gray.500">
-                      {news.source} | {news.date}
-                    </Text>
-                  </Box>
-                </Link>
-              ))}
-            </Stack>
+            {newsData && newsData.length > 0 ? (
+              <Stack w="100%" overflowY="scroll">
+                {newsData.map((news, i) => (
+                  <Link key={i} href={news.link} target="_blank" mr={1}>
+                    <Box border="1px gray solid" borderRadius="5px" p={5}>
+                      <Heading size="md" color="gray.400" mb={1}>
+                        {news.title}
+                      </Heading>
+                      <Text fontSize="xs" color="gray.500">
+                        {news.source} | {news.date}
+                      </Text>
+                    </Box>
+                  </Link>
+                ))}
+              </Stack>
+            ) : (
+              <LoadingFailed />
+            )}
           </>
         )}
       </Flex>

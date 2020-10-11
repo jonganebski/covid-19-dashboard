@@ -11,15 +11,18 @@ import React, { useRef } from "react";
 import { TDailyD } from "../types";
 import { changeBg } from "../utils/utils";
 import Loading from "./Loading";
+import LoadingFailed from "./LoadingFailed";
 
 interface LeftColumnProps {
   countryData: TDailyD[] | null;
+  isCsvLoading: boolean;
   selected: string;
   handleLiClick: (countryName: string) => void;
 }
 
 const LeftColumn: React.FC<LeftColumnProps> = ({
   countryData,
+  isCsvLoading,
   selected,
   handleLiClick,
 }) => {
@@ -39,9 +42,9 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
         p={2}
         bg="gray.700"
       >
-        {!countryData ? (
+        {isCsvLoading ? (
           <Loading />
-        ) : (
+        ) : countryData ? (
           <>
             <Heading size="lg" color="gray.400" mr={1}>
               Total Cases
@@ -53,19 +56,21 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
               {selected === ""
                 ? totalCount.toLocaleString()
                 : countryData
-                    ?.filter((d) => d.country === selected)[0]
+                    .filter((d) => d.country === selected)[0]
                     .confirmed?.toLocaleString() ?? "No data"}
             </Heading>
             <Text fontSize="xs" color="gray.400">
               (cumulative)
             </Text>{" "}
           </>
+        ) : (
+          <LoadingFailed />
         )}
       </Flex>
       <Box bg="gray.800" overflowY="scroll" paddingX={5} ref={listBoxRef}>
-        {!countryData ? (
+        {isCsvLoading ? (
           <Loading />
-        ) : (
+        ) : countryData ? (
           <List spacing={1}>
             {countryData
               .filter((d) => d.confirmed)
@@ -91,12 +96,14 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
                 );
               })}
           </List>
+        ) : (
+          <LoadingFailed />
         )}
       </Box>
       <Flex direction="column" align="center" justify="center" bg="gray.800">
-        {!countryData ? (
+        {isCsvLoading ? (
           <Loading />
-        ) : (
+        ) : countryData ? (
           <>
             <Text color="gray.400">Last Updated at</Text>
             <Text color="gray.400" fontSize="2xl" fontWeight={500}>
@@ -104,6 +111,8 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
                 new Date(countryData[0].lastUpdate).toLocaleString()}
             </Text>
           </>
+        ) : (
+          <LoadingFailed />
         )}
       </Flex>
     </Grid>
