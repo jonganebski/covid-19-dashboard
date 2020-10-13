@@ -59,7 +59,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   dataClass,
 }) => {
   const [viewport, setViewport] = useState(initialViewport);
-
+  // console.log(provinceData);
   // Viewport changes when user selects country or when data is reloaded.
   useEffect(() => {
     if (!selected) {
@@ -90,8 +90,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       style={{ width: "100%", height: "100%", fill: "black" }}
     >
       <TileLayer
-        // attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution={`&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>`}
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         maxZoom={8}

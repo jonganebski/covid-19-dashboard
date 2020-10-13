@@ -62,7 +62,6 @@ const Dashboard = () => {
   // Gets news data
   useEffect(() => {
     setIsNewsLoading(true);
-    console.log("Calling news api");
     newsApi(selected)
       .then((result) => setNewsData(result))
       .finally(() => setIsNewsLoading(false));

@@ -38,7 +38,6 @@ const getTargetUrls = async (files: string[]) => {
       const url = DAILY_BASE_URL + file;
       const res = await axios.get(url);
       const status = res.status;
-      console.log(res);
       if (status === 200) {
         targets.push(url);
         success++;
@@ -46,7 +45,9 @@ const getTargetUrls = async (files: string[]) => {
       if (status !== 200 && success !== 0) {
         success = 3;
       }
-    } catch {}
+    } catch {
+      // csv files are not found. handle this error.
+    }
     if (success === 3) {
       break;
     }
@@ -119,6 +120,10 @@ const computeNewCasesProvince = (
 const csvApi = async () => {
   const files = getFileNames();
   const targetUrls = await getTargetUrls(files);
+  if (targetUrls.length !== 3) {
+    // 이 부분 보강이 필요함.
+    throw Error("The data is not right.");
+  }
   const [
     confirmed,
     deaths,
@@ -135,7 +140,6 @@ const csvApi = async () => {
 
   computeNewCasesCountry(todayData, yesterdayData, twoDaysBeforeData);
   computeNewCasesProvince(todayData, yesterdayData, twoDaysBeforeData);
-  console.log(todayData.countryWise);
 
   return { confirmed, deaths, todayData };
 };
