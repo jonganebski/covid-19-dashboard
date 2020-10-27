@@ -28,7 +28,10 @@ const Header = () => {
       bg="gray.800"
       color="gray.400"
     >
-      <Heading> Covid-19 Information Dashboard</Heading>
+      <Heading fontSize={{ base: "xl", lg: "3xl" }}>
+        {" "}
+        Covid-19 Information Dashboard
+      </Heading>
       <Box position="absolute" right={10}>
         <Icon name="info" cursor="pointer" onClick={onOpen} />
         <Modal isOpen={isOpen} onClose={onClose}>

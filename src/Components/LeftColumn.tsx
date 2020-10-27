@@ -49,13 +49,17 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
           <Loading />
         ) : countryData ? (
           <>
-            <Heading size="lg" color="gray.400" mr={1}>
+            <Heading
+              fontSize={{ base: "lg", lg: "xl" }}
+              color="gray.400"
+              mr={1}
+            >
               Total Cases
             </Heading>
-            <Heading size="lg" color="white">
+            <Heading fontSize={{ base: "xl", lg: "2xl" }} color="white">
               {selected ? selected : "Global"}
             </Heading>
-            <Heading size="xl" color="red.500">
+            <Heading fontSize={{ base: "2xl", lg: "4xl" }} color="red.500">
               {selected === ""
                 ? totalCount.toLocaleString()
                 : countryData

@@ -50,10 +50,10 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
           <Loading />
         ) : sortedData.length > 0 ? (
           <>
-            <Heading size="lg" color="white">
+            <Heading fontSize={{ base: "xl", lg: "2xl" }} color="white">
               {selected ? selected : "Global"}
             </Heading>
-            <Heading size="xl" color={pickColor()}>
+            <Heading fontSize={{ base: "2xl", lg: "4xl" }} color={pickColor()}>
               {selected
                 ? countryCount === null || countryCount === undefined
                   ? "No data"

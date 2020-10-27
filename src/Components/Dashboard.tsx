@@ -72,10 +72,12 @@ const Dashboard = () => {
       <Grid
         w="100%"
         gap={1}
-        style={{
-          gridTemplate: `"header header header" 5vh
-                          "left center right" 94vh / 3fr 9fr 5fr`,
+        templateAreas={{
+          base: `"header" "left" "center" "right"`,
+          lg: '"header header header" "left center right"',
         }}
+        templateColumns={{ base: "1fr", lg: "3fr 9fr 5fr" }}
+        templateRows={{ base: "50px 400px 600px 750px", lg: "5vh 94vh" }}
       >
         <Header />
         <LeftColumn
