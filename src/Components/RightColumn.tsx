@@ -9,7 +9,7 @@ import {
   TTab,
 } from "../types";
 import { compare } from "../utils/utils";
-import LineChart from "./LineChart";
+import ChartContainer from "./ChartContainer";
 import Loading from "./Loading";
 import LoadingFailed from "./LoadingFailed";
 import RightColumnList from "./RightColumnList";
@@ -45,93 +45,6 @@ const getTabDataAndGlobalCount = (countryData: TDailyD[] | null, tab: TTab) => {
   return { data, globalCount };
 };
 
-const getLineChartData = (
-  selected: string,
-  chartTab: TChartTab,
-  timeData: ITimeDataState
-): TDateCount[] | null => {
-  if (chartTab === "confirmed" || chartTab === "deaths") {
-    if (!selected) {
-      return timeData[chartTab].global ?? null;
-    } else {
-      return (
-        timeData[chartTab].countries?.find((d) => d.country === selected)
-          ?.data ?? null
-      );
-    }
-  } else {
-    return null;
-  }
-};
-
-const getBarChartData = (
-  selected: string,
-  chartTab: TChartTab,
-  timeData: ITimeDataState
-): TDateCount[] | null => {
-  const barChartData: ITimeDataState = { ...timeData };
-  const returnData: TDateCount[] = [];
-  if (chartTab === "daily cases") {
-    if (!selected) {
-      const targetData = barChartData.confirmed.global;
-      if (targetData) {
-        returnData.push(targetData[0]);
-        targetData.reduce((acc, d) => {
-          returnData.push({ date: d.date, count: d.count - acc.count });
-          return d;
-        });
-        return returnData;
-      } else {
-        return null;
-      }
-    } else {
-      const targetData = barChartData.confirmed.countries?.find(
-        (d) => d.country === selected
-      )?.data;
-      if (targetData) {
-        returnData.push(targetData[0]);
-        targetData.reduce((acc, d) => {
-          returnData.push({ date: d.date, count: d.count - acc.count });
-          return d;
-        });
-        return returnData;
-      } else {
-        return null;
-      }
-    }
-  } else if (chartTab === "daily deaths") {
-    if (!selected) {
-      const targetData = barChartData.deaths.global;
-      if (targetData) {
-        returnData.push(targetData[0]);
-        targetData.reduce((acc, d) => {
-          returnData.push({ date: d.date, count: d.count - acc.count });
-          return d;
-        });
-        return returnData;
-      } else {
-        return null;
-      }
-    } else {
-      const targetData = barChartData.deaths.countries?.find(
-        (d) => d.country === selected
-      )?.data;
-      if (targetData) {
-        returnData.push(targetData[0]);
-        targetData.reduce((acc, d) => {
-          returnData.push({ date: d.date, count: d.count - acc.count });
-          return d;
-        });
-        return returnData;
-      } else {
-        return null;
-      }
-    }
-  } else {
-    return null;
-  }
-};
-
 // ----------- COMPONENT -----------
 
 const RightColumn: React.FC<RightColumnProps> = ({
@@ -155,11 +68,6 @@ const RightColumn: React.FC<RightColumnProps> = ({
   const sortedDataR = getTabDataAndGlobalCount(countryData, tabR).data;
   const targetDataR = sortedDataR.find((d) => d.country === selected) ?? null;
   const countR = getTabDataAndGlobalCount(countryData, tabR).globalCount;
-
-  // For chart on the bottom
-  const lineChartData = getLineChartData(selected, chartTab, timeData);
-  const barChartData = getBarChartData(selected, chartTab, timeData);
-  console.log("barChartData: ", barChartData);
 
   return (
     <Grid
@@ -239,15 +147,13 @@ const RightColumn: React.FC<RightColumnProps> = ({
         <Box ref={svgContainerRef} w="100%" h="100%" maxH="300px">
           {isCsvLoading ? (
             <Loading />
-          ) : barChartData ? (
-            <LineChart
-              selected={selected}
-              // data={lineChartData}
-              data={barChartData}
-              svgContainerRef={svgContainerRef}
-            />
           ) : (
-            <LoadingFailed />
+            <ChartContainer
+              selected={selected}
+              timeData={timeData}
+              svgContainerRef={svgContainerRef}
+              chartTab={chartTab}
+            />
           )}
         </Box>
       </Box>
