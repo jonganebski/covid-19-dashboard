@@ -50,13 +50,85 @@ const getLineChartData = (
   chartTab: TChartTab,
   timeData: ITimeDataState
 ): TDateCount[] | null => {
-  if (!selected) {
-    return timeData[chartTab].global ?? null;
+  if (chartTab === "confirmed" || chartTab === "deaths") {
+    if (!selected) {
+      return timeData[chartTab].global ?? null;
+    } else {
+      return (
+        timeData[chartTab].countries?.find((d) => d.country === selected)
+          ?.data ?? null
+      );
+    }
   } else {
-    return (
-      timeData[chartTab].countries?.find((d) => d.country === selected)?.data ??
-      null
-    );
+    return null;
+  }
+};
+
+const getBarChartData = (
+  selected: string,
+  chartTab: TChartTab,
+  timeData: ITimeDataState
+): TDateCount[] | null => {
+  const barChartData: ITimeDataState = { ...timeData };
+  const returnData: TDateCount[] = [];
+  if (chartTab === "daily cases") {
+    if (!selected) {
+      const targetData = barChartData.confirmed.global;
+      if (targetData) {
+        returnData.push(targetData[0]);
+        targetData.reduce((acc, d) => {
+          returnData.push({ date: d.date, count: d.count - acc.count });
+          return d;
+        });
+        return returnData;
+      } else {
+        return null;
+      }
+    } else {
+      const targetData = barChartData.confirmed.countries?.find(
+        (d) => d.country === selected
+      )?.data;
+      if (targetData) {
+        returnData.push(targetData[0]);
+        targetData.reduce((acc, d) => {
+          returnData.push({ date: d.date, count: d.count - acc.count });
+          return d;
+        });
+        return returnData;
+      } else {
+        return null;
+      }
+    }
+  } else if (chartTab === "daily deaths") {
+    if (!selected) {
+      const targetData = barChartData.deaths.global;
+      if (targetData) {
+        returnData.push(targetData[0]);
+        targetData.reduce((acc, d) => {
+          returnData.push({ date: d.date, count: d.count - acc.count });
+          return d;
+        });
+        return returnData;
+      } else {
+        return null;
+      }
+    } else {
+      const targetData = barChartData.deaths.countries?.find(
+        (d) => d.country === selected
+      )?.data;
+      if (targetData) {
+        returnData.push(targetData[0]);
+        targetData.reduce((acc, d) => {
+          returnData.push({ date: d.date, count: d.count - acc.count });
+          return d;
+        });
+        return returnData;
+      } else {
+        return null;
+      }
+    }
+  } else {
+    return null;
   }
 };
 
@@ -72,7 +144,7 @@ const RightColumn: React.FC<RightColumnProps> = ({
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
   const [tabL, setTabL] = useState<TTab>("active");
   const [tabR, setTabR] = useState<TTab>("new cases");
-  const [chartTab, setChartTab] = useState<TChartTab>("confirmed");
+  const [chartTab, setChartTab] = useState<TChartTab>("daily cases");
 
   // For list on the left
   const sortedDataL = getTabDataAndGlobalCount(countryData, tabL).data;
@@ -86,6 +158,8 @@ const RightColumn: React.FC<RightColumnProps> = ({
 
   // For chart on the bottom
   const lineChartData = getLineChartData(selected, chartTab, timeData);
+  const barChartData = getBarChartData(selected, chartTab, timeData);
+  console.log("barChartData: ", barChartData);
 
   return (
     <Grid
@@ -138,11 +212,14 @@ const RightColumn: React.FC<RightColumnProps> = ({
             backgroundColor="black"
             color="white"
             placeholder="Select option"
-            defaultValue="confirmed"
+            // defaultValue="confirmed"
+            defaultValue="daily cases"
             onChange={(e) => {
               if (
                 e.currentTarget.value === "confirmed" ||
-                e.currentTarget.value === "deaths"
+                e.currentTarget.value === "deaths" ||
+                e.currentTarget.value === "daily cases" ||
+                e.currentTarget.value === "daily deaths"
               ) {
                 setChartTab(e.currentTarget.value);
               }
@@ -150,6 +227,8 @@ const RightColumn: React.FC<RightColumnProps> = ({
           >
             <option value="confirmed">Confirmed (cumulative)</option>
             <option value="deaths">Deaths (cumulative)</option>
+            <option value="daily cases">Daily Cases</option>
+            <option value="daily deaths">Daily Deaths</option>
           </Select>
           <Flex w="50%" justify="center">
             <Heading size="lg" color="white">
@@ -160,10 +239,11 @@ const RightColumn: React.FC<RightColumnProps> = ({
         <Box ref={svgContainerRef} w="100%" h="100%" maxH="300px">
           {isCsvLoading ? (
             <Loading />
-          ) : lineChartData ? (
+          ) : barChartData ? (
             <LineChart
               selected={selected}
-              data={lineChartData}
+              // data={lineChartData}
+              data={barChartData}
               svgContainerRef={svgContainerRef}
             />
           ) : (

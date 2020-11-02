@@ -70,6 +70,19 @@ const LineChart: React.FC<LineChartProps> = ({
   const xScaleRef = useRef<d3.ScaleTime<number, number> | null>(null);
   const yScaleRef = useRef<d3.ScaleLinear<number, number> | null>(null);
 
+  const xBarScaleRef = useRef<d3.ScaleBand<string> | null>(null);
+  const yBarScaleRef = useRef<d3.ScaleLinear<number, number> | null>(null);
+
+  xBarScaleRef.current = d3
+    .scaleBand()
+    .domain(data!.map((d) => xValue(d).toString()))
+    .range([0, innerW]);
+
+  yBarScaleRef.current = d3
+    .scaleLinear()
+    .domain([0, getMax(data!, yValue)])
+    .range([innerH, 0]);
+
   const handleResize = () => {
     const svgParentW = svgRef.current?.parentElement?.getBoundingClientRect()
       .width;
@@ -233,7 +246,20 @@ const LineChart: React.FC<LineChartProps> = ({
                 );
               })}
           </g>
-          <g className="linegraph-group">
+          <g className="bargraph-group">
+            {data?.map((d) => {
+              console.log(yBarScaleRef.current!(yValue(d)));
+              return (
+                <rect
+                  x={xScaleRef.current!(xValue(d)) ?? 0}
+                  y={yBarScaleRef.current!(yValue(d)) ?? 0}
+                  width={xBarScaleRef.current?.bandwidth()}
+                  height={innerH - yBarScaleRef.current!(yValue(d))!}
+                ></rect>
+              );
+            })}
+          </g>
+          {/* <g className="linegraph-group">
             {data && lineGenerator(data) && (
               <path
                 d={lineGenerator(data) as string}
@@ -276,7 +302,7 @@ const LineChart: React.FC<LineChartProps> = ({
                 </g>
               </g>
             )}
-          </g>
+          </g> */}
         </g>
       </svg>
     </>

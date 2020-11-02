@@ -9,9 +9,13 @@ const DAILY_BASE_URL =
   "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/";
 const TIMESERIES_CSV_URL = {
   CONFIRMED:
-    "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv",
+    process.env.NODE_ENV === "development"
+      ? "time_series_covid19_confirmed_global.csv"
+      : "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv",
   DEATHS:
-    "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv",
+    process.env.NODE_ENV === "development"
+      ? "time_series_covid19_deaths_global.csv"
+      : "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv",
 };
 
 // -----------  SUB FUNCTIONS  -----------
@@ -31,6 +35,9 @@ const getFileNames = () => {
 };
 
 const getTargetUrls = async (files: string[]) => {
+  if (process.env.NODE_ENV === "development") {
+    return ["10-31-2020.csv", "10-30-2020.csv", "10-29-2020.csv"];
+  }
   let targets: string[] = [];
   let success = 0;
   for (const file of files) {

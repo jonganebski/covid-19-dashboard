@@ -63,4 +63,4 @@ export type TNewsData = {
 
 export type TTab = "active" | "deaths" | "recovered" | "new cases";
 
-export type TChartTab = "confirmed" | "deaths";
+export type TChartTab = "confirmed" | "deaths" | "daily cases" | "daily deaths";
