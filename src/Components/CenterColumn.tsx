@@ -16,11 +16,8 @@ import Loading from "./Loading";
 import LoadingFailed from "./LoadingFailed";
 
 interface CenterColumnProps {
-  countryData: TDailyD[] | null;
-  provinceData: TDailyD[] | null;
   newsData: TNewsData[] | null;
   isNewsLoading: boolean;
-  isCsvLoading: boolean;
   selected: string;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -29,11 +26,8 @@ export type TMapDataClass = "confirmed" | "active" | "deaths" | "newCases";
 // ------------- COMPONENT -------------
 
 const CenterColumn: React.FC<CenterColumnProps> = ({
-  countryData,
-  provinceData,
   newsData,
   isNewsLoading,
-  isCsvLoading,
   selected,
   setSelected,
 }) => {
@@ -43,69 +37,60 @@ const CenterColumn: React.FC<CenterColumnProps> = ({
     <Grid gridArea="center" gridTemplateRows="auto 250px" gap={1}>
       <Stack spacing={0} pb={2}>
         <Box h="100%">
-          {isCsvLoading ? (
-            <Loading />
-          ) : countryData && provinceData ? (
-            <LeafletMap
-              countryData={countryData}
-              provinceData={provinceData}
-              selected={selected}
-              setSelected={setSelected}
-              dataClass={dataClass}
-            />
-          ) : (
-            <LoadingFailed />
-          )}
+          <LeafletMap
+            selected={selected}
+            setSelected={setSelected}
+            dataClass={dataClass}
+          />
         </Box>
-        {countryData && provinceData && (
-          <ButtonGroup>
-            <Button
-              size="sm"
-              borderTop="none"
-              borderTopLeftRadius={0}
-              borderTopRightRadius={0}
-              variant="outline"
-              variantColor={dataClass === "confirmed" ? "red" : "gray"}
-              onClick={() => handleBtnClick("confirmed")}
-            >
-              Cumulative Cases
-            </Button>
 
-            <Button
-              size="sm"
-              borderTop="none"
-              borderTopLeftRadius={0}
-              borderTopRightRadius={0}
-              variant="outline"
-              variantColor={dataClass === "deaths" ? "red" : "gray"}
-              onClick={() => handleBtnClick("deaths")}
-            >
-              Cumulative Deaths
-            </Button>
-            <Button
-              size="sm"
-              borderTop="none"
-              borderTopLeftRadius={0}
-              borderTopRightRadius={0}
-              variant="outline"
-              variantColor={dataClass === "active" ? "red" : "gray"}
-              onClick={() => handleBtnClick("active")}
-            >
-              Active Cases
-            </Button>
-            <Button
-              size="sm"
-              borderTop="none"
-              borderTopLeftRadius={0}
-              borderTopRightRadius={0}
-              variant="outline"
-              variantColor={dataClass === "newCases" ? "red" : "gray"}
-              onClick={() => handleBtnClick("newCases")}
-            >
-              New Cases
-            </Button>
-          </ButtonGroup>
-        )}
+        <ButtonGroup>
+          <Button
+            size="sm"
+            borderTop="none"
+            borderTopLeftRadius={0}
+            borderTopRightRadius={0}
+            variant="outline"
+            variantColor={dataClass === "confirmed" ? "red" : "gray"}
+            onClick={() => handleBtnClick("confirmed")}
+          >
+            Cumulative Cases
+          </Button>
+
+          <Button
+            size="sm"
+            borderTop="none"
+            borderTopLeftRadius={0}
+            borderTopRightRadius={0}
+            variant="outline"
+            variantColor={dataClass === "deaths" ? "red" : "gray"}
+            onClick={() => handleBtnClick("deaths")}
+          >
+            Cumulative Deaths
+          </Button>
+          <Button
+            size="sm"
+            borderTop="none"
+            borderTopLeftRadius={0}
+            borderTopRightRadius={0}
+            variant="outline"
+            variantColor={dataClass === "active" ? "red" : "gray"}
+            onClick={() => handleBtnClick("active")}
+          >
+            Active Cases
+          </Button>
+          <Button
+            size="sm"
+            borderTop="none"
+            borderTopLeftRadius={0}
+            borderTopRightRadius={0}
+            variant="outline"
+            variantColor={dataClass === "newCases" ? "red" : "gray"}
+            onClick={() => handleBtnClick("newCases")}
+          >
+            New Cases
+          </Button>
+        </ButtonGroup>
       </Stack>
       <Flex bg="gray.800">
         {isNewsLoading ? (

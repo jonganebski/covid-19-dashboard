@@ -1,6 +1,7 @@
 import { useTheme } from "@chakra-ui/core";
 import * as d3 from "d3";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTimeSeriesDataCtx } from "../contexts/dataContext";
 import { ITimeDataState, TChartTab, TDateCount } from "../types";
 import { getMonthName } from "../utils/utils";
 import BarChart from "./BarChart";
@@ -8,7 +9,6 @@ import LineChart from "./LineChart";
 
 interface ChartContainerProps {
   selected: string;
-  timeData: ITimeDataState;
   svgContainerRef: React.MutableRefObject<HTMLDivElement | null>;
   chartTab: TChartTab;
 }
@@ -141,12 +141,11 @@ const getBarChartData = (
 
 const ChartContainer: React.FC<ChartContainerProps> = ({
   selected,
-  timeData,
   svgContainerRef,
   chartTab,
 }) => {
   const theme = useTheme();
-  const [data, setData] = useState<TDateCount[] | null>(null);
+  const [data, setData] = useState<TDateCount[]>([]);
   const [dataPiece, setDataPiece] = useState<TDateCount | null>(null);
   const [coord, setCoord] = useState<{ x: number; y: number } | null>(null);
   const [svgW, setSvgW] = useState(0);
@@ -165,22 +164,46 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   // const xBarScaleRef = useRef<d3.ScaleBand<string> | null>(null);
   // const yBarScaleRef = useRef<d3.ScaleLinear<number, number> | null>(null);
 
-  useEffect(() => {
-    switch (chartTab) {
-      case "confirmed":
-        setData(getLineChartData(selected, chartTab, timeData));
-        break;
-      case "deaths":
-        setData(getLineChartData(selected, chartTab, timeData));
-        break;
-      case "daily cases":
-        setData(getBarChartData(selected, chartTab, timeData));
-        break;
-      case "daily deaths":
-        setData(getBarChartData(selected, chartTab, timeData));
-        break;
-    }
-  }, [chartTab, selected, timeData]);
+  // useEffect(() => {
+  //   switch (chartTab) {
+  //     case "confirmed":
+  //       setData(() => {
+  //         if (selected) {
+  //           return (
+  //             countryConfirmedTimeSeries.find((d) => d.country === selected)
+  //               ?.data ?? []
+  //           );
+  //         } else {
+  //           return globalConfirmed;
+  //         }
+  //       });
+  //       break;
+  //     case "deaths":
+  //       setData(() => {
+  //         if (selected) {
+  //           return (
+  //             countriesDeaths.find((d) => d.country === selected)?.data ?? []
+  //           );
+  //         } else {
+  //           return globalDeaths;
+  //         }
+  //       });
+  //       break;
+  //     case "daily cases":
+  //       // setData(getBarChartData(selected, chartTab, timeData));
+  //       break;
+  //     case "daily deaths":
+  //       // setData(getBarChartData(selected, chartTab, timeData));
+  //       break;
+  //   }
+  // }, [
+  //   chartTab,
+  //   countryConfirmedTimeSeries,
+  //   countriesDeaths,
+  //   globalConfirmed,
+  //   globalDeaths,
+  //   selected,
+  // ]);
 
   // xBarScaleRef.current = d3
   //   .scaleBand()
@@ -218,7 +241,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   }, []);
 
   const xTicks = useMemo(() => {
-    if (data) {
+    if (data.length > 0) {
       xScaleRef.current = d3
         .scaleTime()
         .domain(getDomainArray(data, xValue))
@@ -232,7 +255,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   }, [data, innerW]);
 
   const yTicks = useMemo(() => {
-    if (data) {
+    if (data.length > 0) {
       yScaleRef.current = d3
         .scaleLinear()
         .domain([getMax(data, yValue), 0])
@@ -363,7 +386,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
               coord={coord}
             />
           )}
-          {(chartTab === "daily cases" || chartTab === "daily deaths") && (
+          {/* {(chartTab === "daily cases" || chartTab === "daily deaths") && (
             <BarChart
               data={data}
               innerW={innerW}
@@ -371,7 +394,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
               getMax={getMax}
               chartTab={chartTab}
             />
-          )}
+          )} */}
         </g>
       </svg>
     </>

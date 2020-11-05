@@ -78,14 +78,18 @@ const computeNewCasesCountry = (
 ) => {
   todayData?.countryWise?.forEach((D) => {
     const country = D.country;
+    const todayConfirmed = todayData?.countryWise?.find(
+      (d) => d.country === country
+    )?.confirmed;
     const yesterdayConfirmed = yesterdayData?.countryWise?.find(
       (d) => d.country === country
     )?.confirmed;
     const twoDaysBeforeConfirmed = twoDaysBeforeData?.countryWise?.find(
       (d) => d.country === country
     )?.confirmed;
-    if (yesterdayConfirmed && twoDaysBeforeConfirmed) {
-      D.newCases = yesterdayConfirmed - twoDaysBeforeConfirmed;
+    if (yesterdayConfirmed && todayConfirmed && twoDaysBeforeConfirmed) {
+      // D.newCases = yesterdayConfirmed - twoDaysBeforeConfirmed;
+      D.newCases = todayConfirmed - yesterdayConfirmed;
     }
   });
 };
@@ -106,6 +110,8 @@ const computeNewCasesProvince = (
 ) => {
   todayData?.provinceWise?.forEach((D) => {
     const key = D.combinedKey;
+    const today = todayData?.provinceWise?.find((d) => d.combinedKey === key);
+    const todayConfirmed = today?.confirmed;
     const yesterday = yesterdayData?.provinceWise?.find(
       (d) => d.combinedKey === key
     );
@@ -115,8 +121,12 @@ const computeNewCasesProvince = (
       (d) => d.combinedKey === key
     )?.confirmed;
 
-    if (yesterdayConfirmed && twoDaysBeforeConfirmed) {
-      D.newCases = yesterdayConfirmed - twoDaysBeforeConfirmed;
+    // if (yesterdayConfirmed && twoDaysBeforeConfirmed) {
+    //   D.newCases = yesterdayConfirmed - twoDaysBeforeConfirmed;
+    // }
+    if (yesterdayConfirmed && todayConfirmed && twoDaysBeforeConfirmed) {
+      // D.newCases = yesterdayConfirmed - twoDaysBeforeConfirmed;
+      D.newCases = todayConfirmed - yesterdayConfirmed;
     }
     D.newCasesLastUpdate = yesterdayDate ?? "";
   });

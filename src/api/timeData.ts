@@ -19,6 +19,8 @@ export const getTimeSeriesData = async (fileName: string) => {
 
   const loadedData = await d3.csv(fileName);
 
+  // console.log(loadedData);
+
   // 가공하여 최종적으로 출력할 두 배열이다.
   let countryData: TCountryTimedata[] = [];
   let globalData: TDateCount[] = [];

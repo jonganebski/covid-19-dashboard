@@ -3,7 +3,9 @@ import { TDailyD, TReferenceD } from "../types";
 import { getCountryWise, numOrNull } from "./dailyDataFns";
 
 const referenceCsvUrl =
-  "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv";
+  process.env.NODE_ENV === "development"
+    ? "UID_ISO_FIPS_LookUp_Table.csv"
+    : "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv";
 
 // ------------- MAIN FUNCTION -------------
 

@@ -1,24 +1,13 @@
 import { Box, Flex, Grid, Heading, Select } from "@chakra-ui/core";
 import React, { useRef, useState } from "react";
-import {
-  ITimeDataState,
-  TChartTab,
-  TDailyD,
-  TDateCount,
-  TListD,
-  TTab,
-} from "../types";
+import { useCountryDataCtx } from "../contexts/dataContext";
+import { TChartTab, TDailyD, TListD, TTab } from "../types";
 import { compare } from "../utils/utils";
 import ChartContainer from "./ChartContainer";
-import Loading from "./Loading";
-import LoadingFailed from "./LoadingFailed";
 import RightColumnList from "./RightColumnList";
 import RightColumnListSelect from "./RightColumnSelect";
 
 interface RightColumnProps {
-  countryData: TDailyD[] | null;
-  timeData: ITimeDataState;
-  isCsvLoading: boolean;
   selected: string;
   handleLiClick: (countryName: string) => void;
 }
@@ -48,12 +37,10 @@ const getTabDataAndGlobalCount = (countryData: TDailyD[] | null, tab: TTab) => {
 // ----------- COMPONENT -----------
 
 const RightColumn: React.FC<RightColumnProps> = ({
-  countryData,
-  timeData,
-  isCsvLoading,
   selected,
   handleLiClick,
 }) => {
+  const { isLoading, data: countryData } = useCountryDataCtx();
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
   const [tabL, setTabL] = useState<TTab>("active");
   const [tabR, setTabR] = useState<TTab>("new cases");
@@ -81,34 +68,26 @@ const RightColumn: React.FC<RightColumnProps> = ({
       }}
     >
       <Grid gridArea="Left" bg="black" gridTemplateRows="auto 2fr 6fr">
-        <RightColumnListSelect
-          countryData={countryData}
-          setTab={setTabL}
-          defaultValue="active"
-        />
+        <RightColumnListSelect setTab={setTabL} defaultValue="active" />
         <RightColumnList
+          isLoading={isLoading}
           selected={selected}
           tab={tabL}
           globalCount={countL}
           targetData={targetDataL}
           sortedData={sortedDataL}
-          isCsvLoading={isCsvLoading}
           handleLiClick={handleLiClick}
         />
       </Grid>
       <Grid gridArea="Right" bg="black" gridTemplateRows="auto 2fr 6fr">
-        <RightColumnListSelect
-          countryData={countryData}
-          setTab={setTabR}
-          defaultValue="new cases"
-        />
+        <RightColumnListSelect setTab={setTabR} defaultValue="new cases" />
         <RightColumnList
+          isLoading={isLoading}
           selected={selected}
           tab={tabR}
           globalCount={countR}
           targetData={targetDataR}
           sortedData={sortedDataR}
-          isCsvLoading={isCsvLoading}
           handleLiClick={handleLiClick}
         />
       </Grid>
@@ -145,16 +124,11 @@ const RightColumn: React.FC<RightColumnProps> = ({
           </Flex>
         </Flex>
         <Box ref={svgContainerRef} w="100%" h="100%" maxH="300px">
-          {isCsvLoading ? (
-            <Loading />
-          ) : (
-            <ChartContainer
-              selected={selected}
-              timeData={timeData}
-              svgContainerRef={svgContainerRef}
-              chartTab={chartTab}
-            />
-          )}
+          <ChartContainer
+            selected={selected}
+            svgContainerRef={svgContainerRef}
+            chartTab={chartTab}
+          />
         </Box>
       </Box>
     </Grid>

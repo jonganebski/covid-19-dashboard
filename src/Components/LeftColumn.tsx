@@ -7,34 +7,34 @@ import {
   ListItem,
   Text,
 } from "@chakra-ui/core";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useCountryDataCtx, useProvinceDataCtx } from "../contexts/dataContext";
 import { TDailyD } from "../types";
 import { changeBg } from "../utils/utils";
 import Loading from "./Loading";
 import LoadingFailed from "./LoadingFailed";
 
 interface LeftColumnProps {
-  countryData: TDailyD[] | null;
-  isCsvLoading: boolean;
   selected: string;
   handleLiClick: (countryName: string) => void;
 }
 
 // ------------- COMPONENT -------------
 
-const LeftColumn: React.FC<LeftColumnProps> = ({
-  countryData,
-  isCsvLoading,
-  selected,
-  handleLiClick,
-}) => {
+const LeftColumn: React.FC<LeftColumnProps> = ({ selected, handleLiClick }) => {
   const listBoxRef = useRef<HTMLDivElement | null>(null);
 
-  let totalCount = 0;
+  const { isLoading, data } = useCountryDataCtx();
+  const [totalCount, setTotalCount] = useState(0);
 
-  countryData?.forEach((d) => {
-    totalCount = totalCount + (d.confirmed ?? 0);
-  });
+  // useEffect(() => {
+  //   setTotalCount((prev) => {
+  //     data?.forEach((d) => {
+  //       prev = prev + (d.confirmed ?? 0);
+  //     });
+  //     return prev;
+  //   });
+  // }, [data]);
 
   return (
     <Grid gridArea="left" bg="black" gridTemplateRows="2fr 12fr 1.5fr" gap={1}>
@@ -45,9 +45,9 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
         p={2}
         bg="gray.700"
       >
-        {isCsvLoading ? (
+        {isLoading ? (
           <Loading />
-        ) : countryData ? (
+        ) : (
           <>
             <Heading
               fontSize={{ base: "lg", lg: "xl" }}
@@ -62,25 +62,23 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
             <Heading fontSize={{ base: "2xl", lg: "4xl" }} color="red.500">
               {selected === ""
                 ? totalCount.toLocaleString()
-                : countryData
-                    .filter((d) => d.country === selected)[0]
+                : data
+                    ?.filter((d) => d.country === selected)[0]
                     .confirmed?.toLocaleString() ?? "No data"}
             </Heading>
             <Text fontSize="xs" color="gray.400">
               (cumulative)
             </Text>{" "}
           </>
-        ) : (
-          <LoadingFailed />
         )}
       </Flex>
       <Box bg="gray.800" overflowY="scroll" paddingX={5} ref={listBoxRef}>
-        {isCsvLoading ? (
+        {isLoading ? (
           <Loading />
-        ) : countryData ? (
+        ) : (
           <List spacing={1}>
-            {countryData
-              .filter((d) => d.confirmed)
+            {data
+              ?.filter((d) => d.confirmed)
               .sort((a, b) => b.confirmed! - a.confirmed!)
               .map((d, i) => {
                 return (
@@ -103,23 +101,18 @@ const LeftColumn: React.FC<LeftColumnProps> = ({
                 );
               })}
           </List>
-        ) : (
-          <LoadingFailed />
         )}
       </Box>
       <Flex direction="column" align="center" justify="center" bg="gray.800">
-        {isCsvLoading ? (
+        {isLoading ? (
           <Loading />
-        ) : countryData ? (
+        ) : (
           <>
             <Text color="gray.400">Last Updated at</Text>
             <Text color="gray.400" fontSize="2xl" fontWeight={500}>
-              {countryData &&
-                new Date(countryData[0].lastUpdate).toLocaleString()}
+              {data && new Date(data[0]?.lastUpdate).toLocaleString()}
             </Text>
           </>
-        ) : (
-          <LoadingFailed />
         )}
       </Flex>
     </Grid>

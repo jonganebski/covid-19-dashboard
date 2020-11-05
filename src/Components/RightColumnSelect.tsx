@@ -1,9 +1,9 @@
 import { Select } from "@chakra-ui/core";
 import React from "react";
+import { useCountryDataCtx } from "../contexts/dataContext";
 import { TDailyD } from "../types";
 
 interface RightColumnListSelectProps {
-  countryData: TDailyD[] | null;
   setTab: React.Dispatch<
     React.SetStateAction<"active" | "deaths" | "recovered" | "new cases">
   >;
@@ -13,11 +13,11 @@ interface RightColumnListSelectProps {
 // ----------- COMPONENT -----------
 
 const RightColumnListSelect: React.FC<RightColumnListSelectProps> = ({
-  countryData,
   setTab,
   defaultValue,
 }) => {
-  return (
+  const { isLoading, data } = useCountryDataCtx();
+  return isLoading ? null : (
     <Select
       size="sm"
       backgroundColor="black"
@@ -35,11 +35,9 @@ const RightColumnListSelect: React.FC<RightColumnListSelectProps> = ({
         }
       }}
     >
-      <option value="active">
-        Active ({countryData && countryData[0].lastUpdate})
-      </option>
+      <option value="active">Active ({data && data[0].lastUpdate})</option>
       <option value="new cases">
-        New Cases ({countryData && countryData[0].newCasesLastUpdate})
+        New Cases ({data && data[0].newCasesLastUpdate})
       </option>
       <option value="deaths">Total deaths (cumulative)</option>
       <option value="recovered">Total recovered (cumulative)</option>

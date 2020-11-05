@@ -10,7 +10,7 @@ interface RightColumnListProps {
   globalCount: number;
   targetData: TListD | null;
   sortedData: TListD[];
-  isCsvLoading: boolean;
+  isLoading: boolean;
   tab: TTab;
   handleLiClick: (countryName: string) => void;
 }
@@ -22,7 +22,7 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
   globalCount,
   targetData,
   sortedData,
-  isCsvLoading,
+  isLoading,
   tab,
   handleLiClick,
 }) => {
@@ -46,7 +46,7 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
         borderBottomWidth={1}
         borderBottom="solid black"
       >
-        {isCsvLoading ? (
+        {isLoading ? (
           <Loading />
         ) : sortedData.length > 0 ? (
           <>
@@ -66,7 +66,7 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
         )}
       </Flex>
       <Box overflowY="scroll" paddingX={5} bg="gray.800">
-        {isCsvLoading ? (
+        {isLoading ? (
           <Loading />
         ) : sortedData.length > 0 ? (
           <List spacing={1}>

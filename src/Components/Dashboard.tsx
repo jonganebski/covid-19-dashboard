@@ -1,26 +1,13 @@
 import { Flex, Grid } from "@chakra-ui/core";
-import React, { useEffect, useState } from "react";
-import csvApi from "../api/csvData";
-import { newsApi } from "../api/newsApi";
-import { ITimeDataState, TDailyD, TNewsData } from "../types";
-import CenterColumn from "./CenterColumn";
+import React, { useState } from "react";
 import Header from "./Header";
 import LeftColumn from "./LeftColumn";
-import RightColumn from "./RightColumn";
 
 // -----------  COMPONENT  -----------
 
 const Dashboard = () => {
-  const [timeData, setTimeData] = useState<ITimeDataState>({
-    confirmed: { countries: null, global: null },
-    deaths: { countries: null, global: null },
-    recovered: { countries: null, global: null },
-  });
-  const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
-  const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
-  const [newsData, setNewsData] = useState<TNewsData[] | null>(null);
-  const [isCsvLoading, setIsCsvLoading] = useState(false);
-  const [isNewsLoading, setIsNewsLoading] = useState(false);
+  // const [newsData, setNewsData] = useState<TNewsData[] | null>(null);
+  // const [isNewsLoading, setIsNewsLoading] = useState(false);
   const [selected, setSelected] = useState("");
 
   // console.log("Dashboard Rendering");
@@ -28,44 +15,18 @@ const Dashboard = () => {
   // console.log("countryData", countryData);
   // console.log("provinceData", provinceData);
   // console.log("Dashboard newsData: ", newsData);
-
+  console.log("dashboard rendering");
   const handleLiClick = (countryName: string) => {
     setSelected((prev) => (prev === countryName ? "" : countryName));
   };
 
-  // Gets csv data
-  useEffect(() => {
-    setIsCsvLoading(true);
-    csvApi()
-      .then((results) => {
-        const { confirmed, deaths, todayData } = results;
-        setCountryData(todayData.countryWise);
-        setProvinceData(todayData.provinceWise);
-        setTimeData({
-          confirmed: {
-            countries: confirmed.countryData,
-            global: confirmed.globalData,
-          },
-          deaths: {
-            countries: deaths.countryData,
-            global: deaths.globalData,
-          },
-          recovered: {
-            countries: null,
-            global: null,
-          },
-        });
-      })
-      .finally(() => setIsCsvLoading(false));
-  }, []);
-
   // Gets news data
-  useEffect(() => {
-    setIsNewsLoading(true);
-    newsApi(selected)
-      .then((result) => setNewsData(result))
-      .finally(() => setIsNewsLoading(false));
-  }, [selected]);
+  // useEffect(() => {
+  //   setIsNewsLoading(true);
+  //   newsApi(selected)
+  //     .then((result) => setNewsData(result))
+  //     .finally(() => setIsNewsLoading(false));
+  // }, [selected]);
 
   return (
     <Flex className="App" p={1} w="100vw" h="100vh" bg="black">
@@ -80,28 +41,14 @@ const Dashboard = () => {
         templateRows={{ base: "50px 400px 600px 750px", lg: "5vh 94vh" }}
       >
         <Header />
-        <LeftColumn
-          countryData={countryData}
-          isCsvLoading={isCsvLoading}
-          selected={selected}
-          handleLiClick={handleLiClick}
-        />
-        <CenterColumn
-          countryData={countryData}
-          provinceData={provinceData}
+        <LeftColumn selected={selected} handleLiClick={handleLiClick} />
+        {/* <CenterColumn
           newsData={newsData}
           isNewsLoading={isNewsLoading}
-          isCsvLoading={isCsvLoading}
           selected={selected}
           setSelected={setSelected}
-        />
-        <RightColumn
-          countryData={countryData}
-          timeData={timeData}
-          isCsvLoading={isCsvLoading}
-          selected={selected}
-          handleLiClick={handleLiClick}
-        />
+        /> */}
+        {/* <RightColumn selected={selected} handleLiClick={handleLiClick} /> */}
       </Grid>
     </Flex>
   );

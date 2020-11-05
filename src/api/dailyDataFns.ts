@@ -1,7 +1,7 @@
 import { TDailyD, TReferenceD } from "../types";
 
-export const numOrNull = (value: string) => {
-  if (value === "") {
+export const numOrNull = (value: string | undefined) => {
+  if (typeof value === "undefined") {
     return null;
   }
   const converted = parseFloat(value);
@@ -38,13 +38,10 @@ export const getCoordOrNull = (
 };
 
 export const getCountryWise = (
-  provinceWise: TDailyD[] | null,
-  referenceData: TReferenceD[] | null,
+  provinceWise: TDailyD[],
+  referenceData: TReferenceD[],
   blackSwans: Set<string>
 ) => {
-  if (provinceWise === null || referenceData === null) {
-    return null;
-  }
   // 전체 데이터를 두 종류로 분류한다. 깔끔한 데이터 / 더러운 데이터.
   const cleanData: TDailyD[] = [];
   const dirtyData: TDailyD[] = [];
