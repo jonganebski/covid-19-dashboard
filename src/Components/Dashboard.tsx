@@ -1,14 +1,12 @@
 import { Flex, Grid } from "@chakra-ui/core";
 import React, { useState } from "react";
+import CenterColumn from "./CenterColumn";
 import Header from "./Header";
 import LeftColumn from "./LeftColumn";
 
 // -----------  COMPONENT  -----------
 
 const Dashboard = () => {
-  // const [newsData, setNewsData] = useState<TNewsData[] | null>(null);
-  // const [isNewsLoading, setIsNewsLoading] = useState(false);
-
   console.log("dashboard rendering");
 
   return (
@@ -25,12 +23,7 @@ const Dashboard = () => {
       >
         <Header />
         <LeftColumn />
-        {/* <CenterColumn
-          newsData={newsData}
-          isNewsLoading={isNewsLoading}
-          selected={selected}
-          setSelected={setSelected}
-        /> */}
+        <CenterColumn />
         {/* <RightColumn selected={selected} handleLiClick={handleLiClick} /> */}
       </Grid>
     </Flex>

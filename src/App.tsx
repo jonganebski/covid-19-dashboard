@@ -7,7 +7,7 @@ const App = () => {
   return (
     <DataContextProvider>
       <SelectContextProvider>
-        <Dashboard />;
+        <Dashboard />
       </SelectContextProvider>
     </DataContextProvider>
   );

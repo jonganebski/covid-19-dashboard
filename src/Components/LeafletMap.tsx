@@ -2,23 +2,15 @@ import * as d3 from "d3";
 import React, { useEffect, useState } from "react";
 import { Map, TileLayer } from "react-leaflet";
 import { useCountryDataCtx, useProvinceDataCtx } from "../contexts/dataContext";
+import { useSelectCountryCtx } from "../contexts/selectContext";
+import { useViewPort } from "../hooks/useViewport";
 import { TDailyD } from "../types";
 import { TMapDataClass } from "./CenterColumn";
 import LeafletCircle from "./LeafletCircle";
 
 interface LeafletMapProps {
-  selected: string;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
   dataClass: TMapDataClass;
 }
-
-// ------------- CONSTANT -------------
-
-const initialViewport = {
-  lat: 20,
-  lng: 10,
-  zoom: 2,
-};
 
 // ------------- SUB FUNCTIONS -------------
 
@@ -50,37 +42,11 @@ const pickColor = (dataClass: TMapDataClass) => {
 
 // ------------- COMPONENT -------------
 
-const LeafletMap: React.FC<LeafletMapProps> = ({
-  selected,
-  setSelected,
-  dataClass,
-}) => {
-  const [viewport, setViewport] = useState(initialViewport);
-  const {
-    isLoading: isProvinceLoading,
-    data: provinceData,
-  } = useProvinceDataCtx();
-  const {
-    isLoading: isCountryLoading,
-    data: countryData,
-  } = useCountryDataCtx();
-  // console.log(provinceData);
-  // Viewport changes when user selects country or when data is reloaded.
-  useEffect(() => {
-    if (!selected) {
-      setViewport(initialViewport);
-    } else {
-      const countryD = countryData?.find((D) => D.country === selected);
-      const lat = countryD?.lat;
-      const lng = countryD?.lon;
-      const zoom = selected === "Russia" ? 3 : 4;
-      if (lat && lng) {
-        setViewport({ lat, lng, zoom });
-      } else {
-        setViewport(initialViewport);
-      }
-    }
-  }, [selected, countryData]);
+const LeafletMap: React.FC<LeafletMapProps> = ({ dataClass }) => {
+  const { selectedCountry, setSelectedCountry } = useSelectCountryCtx();
+  const { data: provinceData } = useProvinceDataCtx();
+  const { data: countryData } = useCountryDataCtx();
+  const [viewport, setViewport] = useViewPort(selectedCountry, countryData);
 
   // Function that gets the radius.
   const getRadius = d3
@@ -110,8 +76,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
               key={i}
               d={d}
               radius={radius && radius > 0 ? radius : 0}
-              selected={selected}
-              setSelected={setSelected}
+              selected={selectedCountry}
+              setSelected={setSelectedCountry}
               setViewport={setViewport}
               dataClass={dataClass}
               color={pickColor(dataClass)}
