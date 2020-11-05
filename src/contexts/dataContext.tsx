@@ -1,4 +1,5 @@
 import React, { createContext, ReactNode, useContext } from "react";
+import { TIMESERIES_CSV_URL } from "../constants";
 import { useBlackSwans } from "../hooks/useBlackSwans";
 import { useDailyCountry } from "../hooks/useDailyData-country";
 import { useDailyProvince } from "../hooks/useDailyData-province";
@@ -30,9 +31,9 @@ const DataContextProvider: React.FC<DataContextProviderProps> = ({
   const [
     countryConfirmedTimeSeries,
     globalConfirmedTimeSeries,
-  ] = useTimeSeriesData("time_series_covid19_confirmed_global.csv");
+  ] = useTimeSeriesData(TIMESERIES_CSV_URL.CONFIRMED);
   const [countryDeathsTimeSeries, globalDeathsTimeSeries] = useTimeSeriesData(
-    "time_series_covid19_deaths_global.csv"
+    TIMESERIES_CSV_URL.DEATHS
   );
   const [, , yesterdayProvince] = useDailyProvince("10-30-2020.csv");
   const [isProvinceLoading, error, data] = useDailyProvince(

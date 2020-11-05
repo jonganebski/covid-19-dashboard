@@ -1,8 +1,9 @@
 import { Flex, Grid } from "@chakra-ui/core";
-import React, { useState } from "react";
+import React from "react";
 import CenterColumn from "./CenterColumn";
 import Header from "./Header";
 import LeftColumn from "./LeftColumn";
+import RightColumn from "./RightColumn";
 
 // -----------  COMPONENT  -----------
 
@@ -24,7 +25,7 @@ const Dashboard = () => {
         <Header />
         <LeftColumn />
         <CenterColumn />
-        {/* <RightColumn selected={selected} handleLiClick={handleLiClick} /> */}
+        <RightColumn />
       </Grid>
     </Flex>
   );

@@ -1,16 +1,12 @@
 import { Box, Flex, Grid, Heading, Select } from "@chakra-ui/core";
 import React, { useRef, useState } from "react";
 import { useCountryDataCtx } from "../contexts/dataContext";
+import { useSelectCountryCtx } from "../contexts/selectContext";
 import { TChartTab, TDailyD, TListD, TTab } from "../types";
 import { compare } from "../utils/utils";
 import ChartContainer from "./ChartContainer";
 import RightColumnList from "./RightColumnList";
 import RightColumnListSelect from "./RightColumnSelect";
-
-interface RightColumnProps {
-  selected: string;
-  handleLiClick: (countryName: string) => void;
-}
 
 // ----------- SUB FUNCTIONS -----------
 
@@ -36,10 +32,8 @@ const getTabDataAndGlobalCount = (countryData: TDailyD[] | null, tab: TTab) => {
 
 // ----------- COMPONENT -----------
 
-const RightColumn: React.FC<RightColumnProps> = ({
-  selected,
-  handleLiClick,
-}) => {
+const RightColumn = () => {
+  const { selectedCountry, handleLiClick } = useSelectCountryCtx();
   const { isLoading, data: countryData } = useCountryDataCtx();
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
   const [tabL, setTabL] = useState<TTab>("active");
@@ -47,14 +41,20 @@ const RightColumn: React.FC<RightColumnProps> = ({
   const [chartTab, setChartTab] = useState<TChartTab>("daily cases");
 
   // For list on the left
-  const sortedDataL = getTabDataAndGlobalCount(countryData, tabL).data;
-  const targetDataL = sortedDataL.find((d) => d.country === selected) ?? null;
-  const countL = getTabDataAndGlobalCount(countryData, tabL).globalCount;
+  const { data: sortedDataL, globalCount: countL } = getTabDataAndGlobalCount(
+    countryData,
+    tabL
+  );
+  const targetDataL =
+    sortedDataL.find((d) => d.country === selectedCountry) ?? null;
 
   // For list on the right
-  const sortedDataR = getTabDataAndGlobalCount(countryData, tabR).data;
-  const targetDataR = sortedDataR.find((d) => d.country === selected) ?? null;
-  const countR = getTabDataAndGlobalCount(countryData, tabR).globalCount;
+  const { data: sortedDataR, globalCount: countR } = getTabDataAndGlobalCount(
+    countryData,
+    tabR
+  );
+  const targetDataR =
+    sortedDataR.find((d) => d.country === selectedCountry) ?? null;
 
   return (
     <Grid
@@ -71,7 +71,6 @@ const RightColumn: React.FC<RightColumnProps> = ({
         <RightColumnListSelect setTab={setTabL} defaultValue="active" />
         <RightColumnList
           isLoading={isLoading}
-          selected={selected}
           tab={tabL}
           globalCount={countL}
           targetData={targetDataL}
@@ -83,7 +82,6 @@ const RightColumn: React.FC<RightColumnProps> = ({
         <RightColumnListSelect setTab={setTabR} defaultValue="new cases" />
         <RightColumnList
           isLoading={isLoading}
-          selected={selected}
           tab={tabR}
           globalCount={countR}
           targetData={targetDataR}
@@ -119,13 +117,13 @@ const RightColumn: React.FC<RightColumnProps> = ({
           </Select>
           <Flex w="50%" justify="center">
             <Heading size="lg" color="white">
-              {selected ? selected : "Global"}
+              {selectedCountry ? selectedCountry : "Global"}
             </Heading>
           </Flex>
         </Flex>
         <Box ref={svgContainerRef} w="100%" h="100%" maxH="300px">
           <ChartContainer
-            selected={selected}
+            selected={selectedCountry}
             svgContainerRef={svgContainerRef}
             chartTab={chartTab}
           />

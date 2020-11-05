@@ -1,12 +1,12 @@
 import { Box, Flex, Heading, List, ListItem, Text } from "@chakra-ui/core";
 import React from "react";
+import { useSelectCountryCtx } from "../contexts/selectContext";
 import { TListD, TTab } from "../types";
 import { changeBg } from "../utils/utils";
 import Loading from "./Loading";
 import LoadingFailed from "./LoadingFailed";
 
 interface RightColumnListProps {
-  selected: string;
   globalCount: number;
   targetData: TListD | null;
   sortedData: TListD[];
@@ -18,7 +18,6 @@ interface RightColumnListProps {
 // -----------  COMPONENT -----------
 
 const RightColumnList: React.FC<RightColumnListProps> = ({
-  selected,
   globalCount,
   targetData,
   sortedData,
@@ -26,6 +25,7 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
   tab,
   handleLiClick,
 }) => {
+  const { selectedCountry } = useSelectCountryCtx();
   const countryCount = targetData?.count;
   const pickColor = () =>
     tab === "active"
@@ -51,10 +51,10 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
         ) : sortedData.length > 0 ? (
           <>
             <Heading fontSize={{ base: "xl", lg: "2xl" }} color="white">
-              {selected ? selected : "Global"}
+              {selectedCountry ? selectedCountry : "Global"}
             </Heading>
             <Heading fontSize={{ base: "2xl", lg: "4xl" }} color={pickColor()}>
-              {selected
+              {selectedCountry
                 ? countryCount === null || countryCount === undefined
                   ? "No data"
                   : countryCount.toLocaleString()
@@ -81,7 +81,7 @@ const RightColumnList: React.FC<RightColumnListProps> = ({
                     borderBottomColor="gray.500"
                     cursor="pointer"
                     onClick={() => handleLiClick(d.country)}
-                    bg={changeBg(selected, d.country)}
+                    bg={changeBg(selectedCountry, d.country)}
                   >
                     <Text fontWeight={600} color={pickColor()}>
                       {d.count === null

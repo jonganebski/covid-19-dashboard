@@ -1,12 +1,8 @@
 import * as d3 from "d3";
 import { useEffect, useState } from "react";
 import { numOrNull } from "../api/dailyDataFns";
+import { REFERENCE_CSV_URL } from "../constants";
 import { TReferenceD } from "../types";
-
-const referenceCsvUrl =
-  process.env.NODE_ENV === "development"
-    ? "UID_ISO_FIPS_LookUp_Table.csv"
-    : "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv";
 
 export const useReferenceData = (): [TReferenceD[] | null] => {
   const [referenceData, setReferenceData] = useState<TReferenceD[] | null>(
@@ -14,7 +10,7 @@ export const useReferenceData = (): [TReferenceD[] | null] => {
   );
 
   useEffect(() => {
-    d3.csv(referenceCsvUrl, (row) => {
+    d3.csv(REFERENCE_CSV_URL, (row) => {
       return {
         country: row.Country_Region ?? "",
         province: row.Province_State ?? "",

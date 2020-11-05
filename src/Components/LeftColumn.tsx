@@ -21,7 +21,6 @@ const LeftColumn = () => {
 
   const { selectedCountry, handleLiClick } = useSelectCountryCtx();
   const { isLoading, error, data } = useCountryDataCtx();
-  console.log(data);
   return (
     <Grid gridArea="left" bg="black" gridTemplateRows="2fr 12fr 1.5fr" gap={1}>
       <Flex

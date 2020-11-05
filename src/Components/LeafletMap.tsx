@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Map, TileLayer } from "react-leaflet";
 import { useCountryDataCtx, useProvinceDataCtx } from "../contexts/dataContext";
 import { useSelectCountryCtx } from "../contexts/selectContext";
@@ -28,7 +28,7 @@ const getMax = (data: TDailyD[] | null, dataClass: TMapDataClass) => {
   }
 };
 
-const pickColor = (dataClass: TMapDataClass) => {
+const pickCircleColor = (dataClass: TMapDataClass) => {
   return dataClass === "confirmed"
     ? "red"
     : dataClass === "active"
@@ -80,7 +80,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ dataClass }) => {
               setSelected={setSelectedCountry}
               setViewport={setViewport}
               dataClass={dataClass}
-              color={pickColor(dataClass)}
+              color={pickCircleColor(dataClass)}
             />
           );
         })}

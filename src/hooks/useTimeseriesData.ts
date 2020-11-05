@@ -12,13 +12,13 @@ const sumDateCount = (data: TDateCount[], date: number, count: number) => {
 };
 
 export const useTimeSeriesData = (
-  fileName: string
+  url: string
 ): [TCountryTimedata[], TDateCount[]] => {
   const [countriesData, setCountriesData] = useState<TCountryTimedata[]>([]);
   const [globalData, setGlobalData] = useState<TDateCount[]>([]);
 
   useEffect(() => {
-    d3.csv(fileName).then((loadedData) => {
+    d3.csv(url).then((loadedData) => {
       // 1. 지역별로 나눠져 있는 데이터는 한 나라의 데이터로 합친다.
       // 2. 그러면서 모든 날짜의 데이터를 수집하여 글로벌 단위의 데이터를 만든다.
       const reduced = loadedData.reduce(
@@ -70,7 +70,7 @@ export const useTimeSeriesData = (
       setCountriesData(reduced.countries);
       setGlobalData(reduced.global);
     });
-  }, [fileName]);
+  }, [url]);
 
   return [countriesData, globalData];
 };
