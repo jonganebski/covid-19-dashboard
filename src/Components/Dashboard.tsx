@@ -8,25 +8,8 @@ import LeftColumn from "./LeftColumn";
 const Dashboard = () => {
   // const [newsData, setNewsData] = useState<TNewsData[] | null>(null);
   // const [isNewsLoading, setIsNewsLoading] = useState(false);
-  const [selected, setSelected] = useState("");
 
-  // console.log("Dashboard Rendering");
-  // console.log("timeData", timeData);
-  // console.log("countryData", countryData);
-  // console.log("provinceData", provinceData);
-  // console.log("Dashboard newsData: ", newsData);
   console.log("dashboard rendering");
-  const handleLiClick = (countryName: string) => {
-    setSelected((prev) => (prev === countryName ? "" : countryName));
-  };
-
-  // Gets news data
-  // useEffect(() => {
-  //   setIsNewsLoading(true);
-  //   newsApi(selected)
-  //     .then((result) => setNewsData(result))
-  //     .finally(() => setIsNewsLoading(false));
-  // }, [selected]);
 
   return (
     <Flex className="App" p={1} w="100vw" h="100vh" bg="black">
@@ -41,7 +24,7 @@ const Dashboard = () => {
         templateRows={{ base: "50px 400px 600px 750px", lg: "5vh 94vh" }}
       >
         <Header />
-        <LeftColumn selected={selected} handleLiClick={handleLiClick} />
+        <LeftColumn />
         {/* <CenterColumn
           newsData={newsData}
           isNewsLoading={isNewsLoading}

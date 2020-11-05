@@ -14,7 +14,7 @@ type TDataContext = {
     globalDeathsTimeSeries: TDateCount[];
   };
   provinceData: { isLoading: boolean; error: string; data: TDailyD[] | null };
-  countryData: { isLoading: boolean; data: TDailyD[] | null };
+  countryData: { isLoading: boolean; error: string; data: TDailyD[] | null };
 };
 
 const DataContext = createContext<Partial<TDataContext>>({});
@@ -22,15 +22,6 @@ const DataContext = createContext<Partial<TDataContext>>({});
 interface DataContextProviderProps {
   children: ReactNode;
 }
-
-export const useTimeSeriesDataCtx = () => {
-  const { timeseriesData } = useContext(DataContext);
-  if (timeseriesData) {
-    return timeseriesData;
-  } else {
-    throw new Error("timeseriesData is empty.");
-  }
-};
 
 const DataContextProvider: React.FC<DataContextProviderProps> = ({
   children,
@@ -71,7 +62,7 @@ const DataContextProvider: React.FC<DataContextProviderProps> = ({
           globalDeathsTimeSeries,
         },
         provinceData: { isLoading: isProvinceLoading, error, data },
-        countryData: { isLoading: isCountryLoading, data: coutryData },
+        countryData: { isLoading: isCountryLoading, error, data: coutryData },
       }}
     >
       {children}
@@ -94,6 +85,15 @@ export const useCountryDataCtx = () => {
     return countryData;
   } else {
     throw new Error("dailyData is empty.");
+  }
+};
+
+export const useTimeSeriesDataCtx = () => {
+  const { timeseriesData } = useContext(DataContext);
+  if (timeseriesData) {
+    return timeseriesData;
+  } else {
+    throw new Error("timeseriesData is empty.");
   }
 };
 

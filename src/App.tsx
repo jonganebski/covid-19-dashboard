@@ -1,11 +1,14 @@
 import React from "react";
 import Dashboard from "./Components/Dashboard";
 import DataContextProvider from "./contexts/dataContext";
+import SelectContextProvider from "./contexts/selectContext";
 
 const App = () => {
   return (
     <DataContextProvider>
-      <Dashboard />;
+      <SelectContextProvider>
+        <Dashboard />;
+      </SelectContextProvider>
     </DataContextProvider>
   );
 };

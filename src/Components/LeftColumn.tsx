@@ -7,35 +7,21 @@ import {
   ListItem,
   Text,
 } from "@chakra-ui/core";
-import React, { useEffect, useRef, useState } from "react";
-import { useCountryDataCtx, useProvinceDataCtx } from "../contexts/dataContext";
-import { TDailyD } from "../types";
-import { changeBg } from "../utils/utils";
+import React, { useRef } from "react";
+import { useCountryDataCtx } from "../contexts/dataContext";
+import { useSelectCountryCtx } from "../contexts/selectContext";
+import { changeBg, getCountryCount, getTotalCount } from "../utils/utils";
 import Loading from "./Loading";
 import LoadingFailed from "./LoadingFailed";
 
-interface LeftColumnProps {
-  selected: string;
-  handleLiClick: (countryName: string) => void;
-}
-
 // ------------- COMPONENT -------------
 
-const LeftColumn: React.FC<LeftColumnProps> = ({ selected, handleLiClick }) => {
+const LeftColumn = () => {
   const listBoxRef = useRef<HTMLDivElement | null>(null);
 
-  const { isLoading, data } = useCountryDataCtx();
-  const [totalCount, setTotalCount] = useState(0);
-
-  // useEffect(() => {
-  //   setTotalCount((prev) => {
-  //     data?.forEach((d) => {
-  //       prev = prev + (d.confirmed ?? 0);
-  //     });
-  //     return prev;
-  //   });
-  // }, [data]);
-
+  const { selectedCountry, handleLiClick } = useSelectCountryCtx();
+  const { isLoading, error, data } = useCountryDataCtx();
+  console.log(data);
   return (
     <Grid gridArea="left" bg="black" gridTemplateRows="2fr 12fr 1.5fr" gap={1}>
       <Flex
@@ -47,6 +33,8 @@ const LeftColumn: React.FC<LeftColumnProps> = ({ selected, handleLiClick }) => {
       >
         {isLoading ? (
           <Loading />
+        ) : error ? (
+          <LoadingFailed />
         ) : (
           <>
             <Heading
@@ -57,14 +45,12 @@ const LeftColumn: React.FC<LeftColumnProps> = ({ selected, handleLiClick }) => {
               Total Cases
             </Heading>
             <Heading fontSize={{ base: "xl", lg: "2xl" }} color="white">
-              {selected ? selected : "Global"}
+              {selectedCountry ? selectedCountry : "Global"}
             </Heading>
             <Heading fontSize={{ base: "2xl", lg: "4xl" }} color="red.500">
-              {selected === ""
-                ? totalCount.toLocaleString()
-                : data
-                    ?.filter((d) => d.country === selected)[0]
-                    .confirmed?.toLocaleString() ?? "No data"}
+              {selectedCountry === ""
+                ? getTotalCount(data, "confirmed")
+                : getCountryCount(data, selectedCountry, "confirmed")}
             </Heading>
             <Text fontSize="xs" color="gray.400">
               (cumulative)
@@ -75,6 +61,8 @@ const LeftColumn: React.FC<LeftColumnProps> = ({ selected, handleLiClick }) => {
       <Box bg="gray.800" overflowY="scroll" paddingX={5} ref={listBoxRef}>
         {isLoading ? (
           <Loading />
+        ) : error ? (
+          <LoadingFailed />
         ) : (
           <List spacing={1}>
             {data
@@ -91,7 +79,7 @@ const LeftColumn: React.FC<LeftColumnProps> = ({ selected, handleLiClick }) => {
                     borderBottomColor="gray.500"
                     cursor="pointer"
                     onClick={() => handleLiClick(d.country)}
-                    bg={changeBg(selected, d.country)}
+                    bg={changeBg(selectedCountry, d.country)}
                   >
                     <Text fontWeight={600} color="red.500" mr={2}>
                       {d.confirmed?.toLocaleString() ?? "No data"}
@@ -106,6 +94,8 @@ const LeftColumn: React.FC<LeftColumnProps> = ({ selected, handleLiClick }) => {
       <Flex direction="column" align="center" justify="center" bg="gray.800">
         {isLoading ? (
           <Loading />
+        ) : error ? (
+          <LoadingFailed />
         ) : (
           <>
             <Text color="gray.400">Last Updated at</Text>
