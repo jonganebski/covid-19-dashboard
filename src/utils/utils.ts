@@ -55,3 +55,15 @@ export const getCountryCount = (
   }
   return "No Data";
 };
+
+export const numberToKMB = (num: number) => {
+  if (num < 10 ** 3) {
+    return num;
+  } else if (10 ** 3 <= num && num < 10 ** 6) {
+    return (num / 10 ** 3).toString() + "K";
+  } else if (10 ** 6 <= num && num < 10 ** 9) {
+    return (num / 10 ** 6).toString() + "M";
+  } else {
+    return (num / 10 ** 9).toString() + "B";
+  }
+};

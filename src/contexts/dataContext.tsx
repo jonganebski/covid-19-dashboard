@@ -10,10 +10,10 @@ import { TCountryTimedata, TDailyD, TDateCount } from "../types";
 
 type TDataContext = {
   timeseriesData: {
-    countryConfirmedTimeSeries: TCountryTimedata[];
-    countryDeathsTimeSeries: TCountryTimedata[];
-    globalConfirmedTimeSeries: TDateCount[];
-    globalDeathsTimeSeries: TDateCount[];
+    countryConfirmedTimeSeries: TCountryTimedata[] | null;
+    countryDeathsTimeSeries: TCountryTimedata[] | null;
+    globalConfirmedTimeSeries: TDateCount[] | null;
+    globalDeathsTimeSeries: TDateCount[] | null;
   };
   provinceData: { isLoading: boolean; error: string; data: TDailyD[] | null };
   countryData: { isLoading: boolean; error: string; data: TDailyD[] | null };

@@ -123,7 +123,6 @@ const RightColumn = () => {
         </Flex>
         <Box ref={svgContainerRef} w="100%" h="100%" maxH="300px">
           <ChartContainer
-            selected={selectedCountry}
             svgContainerRef={svgContainerRef}
             chartTab={chartTab}
           />

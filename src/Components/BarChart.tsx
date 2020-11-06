@@ -7,41 +7,24 @@ interface IBarCartProps {
   data: TDateCount[] | null;
   innerW: number;
   innerH: number;
-  getMax: (
-    data: Array<TDateCount>,
-    yValue: (d: TDateCount) => number
-  ) => number;
   chartTab: TChartTab;
+  xBarScaleRef: d3.ScaleBand<string> | undefined;
+  yBarScaleRef: d3.ScaleLinear<number, number> | undefined;
+  xValue: (d: TDateCount) => number;
+  yValue: (d: TDateCount) => number;
 }
 
 const BarChart: React.FC<IBarCartProps> = ({
   data,
   innerW,
   innerH,
-  getMax,
   chartTab,
+  xBarScaleRef,
+  yBarScaleRef,
+  xValue,
+  yValue,
 }) => {
   const theme = useTheme();
-  const xValue = (d: TDateCount) => d.date;
-  const yValue = (d: TDateCount) => d.count;
-
-  const xBarScaleRef = useMemo(() => {
-    if (data) {
-      return d3
-        .scaleBand()
-        .domain(data!.map((d) => xValue(d).toString()))
-        .range([0, innerW]);
-    }
-  }, [data, innerW]);
-  const yBarScaleRef = useMemo(() => {
-    if (data) {
-      return d3
-        .scaleLinear()
-        .domain([0, getMax(data!, yValue)])
-        .range([innerH, 0])
-        .nice();
-    }
-  }, [data, getMax, innerH]);
 
   return (
     <g className="bargraph-group">

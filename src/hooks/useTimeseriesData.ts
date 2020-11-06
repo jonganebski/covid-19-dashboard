@@ -13,9 +13,11 @@ const sumDateCount = (data: TDateCount[], date: number, count: number) => {
 
 export const useTimeSeriesData = (
   url: string
-): [TCountryTimedata[], TDateCount[]] => {
-  const [countriesData, setCountriesData] = useState<TCountryTimedata[]>([]);
-  const [globalData, setGlobalData] = useState<TDateCount[]>([]);
+): [TCountryTimedata[] | null, TDateCount[] | null] => {
+  const [countriesData, setCountriesData] = useState<TCountryTimedata[] | null>(
+    null
+  );
+  const [globalData, setGlobalData] = useState<TDateCount[] | null>(null);
 
   useEffect(() => {
     d3.csv(url).then((loadedData) => {
