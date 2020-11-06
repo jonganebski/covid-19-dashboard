@@ -61,7 +61,6 @@ export const useDailyProvince = (
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState("");
   const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
-
   useEffect(() => {
     const computeNewCases = (
       todayData: TDailyD[],
@@ -83,24 +82,29 @@ export const useDailyProvince = (
       });
     };
 
-    setIsLoading(true);
-    d3.csv(url, (row) => {
-      try {
-        const [err, validRow] = rowValidator(row);
-        if (err) {
-          throw new Error(err);
+    const getProvinceData = async (url: string) => {
+      const data = await d3.csv(url, (row) => {
+        try {
+          const [err, validRow] = rowValidator(row);
+          if (err) {
+            throw new Error(err);
+          }
+          return validRow;
+        } catch (err) {
+          setError(err);
         }
-        return validRow;
-      } catch (err) {
-        setError(err);
-      }
-    }).then((data) => {
+      });
       if (yesterdayData) {
         computeNewCases(data, yesterdayData);
       }
       setProvinceData(data);
+    };
+
+    if (url) {
+      setIsLoading(true);
+      getProvinceData(url);
       setIsLoading(false);
-    });
+    }
   }, [url, yesterdayData]);
   return [isLoading, error, provinceData];
 };

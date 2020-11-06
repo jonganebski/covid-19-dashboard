@@ -4,6 +4,7 @@ import { useBlackSwans } from "../hooks/useBlackSwans";
 import { useDailyCountry } from "../hooks/useDailyData-country";
 import { useDailyProvince } from "../hooks/useDailyData-province";
 import { useReferenceData } from "../hooks/useReferenceData";
+import { useTargetUrls } from "../hooks/useTargetUrls";
 import { useTimeSeriesData } from "../hooks/useTimeseriesData";
 import { TCountryTimedata, TDailyD, TDateCount } from "../types";
 
@@ -27,6 +28,7 @@ interface DataContextProviderProps {
 const DataContextProvider: React.FC<DataContextProviderProps> = ({
   children,
 }) => {
+  const [mostRecent, oneDayBefore] = useTargetUrls();
   const [reference] = useReferenceData();
   const [
     countryConfirmedTimeSeries,
@@ -35,9 +37,9 @@ const DataContextProvider: React.FC<DataContextProviderProps> = ({
   const [countryDeathsTimeSeries, globalDeathsTimeSeries] = useTimeSeriesData(
     TIMESERIES_CSV_URL.DEATHS
   );
-  const [, , yesterdayProvince] = useDailyProvince("10-30-2020.csv");
+  const [, , yesterdayProvince] = useDailyProvince(oneDayBefore);
   const [isProvinceLoading, error, data] = useDailyProvince(
-    "10-31-2020.csv",
+    mostRecent,
     yesterdayProvince
   );
   const [blackSwans] = useBlackSwans(data);
