@@ -1,8 +1,8 @@
 import * as d3 from "d3";
 import { useEffect, useState } from "react";
-import { numOrNull } from "../api/dailyDataFns";
 import { REFERENCE_CSV_URL } from "../constants";
 import { TReferenceD } from "../types";
+import { numOrNull } from "../utils/utils";
 
 export const useReferenceData = (): [TReferenceD[] | null] => {
   const [referenceData, setReferenceData] = useState<TReferenceD[] | null>(

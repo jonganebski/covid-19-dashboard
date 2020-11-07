@@ -1,8 +1,11 @@
 import { Box, Flex, Grid, Heading, Select } from "@chakra-ui/core";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useCountryDataCtx } from "../contexts/dataContext";
-import { useSelectCountryCtx } from "../contexts/selectContext";
-import { TChartTab, TDailyD, TListD, TTab } from "../types";
+import {
+  useSelectCountryCtx,
+  useTabSelectionCtx,
+} from "../contexts/selectContext";
+import { TDailyD, TListD, TTab } from "../types";
 import { compare } from "../utils/utils";
 import ChartContainer from "./ChartContainer";
 import RightColumnList from "./RightColumnList";
@@ -35,10 +38,15 @@ const getTabDataAndGlobalCount = (countryData: TDailyD[] | null, tab: TTab) => {
 const RightColumn = () => {
   const { selectedCountry, handleLiClick } = useSelectCountryCtx();
   const { isLoading, data: countryData } = useCountryDataCtx();
+  const {
+    tabL,
+    tabR,
+    chartTab,
+    setTabL,
+    setTabR,
+    setChartTab,
+  } = useTabSelectionCtx();
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
-  const [tabL, setTabL] = useState<TTab>("active");
-  const [tabR, setTabR] = useState<TTab>("new cases");
-  const [chartTab, setChartTab] = useState<TChartTab>("daily cases");
 
   // For list on the left
   const { data: sortedDataL, globalCount: countL } = getTabDataAndGlobalCount(

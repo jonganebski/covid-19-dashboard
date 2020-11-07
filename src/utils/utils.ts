@@ -1,6 +1,4 @@
-import { DAILY_BASE_URL } from "../constants";
 import { TDailyD } from "../types";
-import Axios from "axios";
 
 export const getMonthName = (i: number) => {
   const months = [
@@ -66,4 +64,15 @@ export const numberToKMB = (num: number) => {
   } else {
     return (num / 10 ** 9).toString() + "B";
   }
+};
+
+export const numOrNull = (value: string | undefined) => {
+  if (typeof value === "undefined") {
+    return null;
+  }
+  const converted = parseFloat(value);
+  if (isNaN(converted)) {
+    return null;
+  }
+  return converted;
 };

@@ -24,13 +24,13 @@ const LineChart: React.FC<ILineChartProps> = ({
 }) => {
   return (
     <>
-      <rect
+      {/* <rect
         className="mouse-listener"
         width={Math.abs(innerW)}
         height={Math.abs(innerH)}
         opacity="0"
         onMouseMove={handleMouseMove}
-      />
+      /> */}
       <g className="linegraph-group">
         {data && lineGenerator(data) && (
           <path

@@ -20,6 +20,7 @@ export const useViewPort = (
   countryData: TDailyD[] | null
 ): [TViewport, React.Dispatch<React.SetStateAction<TViewport>>] => {
   const [viewport, setViewport] = useState<TViewport>(initialViewport);
+
   useEffect(() => {
     if (!selectedCountry) {
       setViewport(initialViewport);
@@ -35,5 +36,6 @@ export const useViewPort = (
       }
     }
   }, [selectedCountry, countryData]);
+
   return [viewport, setViewport];
 };

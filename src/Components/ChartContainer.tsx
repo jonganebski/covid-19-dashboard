@@ -145,6 +145,13 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 );
               })}
           </g>
+          <rect
+            className="mouse-listener"
+            width={Math.abs(innerW)}
+            height={Math.abs(innerH)}
+            opacity="0"
+            onMouseMove={handleMouseMove}
+          />
           {(chartTab === "confirmed" || chartTab === "deaths") && (
             <LineChart
               data={data}
@@ -166,6 +173,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
               yBarScaleRef={yBarScaleRef}
               xValue={xValue}
               yValue={yValue}
+              coord={coord}
             />
           )}
         </g>

@@ -1,7 +1,5 @@
 import * as d3 from "d3";
-import { useState, useRef, useMemo, useEffect } from "react";
-import { useTimeSeriesDataCtx } from "../contexts/dataContext";
-import { useSelectCountryCtx } from "../contexts/selectContext";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { TChartTab, TCountryTimedata, TDateCount } from "../types";
 
 export const useChart = (
@@ -30,6 +28,7 @@ export const useChart = (
     const getLineChartData = (data: TCountryTimedata[]) => {
       return data.find((d) => d.country === selectedCountry)?.data ?? [];
     };
+
     const getBarChartReturnData = (data: TDateCount[]) => {
       const returnData: TDateCount[] = [];
       returnData.push(data[0]);
@@ -39,6 +38,7 @@ export const useChart = (
       });
       return returnData;
     };
+
     const getBarChartData = (data: TCountryTimedata[]) => {
       const targetData = data.find((d) => d.country === selectedCountry)?.data;
       if (targetData) {
@@ -47,6 +47,7 @@ export const useChart = (
         return [];
       }
     };
+
     if (
       countryConfirmedTimeSeries &&
       countryDeathsTimeSeries &&
@@ -100,6 +101,20 @@ export const useChart = (
     globalDeathsTimeSeries,
     selectedCountry,
   ]);
+
+  useEffect(() => {
+    const svgParentW = svgRef.current?.parentElement?.getBoundingClientRect()
+      .width;
+    const svgParentH = svgRef.current?.parentElement?.getBoundingClientRect()
+      .height;
+    const svgW = svgParentW ?? 0;
+    const svgH = svgParentH ?? 0;
+    setSvgW(svgW);
+    setSvgH(svgH);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // d3.extent() 에서 [undefined, undefined]가 나오는 경우를 배제하는 함수다.
   const getDomainArray = (
     data: Array<TDateCount>,
@@ -164,19 +179,6 @@ export const useChart = (
     setSvgW(svgW);
     setSvgH(svgH);
   };
-
-  useEffect(() => {
-    const svgParentW = svgRef.current?.parentElement?.getBoundingClientRect()
-      .width;
-    const svgParentH = svgRef.current?.parentElement?.getBoundingClientRect()
-      .height;
-    const svgW = svgParentW ?? 0;
-    const svgH = svgParentH ?? 0;
-    setSvgW(svgW);
-    setSvgH(svgH);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   return {
     data,

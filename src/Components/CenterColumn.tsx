@@ -1,5 +1,4 @@
 import { Box, Button, ButtonGroup, Flex, Grid, Stack } from "@chakra-ui/core";
-import styled from "@emotion/styled";
 import React, { useState } from "react";
 import LeafletMap from "./LeafletMap";
 import News from "./News";

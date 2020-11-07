@@ -1,7 +1,6 @@
 import { Select } from "@chakra-ui/core";
 import React from "react";
 import { useCountryDataCtx } from "../contexts/dataContext";
-import { TDailyD } from "../types";
 
 interface RightColumnListSelectProps {
   setTab: React.Dispatch<

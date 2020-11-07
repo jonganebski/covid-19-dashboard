@@ -1,6 +1,31 @@
 import { useEffect, useState } from "react";
-import { sumValueOrNull, getCoordOrNull } from "../api/dailyDataFns";
 import { TDailyD, TReferenceD } from "../types";
+
+const sumValueOrNull = (a: number | null, b: number | null) => {
+  if (a === null) {
+    return b;
+  } else if (b === null) {
+    return a;
+  } else {
+    return a + b;
+  }
+};
+
+const getCoordOrNull = (
+  reference: TReferenceD[],
+  targetCountry: string,
+  type: "lat" | "lon"
+) => {
+  const targetRow = reference.find(
+    (d) => d.country === targetCountry && d.province === ""
+  );
+  if (targetRow) {
+    return targetRow[type];
+  } else {
+    console.error("Some missing coords...");
+    return null;
+  }
+};
 
 export const useDailyCountry = (
   provinceData: TDailyD[] | null,

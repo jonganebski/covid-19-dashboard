@@ -8,17 +8,6 @@ export type TCountryTimedata = {
   data: TDateCount[];
 };
 
-export type ITimeDataState = {
-  confirmed: { countries: TTimeseriesD[] | null; global: TDateCount[] | null };
-  deaths: { countries: TTimeseriesD[] | null; global: TDateCount[] | null };
-  recovered: { countries: TTimeseriesD[] | null; global: TDateCount[] | null };
-};
-
-export type TTimeseriesD = {
-  country: string;
-  data: TDateCount[];
-};
-
 export type TListD = {
   country: string;
   count: number | null;

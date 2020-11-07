@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { useEffect, useState } from "react";
-import { numOrNull } from "../api/dailyDataFns";
 import { TDailyD } from "../types";
+import { numOrNull } from "../utils/utils";
 
 const rowValidator = (row: d3.DSVRowString<string>): [string, TDailyD?] => {
   const country = row.Country_Region;
