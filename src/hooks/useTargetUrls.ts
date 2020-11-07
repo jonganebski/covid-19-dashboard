@@ -20,7 +20,6 @@ export const useTargetUrls = (): [string, string] => {
       return files;
     };
     const getTargetUrls = async () => {
-      console.log(process.env.NODE_ENV);
       if (process.env.NODE_ENV === "development") {
         setTargetUrls(["10-31-2020.csv", "10-30-2020.csv"]);
         return;

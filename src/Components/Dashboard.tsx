@@ -8,10 +8,8 @@ import RightColumn from "./RightColumn";
 // -----------  COMPONENT  -----------
 
 const Dashboard = () => {
-  console.log("dashboard rendering");
-
   return (
-    <Flex className="App" p={1} w="100vw" h="100vh" bg="black">
+    <Flex className="App" w="100vw" h="100vh" bg="black">
       <Grid
         w="100%"
         gap={1}

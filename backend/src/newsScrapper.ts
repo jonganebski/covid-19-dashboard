@@ -37,7 +37,7 @@ export const getNews = async (country: string) => {
   const length = 10;
 
   let searchTerm: string;
-  if (country === "georgia") {
+  if (country === "Georgia") {
     searchTerm = "tbilisi";
   } else {
     searchTerm = country;

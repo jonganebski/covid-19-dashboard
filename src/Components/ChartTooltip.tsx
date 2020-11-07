@@ -7,6 +7,7 @@ interface ChartTooltipProps {
 }
 
 const ChartTooltip: React.FC<ChartTooltipProps> = ({ dataPiece }) => {
+  console.log("rendering");
   return (
     <g
       className="tooltip-group"

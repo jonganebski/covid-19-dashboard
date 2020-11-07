@@ -58,7 +58,6 @@ const DataContextProvider: React.FC<DataContextProviderProps> = ({
     yesterDayCountry,
     newCasesPer100kWeek
   );
-  console.log("context rendering");
 
   return (
     <DataContext.Provider

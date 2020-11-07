@@ -52,6 +52,7 @@ const BarChart: React.FC<IBarChartProps> = ({
   coord,
 }) => {
   const theme = useTheme();
+
   return (
     <g className="bargraph-group">
       {data?.map((d, i) => {
@@ -82,4 +83,4 @@ const BarChart: React.FC<IBarChartProps> = ({
   );
 };
 
-export default React.memo(BarChart);
+export default BarChart;
