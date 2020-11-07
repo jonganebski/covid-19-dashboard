@@ -11,18 +11,12 @@ import BarChart from "./BarChart";
 import LineChart from "./LineChart";
 
 interface ChartContainerProps {
-  svgContainerRef: React.MutableRefObject<HTMLDivElement | null>;
   chartTab: TChartTab;
 }
 
-// ----------- FUNCTION -----------
-
 // ----------- COMPONENT-----------
 
-const ChartContainer: React.FC<ChartContainerProps> = ({
-  svgContainerRef,
-  chartTab,
-}) => {
+const ChartContainer: React.FC<ChartContainerProps> = ({ chartTab }) => {
   const theme = useTheme();
   const {
     countryConfirmedTimeSeries,
@@ -34,9 +28,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   const {
     data,
     coord,
-    setCoord,
     dataPiece,
-    setDataPiece,
     innerW,
     innerH,
     xValue,
@@ -49,6 +41,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     yScaleRef,
     xTicks,
     yTicks,
+    handleMouseMove,
   } = useChart(
     countryConfirmedTimeSeries,
     globalConfirmedTimeSeries,
@@ -57,15 +50,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     selectedCountry,
     chartTab
   );
-  const { lineGenerator, handleMouseMove } = useLineChart(
-    xScaleRef,
-    yScaleRef,
-    xValue,
-    yValue,
-    data,
-    setCoord,
-    setDataPiece
-  );
+  const { lineGenerator } = useLineChart(xScaleRef, yScaleRef, xValue, yValue);
   const { xBarScaleRef, yBarScaleRef } = useBarChart(
     data,
     xValue,
@@ -106,7 +91,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                   </text>
                 </g>
               ))}
-            {coord && (
+            {coord && (chartTab === "confirmed" || chartTab === "deaths") && (
               <line
                 x1={coord.x}
                 x2={coord.x}
@@ -145,28 +130,19 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 );
               })}
           </g>
-          <rect
-            className="mouse-listener"
-            width={Math.abs(innerW)}
-            height={Math.abs(innerH)}
-            opacity="0"
-            onMouseMove={handleMouseMove}
-          />
+
           {(chartTab === "confirmed" || chartTab === "deaths") && (
             <LineChart
               data={data}
               dataPiece={dataPiece}
               lineGenerator={lineGenerator}
               coord={coord}
-              innerW={innerW}
-              innerH={innerH}
-              handleMouseMove={handleMouseMove}
             />
           )}
           {(chartTab === "daily cases" || chartTab === "daily deaths") && (
             <BarChart
               data={data}
-              innerW={innerW}
+              dataPiece={dataPiece}
               innerH={innerH}
               chartTab={chartTab}
               xBarScaleRef={xBarScaleRef}
@@ -176,6 +152,13 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
               coord={coord}
             />
           )}
+          <rect
+            className="mouse-listener"
+            width={Math.abs(innerW)}
+            height={Math.abs(innerH)}
+            opacity="0"
+            onMouseMove={handleMouseMove}
+          />
         </g>
       </svg>
     </>

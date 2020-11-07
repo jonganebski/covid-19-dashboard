@@ -1,5 +1,5 @@
 import { Box, Flex, Grid, Heading, Select } from "@chakra-ui/core";
-import React, { useRef } from "react";
+import React from "react";
 import { useCountryDataCtx } from "../contexts/dataContext";
 import {
   useSelectCountryCtx,
@@ -46,8 +46,6 @@ const RightColumn = () => {
     setTabR,
     setChartTab,
   } = useTabSelectionCtx();
-  const svgContainerRef = useRef<HTMLDivElement | null>(null);
-
   // For list on the left
   const { data: sortedDataL, globalCount: countL } = getTabDataAndGlobalCount(
     countryData,
@@ -105,7 +103,6 @@ const RightColumn = () => {
             backgroundColor="black"
             color="white"
             placeholder="Select option"
-            // defaultValue="confirmed"
             defaultValue="daily cases"
             onChange={(e) => {
               if (
@@ -129,11 +126,8 @@ const RightColumn = () => {
             </Heading>
           </Flex>
         </Flex>
-        <Box ref={svgContainerRef} w="100%" h="100%" maxH="300px">
-          <ChartContainer
-            svgContainerRef={svgContainerRef}
-            chartTab={chartTab}
-          />
+        <Box w="100%" h="100%" maxH="300px">
+          <ChartContainer chartTab={chartTab} />
         </Box>
       </Box>
     </Grid>

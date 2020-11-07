@@ -50,6 +50,11 @@ export type TNewsData = {
   link: string;
 };
 
+export type TCoord = {
+  x: number;
+  y: number;
+};
+
 export type TTab = "active" | "deaths" | "recovered" | "new cases";
 
 export type TChartTab = "confirmed" | "deaths" | "daily cases" | "daily deaths";

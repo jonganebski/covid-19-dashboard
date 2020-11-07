@@ -1,33 +1,48 @@
-import { useTheme } from "@chakra-ui/core";
+import { DefaultTheme, useTheme } from "@chakra-ui/core";
 import * as d3 from "d3";
 import React from "react";
 import styled from "styled-components";
-import { TChartTab, TDateCount } from "../types";
+import { TChartTab, TCoord, TDateCount } from "../types";
+import ChartTooltip from "./ChartTooltip";
 
-interface IBarCartProps {
+interface IBarChartProps {
   data: TDateCount[] | null;
-  innerW: number;
+  dataPiece: TDateCount | null;
   innerH: number;
   chartTab: TChartTab;
   xBarScaleRef: d3.ScaleBand<string> | undefined;
   yBarScaleRef: d3.ScaleLinear<number, number> | undefined;
   xValue: (d: TDateCount) => number;
   yValue: (d: TDateCount) => number;
-  coord: {
-    x: number;
-    y: number;
-  } | null;
+  coord: TCoord | null;
 }
 
-const Rect = styled.rect`
-  &:hover {
-    fill: red;
-  }
+interface IBarProps {
+  chartTab: TChartTab;
+  theme: DefaultTheme;
+  barDate: number;
+  mouseDate?: number;
+}
+
+const Bar = styled.rect<IBarProps>`
+  fill: ${({ chartTab, theme, barDate, mouseDate }) => {
+    if (chartTab === "daily cases") {
+      if (barDate === mouseDate) {
+        return "red";
+      }
+      return theme.colors.pink[400];
+    } else {
+      if (barDate === mouseDate) {
+        return "white";
+      }
+      return theme.colors.gray[400];
+    }
+  }};
 `;
 
-const BarChart: React.FC<IBarCartProps> = ({
+const BarChart: React.FC<IBarChartProps> = ({
   data,
-  innerW,
+  dataPiece,
   innerH,
   chartTab,
   xBarScaleRef,
@@ -41,27 +56,28 @@ const BarChart: React.FC<IBarCartProps> = ({
     <g className="bargraph-group">
       {data?.map((d, i) => {
         const x = xBarScaleRef?.(xValue(d).toString());
+        const y = yBarScaleRef?.(yValue(d));
         return (
-          x && (
-            <Rect
+          x &&
+          y && (
+            <Bar
               key={i}
-              x={xBarScaleRef?.(xValue(d).toString())}
-              y={yBarScaleRef?.(yValue(d)) ?? 0}
+              transform={`translate(${x}, ${y})`}
               width={xBarScaleRef?.bandwidth()}
               height={innerH - yBarScaleRef?.(yValue(d))!}
-              fill={
-                chartTab === "daily cases" && coord?.x === Math.round(x)
-                  ? "red"
-                  : chartTab === "daily deaths" && coord?.x === Math.round(x)
-                  ? "white"
-                  : chartTab === "daily cases"
-                  ? theme.colors.pink[400]
-                  : theme.colors.gray[400]
-              }
-            ></Rect>
+              chartTab={chartTab}
+              theme={theme}
+              barDate={d.date}
+              mouseDate={dataPiece?.date}
+            ></Bar>
           )
         );
       })}
+      {dataPiece && (
+        <g transform={`translate(${coord?.x}, ${coord?.y})`}>
+          <ChartTooltip dataPiece={dataPiece} />
+        </g>
+      )}
     </g>
   );
 };

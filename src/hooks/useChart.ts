@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TChartTab, TCountryTimedata, TDateCount } from "../types";
+import { TChartTab, TCoord, TCountryTimedata, TDateCount } from "../types";
 
 export const useChart = (
   countryConfirmedTimeSeries: TCountryTimedata[] | null,
@@ -12,7 +12,7 @@ export const useChart = (
 ) => {
   const [data, setData] = useState<TDateCount[] | null>(null);
   const [dataPiece, setDataPiece] = useState<TDateCount | null>(null);
-  const [coord, setCoord] = useState<{ x: number; y: number } | null>(null);
+  const [coord, setCoord] = useState<TCoord | null>(null);
   const [svgW, setSvgW] = useState(0);
   const [svgH, setSvgH] = useState(0);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -23,6 +23,7 @@ export const useChart = (
   const yValue = (d: TDateCount) => d.count;
   const xScaleRef = useRef<d3.ScaleTime<number, number> | null>(null);
   const yScaleRef = useRef<d3.ScaleLinear<number, number> | null>(null);
+  const tooltipG = d3.select("#tooltip-group");
 
   useEffect(() => {
     const getLineChartData = (data: TCountryTimedata[]) => {
@@ -180,13 +181,36 @@ export const useChart = (
     setSvgH(svgH);
   };
 
+  const handleMouseMove = (e: React.MouseEvent<SVGRectElement, MouseEvent>) => {
+    if (xScaleRef.current && yScaleRef.current && data) {
+      const elementCoord = e.currentTarget.getBoundingClientRect();
+      const hoveredDate = xScaleRef.current
+        .invert(e.clientX - elementCoord.x)
+        .getTime();
+      const bs = d3.bisector((d: TDateCount) => d.date);
+      const i = bs.left(data, hoveredDate, 1);
+      const x = e.clientX - elementCoord.x;
+      const y = yScaleRef.current(data[i].count);
+      if (y) {
+        setCoord({ x, y });
+        setDataPiece(data[i]);
+      }
+      if (x < 100) {
+        tooltipG.attr("transform", "translate(20, -60)");
+      } else if (100 <= x) {
+        tooltipG.attr("transform", "translate(-80, -60)");
+      }
+      if (y && y <= 60) {
+        tooltipG.attr("transform", "translate(-80, 0)");
+      }
+    }
+    return;
+  };
+
   return {
     data,
     coord,
-    setCoord,
     dataPiece,
-    setDataPiece,
-    handleResize,
     innerW,
     innerH,
     xValue,
@@ -199,5 +223,6 @@ export const useChart = (
     yScaleRef,
     xTicks,
     yTicks,
+    handleMouseMove,
   };
 };

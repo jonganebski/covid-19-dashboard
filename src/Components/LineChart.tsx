@@ -1,16 +1,13 @@
 import React from "react";
 import theme from "../theme";
-import { TDateCount } from "../types";
-import { getMonthName } from "../utils/utils";
+import { TCoord, TDateCount } from "../types";
+import ChartTooltip from "./ChartTooltip";
 
 interface ILineChartProps {
   data: TDateCount[] | null;
   dataPiece: TDateCount | null;
   lineGenerator: d3.Line<TDateCount>;
-  coord: { x: number; y: number } | null;
-  innerW: number;
-  innerH: number;
-  handleMouseMove: (e: React.MouseEvent<SVGRectElement, MouseEvent>) => void;
+  coord: TCoord | null;
 }
 
 const LineChart: React.FC<ILineChartProps> = ({
@@ -18,19 +15,9 @@ const LineChart: React.FC<ILineChartProps> = ({
   dataPiece,
   lineGenerator,
   coord,
-  innerW,
-  innerH,
-  handleMouseMove,
 }) => {
   return (
     <>
-      {/* <rect
-        className="mouse-listener"
-        width={Math.abs(innerW)}
-        height={Math.abs(innerH)}
-        opacity="0"
-        onMouseMove={handleMouseMove}
-      /> */}
       <g className="linegraph-group">
         {data && lineGenerator(data) && (
           <path
@@ -42,28 +29,7 @@ const LineChart: React.FC<ILineChartProps> = ({
         {coord && dataPiece && (
           <g transform={`translate(${coord.x}, ${coord.y})`}>
             <circle r="4" fill="yellow"></circle>
-            <g
-              className="tooltip-group"
-              id="tooltip-group"
-              transform="translate(-80, -60)"
-              pointerEvents="none"
-            >
-              <rect
-                className="tooltip-rect"
-                width="70"
-                height="50"
-                fill="black"
-                opacity="0.8"
-                rx="5"
-              ></rect>
-              <text transform="translate(5, 20)" fontSize="12px" fill="white">
-                {new Date(dataPiece.date).getDate()}{" "}
-                {getMonthName(new Date(dataPiece.date).getMonth())}
-              </text>
-              <text transform="translate(5, 40)" fontSize="12px" fill="white">
-                {dataPiece.count.toLocaleString()}
-              </text>
-            </g>
+            <ChartTooltip dataPiece={dataPiece} />
           </g>
         )}
       </g>
