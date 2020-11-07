@@ -1,4 +1,12 @@
-import { Box, Button, ButtonGroup, Flex, Grid, Stack } from "@chakra-ui/core";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Flex,
+  Grid,
+  Stack,
+  Text,
+} from "@chakra-ui/core";
 import React, { useState } from "react";
 import LeafletMap from "./LeafletMap";
 import News from "./News";
@@ -43,33 +51,37 @@ const CenterColumn = () => {
         <Box h="100%">
           <LeafletMap dataClass={dataClass} />
         </Box>
-
-        <ButtonGroup>
-          <MyButton
-            dataClass={dataClass}
-            handleBtnClick={handleBtnClick}
-            text={"Cumulative Cases"}
-            type={"confirmed"}
-          />
-          <MyButton
-            dataClass={dataClass}
-            handleBtnClick={handleBtnClick}
-            text={"Cumulative Deaths"}
-            type={"deaths"}
-          />
-          <MyButton
-            dataClass={dataClass}
-            handleBtnClick={handleBtnClick}
-            text={"Active Cases"}
-            type={"active"}
-          />
-          <MyButton
-            dataClass={dataClass}
-            handleBtnClick={handleBtnClick}
-            text={"New Cases"}
-            type={"newCases"}
-          />
-        </ButtonGroup>
+        <Flex>
+          <ButtonGroup mr={5}>
+            <MyButton
+              dataClass={dataClass}
+              handleBtnClick={handleBtnClick}
+              text={"Cumulative Cases"}
+              type={"confirmed"}
+            />
+            <MyButton
+              dataClass={dataClass}
+              handleBtnClick={handleBtnClick}
+              text={"Cumulative Deaths"}
+              type={"deaths"}
+            />
+            <MyButton
+              dataClass={dataClass}
+              handleBtnClick={handleBtnClick}
+              text={"Active Cases"}
+              type={"active"}
+            />
+            <MyButton
+              dataClass={dataClass}
+              handleBtnClick={handleBtnClick}
+              text={"New Cases"}
+              type={"newCases"}
+            />
+          </ButtonGroup>
+          <Text fontSize="13px" color="gray.500">
+            NCR: New Cases per 100,000 population for last 7 days
+          </Text>
+        </Flex>
       </Stack>
       <Flex bg="gray.800">
         <News />

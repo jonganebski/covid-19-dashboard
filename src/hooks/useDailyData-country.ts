@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TDailyD, TReferenceD } from "../types";
+import { TDailyD, TRate, TReferenceD } from "../types";
 
 const sumValueOrNull = (a: number | null, b: number | null) => {
   if (a === null) {
@@ -31,7 +31,8 @@ export const useDailyCountry = (
   provinceData: TDailyD[] | null,
   referenceData: TReferenceD[] | null,
   blackSwans: Set<string> | null,
-  yesterdayData?: TDailyD[] | null
+  yesterdayData?: TDailyD[] | null,
+  rateData?: TRate[] | null
 ): [boolean, TDailyD[] | null] => {
   const [isLoading, setIsLoading] = useState(true);
   const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
@@ -87,12 +88,10 @@ export const useDailyCountry = (
               newCasesLastUpdate: "",
               lat: getCoordOrNull(referenceData, d.country, "lat"),
               lon: getCoordOrNull(referenceData, d.country, "lon"),
-              FIPS: "",
-              incidenceRate: null,
-              caseFatalityRatio: null,
               combinedKey: "",
-              admin2: "",
               province: "",
+              admin2: d.admin2,
+              newCaseRate: 0,
             };
             return acc;
           });
@@ -102,13 +101,19 @@ export const useDailyCountry = (
       if (yesterdayData) {
         computeNewCases(countryWise, yesterdayData);
       }
+      if (rateData) {
+        countryWise.forEach((data) => {
+          const rate =
+            rateData.find((d) => d.country === data.country)?.rate ?? 0;
+          data.newCaseRate = rate;
+        });
+      }
       setIsLoading(false);
       return countryWise;
     };
     if (provinceData && referenceData && blackSwans) {
       setCountryData(getCountryWise(provinceData, referenceData, blackSwans));
     }
-  }, [blackSwans, provinceData, referenceData, yesterdayData]);
-
+  }, [blackSwans, provinceData, rateData, referenceData, yesterdayData]);
   return [isLoading, countryData];
 };

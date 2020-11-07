@@ -9,7 +9,6 @@ const rowValidator = (row: d3.DSVRowString<string>): [string, TDailyD?] => {
   const lastUpdate = row.Last_Update;
   const newCasesLastUpdate = "";
   const admin2 = row.Admin2;
-  const FIPS = row.FIPS;
   const province = row.Province_State;
   const active = numOrNull(row.Active);
   const confirmed = numOrNull(row.Confirmed);
@@ -18,14 +17,12 @@ const rowValidator = (row: d3.DSVRowString<string>): [string, TDailyD?] => {
   const newCases = null;
   const lat = numOrNull(row.Lat);
   const lon = numOrNull(row.Long_);
-  const caseFatalityRatio = numOrNull(row["Case-Fatality_Ratio"]);
-  const incidenceRate = numOrNull(row.Incident_Rate);
+  const newCaseRate = 0;
   if (
     typeof country === "undefined" ||
     typeof combinedKey === "undefined" ||
     typeof lastUpdate === "undefined" ||
     typeof admin2 === "undefined" ||
-    typeof FIPS === "undefined" ||
     typeof province === "undefined"
   ) {
     return [`Some data are missing.`];
@@ -38,7 +35,6 @@ const rowValidator = (row: d3.DSVRowString<string>): [string, TDailyD?] => {
         lastUpdate,
         newCasesLastUpdate,
         admin2,
-        FIPS,
         province,
         active,
         confirmed,
@@ -47,8 +43,7 @@ const rowValidator = (row: d3.DSVRowString<string>): [string, TDailyD?] => {
         newCases,
         lat,
         lon,
-        caseFatalityRatio,
-        incidenceRate,
+        newCaseRate,
       },
     ];
   }

@@ -11,16 +11,18 @@ export const useReferenceData = (): [TReferenceD[] | null] => {
 
   useEffect(() => {
     d3.csv(REFERENCE_CSV_URL, (row) => {
-      return {
-        country: row.Country_Region ?? "",
-        province: row.Province_State ?? "",
-        admin2: row.Admin2 ?? "",
-        iso2: row.iso2 ?? "",
-        lat: numOrNull(row.Lat),
-        lon: numOrNull(row.Long_),
-        population: numOrNull(row.Population),
-        UID: numOrNull(row.UID),
-      };
+      if (row.Province_State === "") {
+        return {
+          country: row.Country_Region ?? "",
+          province: row.Province_State ?? "",
+          admin2: row.Admin2 ?? "",
+          iso2: row.iso2 ?? "",
+          lat: numOrNull(row.Lat),
+          lon: numOrNull(row.Long_),
+          population: numOrNull(row.Population),
+          UID: numOrNull(row.UID),
+        };
+      }
     }).then((data) => {
       setReferenceData(data);
     });

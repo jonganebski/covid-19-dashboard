@@ -15,11 +15,13 @@ import {
   useDisclosure,
 } from "@chakra-ui/core";
 import React from "react";
+import { useSelectCountryCtx } from "../contexts/selectContext";
 
 // ------------- COMPONENT -------------
 
 const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { setSelectedCountry } = useSelectCountryCtx();
   return (
     <Flex
       gridArea="header"
@@ -28,8 +30,11 @@ const Header = () => {
       bg="gray.800"
       color="gray.400"
     >
-      <Heading fontSize={{ base: "xl", lg: "3xl" }}>
-        {" "}
+      <Heading
+        fontSize={{ base: "xl", lg: "3xl" }}
+        onClick={() => setSelectedCountry("")}
+        cursor="pointer"
+      >
         Covid-19 Information Dashboard
       </Heading>
       <Box position="absolute" right={10}>

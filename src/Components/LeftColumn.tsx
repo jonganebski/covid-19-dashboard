@@ -3,9 +3,11 @@ import {
   Flex,
   Grid,
   Heading,
+  Icon,
   List,
   ListItem,
   Text,
+  Tooltip,
 } from "@chakra-ui/core";
 import React, { useRef } from "react";
 import { useCountryDataCtx } from "../contexts/dataContext";
@@ -21,6 +23,7 @@ const LeftColumn = () => {
 
   const { selectedCountry, handleLiClick } = useSelectCountryCtx();
   const { isLoading, error, data } = useCountryDataCtx();
+
   return (
     <Grid gridArea="left" bg="black" gridTemplateRows="2fr 12fr 1.5fr" gap={1}>
       <Flex
@@ -68,9 +71,11 @@ const LeftColumn = () => {
               ?.filter((d) => d.confirmed)
               .sort((a, b) => b.confirmed! - a.confirmed!)
               .map((d, i) => {
+                const isWarning = d.newCaseRate > 0;
                 return (
                   <ListItem
                     display="flex"
+                    alignItems="center"
                     key={i}
                     paddingY={2}
                     m={0}
@@ -84,6 +89,16 @@ const LeftColumn = () => {
                       {d.confirmed?.toLocaleString() ?? "No data"}
                     </Text>
                     <Text color="gray.100">{d.country}</Text>
+                    {isWarning && (
+                      <Tooltip
+                        aria-label="new cases rate per 100,000 population for last 7 days"
+                        label={`NCR: ${d.newCaseRate}`}
+                        placement="left"
+                        zIndex={90}
+                      >
+                        <Icon name="warning" color="red.800" ml="auto" />
+                      </Tooltip>
+                    )}
                   </ListItem>
                 );
               })}

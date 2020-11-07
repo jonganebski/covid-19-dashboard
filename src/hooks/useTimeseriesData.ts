@@ -71,6 +71,7 @@ export const useTimeSeriesData = (
       );
       setCountriesData(reduced.countries);
       setGlobalData(reduced.global);
+      // console.log(reduced.countries);
     });
   }, [url]);
 

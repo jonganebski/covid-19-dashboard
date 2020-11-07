@@ -3,10 +3,11 @@ import { TIMESERIES_CSV_URL } from "../constants";
 import { useBlackSwans } from "../hooks/useBlackSwans";
 import { useDailyCountry } from "../hooks/useDailyData-country";
 import { useDailyProvince } from "../hooks/useDailyData-province";
+import { useRate } from "../hooks/useRate";
 import { useReferenceData } from "../hooks/useReferenceData";
 import { useTargetUrls } from "../hooks/useTargetUrls";
 import { useTimeSeriesData } from "../hooks/useTimeseriesData";
-import { TCountryTimedata, TDailyD, TDateCount } from "../types";
+import { TCountryTimedata, TDailyD, TDateCount, TRate } from "../types";
 
 type TDataContext = {
   timeseriesData: {
@@ -17,6 +18,7 @@ type TDataContext = {
   };
   provinceData: { isLoading: boolean; error: string; data: TDailyD[] | null };
   countryData: { isLoading: boolean; error: string; data: TDailyD[] | null };
+  rateData: { newCasesPer100kWeek: TRate[] | null };
 };
 
 const DataContext = createContext<Partial<TDataContext>>({});
@@ -37,6 +39,7 @@ const DataContextProvider: React.FC<DataContextProviderProps> = ({
   const [countryDeathsTimeSeries, globalDeathsTimeSeries] = useTimeSeriesData(
     TIMESERIES_CSV_URL.DEATHS
   );
+  const [newCasesPer100kWeek] = useRate(reference, countryConfirmedTimeSeries);
   const [, , yesterdayProvince] = useDailyProvince(oneDayBefore);
   const [isProvinceLoading, error, data] = useDailyProvince(
     mostRecent,
@@ -52,9 +55,11 @@ const DataContextProvider: React.FC<DataContextProviderProps> = ({
     data,
     reference,
     blackSwans,
-    yesterDayCountry
+    yesterDayCountry,
+    newCasesPer100kWeek
   );
   console.log("context rendering");
+
   return (
     <DataContext.Provider
       value={{
@@ -66,6 +71,7 @@ const DataContextProvider: React.FC<DataContextProviderProps> = ({
         },
         provinceData: { isLoading: isProvinceLoading, error, data },
         countryData: { isLoading: isCountryLoading, error, data: coutryData },
+        rateData: { newCasesPer100kWeek },
       }}
     >
       {children}

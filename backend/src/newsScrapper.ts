@@ -35,7 +35,15 @@ const scrapeAllNews = (selector: cheerio.Root) => {
 
 export const getNews = async (country: string) => {
   const length = 10;
-  const URL = `https://news.google.com/search?q=covid-19+${country}+when:2d&hl=en-US&gl=US&ceid=US:en`;
+
+  let searchTerm: string;
+  if (country === "georgia") {
+    searchTerm = "tbilisi";
+  } else {
+    searchTerm = country;
+  }
+
+  const URL = `https://news.google.com/search?q=covid-19+${searchTerm}+when:2d&hl=en-US&gl=US&ceid=US:en`;
 
   const { data: html } = await axios.get(URL);
 

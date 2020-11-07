@@ -15,9 +15,7 @@ export type TListD = {
 
 export type TDailyD = {
   country: string;
-  admin2: string;
   combinedKey: string;
-  FIPS: string;
   lastUpdate: string;
   newCasesLastUpdate: string;
   active: number | null;
@@ -28,8 +26,8 @@ export type TDailyD = {
   lat: number | null;
   lon: number | null;
   province: string;
-  caseFatalityRatio: number | null;
-  incidenceRate: number | null;
+  admin2: string;
+  newCaseRate: number;
 };
 
 export type TReferenceD = {
@@ -53,6 +51,11 @@ export type TNewsData = {
 export type TCoord = {
   x: number;
   y: number;
+};
+
+export type TRate = {
+  country: string;
+  rate: number;
 };
 
 export type TTab = "active" | "deaths" | "recovered" | "new cases";
