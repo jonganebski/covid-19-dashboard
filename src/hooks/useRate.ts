@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { TCountryTimedata, TRate, TReferenceD } from "../types";
+import { CountryTimeData, Rate, ReferenceData } from "../types";
 
 export const useRate = (
-  reference: TReferenceD[] | null,
-  timeData: TCountryTimedata[] | null
+  reference: ReferenceData[] | null,
+  timeData: CountryTimeData[] | null
 ) => {
-  const [perPopulation, setPerPopulation] = useState<TRate[] | null>(null);
+  const [perPopulation, setPerPopulation] = useState<Rate[] | null>(null);
 
   useEffect(() => {
     if (reference && timeData) {
-      const result: TRate[] = [];
+      const result: Rate[] = [];
       timeData.forEach((d) => {
         const country = d.country;
         const population = reference.find((d) => d.country === country)

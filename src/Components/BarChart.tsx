@@ -2,19 +2,19 @@ import { DefaultTheme, useTheme } from "@chakra-ui/core";
 import * as d3 from "d3";
 import React from "react";
 import styled from "styled-components";
-import { TChartTab, TCoord, TDateCount } from "../types";
+import { TChartTab, Coord, DateAndCount } from "../types";
 import ChartTooltip from "./ChartTooltip";
 
 interface IBarChartProps {
-  data: TDateCount[] | null;
-  dataPiece: TDateCount | null;
+  data: DateAndCount[] | null;
+  dataPiece: DateAndCount | null;
   innerH: number;
   chartTab: TChartTab;
   xBarScaleRef: d3.ScaleBand<string> | undefined;
   yBarScaleRef: d3.ScaleLinear<number, number> | undefined;
-  xValue: (d: TDateCount) => number;
-  yValue: (d: TDateCount) => number;
-  coord: TCoord | null;
+  xValue: (d: DateAndCount) => number;
+  yValue: (d: DateAndCount) => number;
+  coord: Coord | null;
 }
 
 interface IBarProps {

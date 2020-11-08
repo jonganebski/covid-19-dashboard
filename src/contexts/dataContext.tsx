@@ -7,21 +7,21 @@ import { useRate } from "../hooks/useRate";
 import { useReferenceData } from "../hooks/useReferenceData";
 import { useTargetUrls } from "../hooks/useTargetUrls";
 import { useTimeSeriesData } from "../hooks/useTimeseriesData";
-import { TCountryTimedata, TDailyD, TDateCount, TRate } from "../types";
+import { CountryTimeData, DailyData, DateAndCount, Rate } from "../types";
 
-type TDataContext = {
+interface DataContext {
   timeseriesData: {
-    countryConfirmedTimeSeries: TCountryTimedata[] | null;
-    countryDeathsTimeSeries: TCountryTimedata[] | null;
-    globalConfirmedTimeSeries: TDateCount[] | null;
-    globalDeathsTimeSeries: TDateCount[] | null;
+    countryConfirmedTimeSeries: CountryTimeData[] | null;
+    countryDeathsTimeSeries: CountryTimeData[] | null;
+    globalConfirmedTimeSeries: DateAndCount[] | null;
+    globalDeathsTimeSeries: DateAndCount[] | null;
   };
-  provinceData: { isLoading: boolean; error: string; data: TDailyD[] | null };
-  countryData: { isLoading: boolean; error: string; data: TDailyD[] | null };
-  rateData: { newCasesPer100kWeek: TRate[] | null };
-};
+  provinceData: { isLoading: boolean; error: string; data: DailyData[] | null };
+  countryData: { isLoading: boolean; error: string; data: DailyData[] | null };
+  rateData: { newCasesPer100kWeek: Rate[] | null };
+}
 
-const DataContext = createContext<Partial<TDataContext>>({});
+const DataContext = createContext<Partial<DataContext>>({});
 
 interface DataContextProviderProps {
   children: ReactNode;

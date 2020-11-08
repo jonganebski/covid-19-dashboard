@@ -5,7 +5,7 @@ import {
   useSelectCountryCtx,
   useTabSelectionCtx,
 } from "../contexts/selectContext";
-import { TDailyD, TListD, TTab } from "../types";
+import { DailyData, CountryAndCount, TTab } from "../types";
 import { compare } from "../utils/utils";
 import ChartContainer from "./ChartContainer";
 import RightColumnList from "./RightColumnList";
@@ -13,8 +13,11 @@ import RightColumnListSelect from "./RightColumnSelect";
 
 // ----------- SUB FUNCTIONS -----------
 
-const getTabDataAndGlobalCount = (countryData: TDailyD[] | null, tab: TTab) => {
-  const data: TListD[] = [];
+const getTabDataAndGlobalCount = (
+  countryData: DailyData[] | null,
+  tab: TTab
+) => {
+  const data: CountryAndCount[] = [];
   let globalCount = 0;
   countryData?.forEach((d) => {
     const country = d.country;

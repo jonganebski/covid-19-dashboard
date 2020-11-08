@@ -1,37 +1,37 @@
 import * as d3 from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TChartTab, TCoord, TCountryTimedata, TDateCount } from "../types";
+import { TChartTab, Coord, CountryTimeData, DateAndCount } from "../types";
 
 export const useChart = (
-  countryConfirmedTimeSeries: TCountryTimedata[] | null,
-  globalConfirmedTimeSeries: TDateCount[] | null,
-  countryDeathsTimeSeries: TCountryTimedata[] | null,
-  globalDeathsTimeSeries: TDateCount[] | null,
+  countryConfirmedTimeSeries: CountryTimeData[] | null,
+  globalConfirmedTimeSeries: DateAndCount[] | null,
+  countryDeathsTimeSeries: CountryTimeData[] | null,
+  globalDeathsTimeSeries: DateAndCount[] | null,
   selectedCountry: string,
   chartTab: TChartTab
 ) => {
-  const [data, setData] = useState<TDateCount[] | null>(null);
-  const [dataPiece, setDataPiece] = useState<TDateCount | null>(null);
-  const [coord, setCoord] = useState<TCoord | null>(null);
+  const [data, setData] = useState<DateAndCount[] | null>(null);
+  const [dataPiece, setDataPiece] = useState<DateAndCount | null>(null);
+  const [coord, setCoord] = useState<Coord | null>(null);
   const [svgW, setSvgW] = useState(0);
   const [svgH, setSvgH] = useState(0);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const margin = { top: 20, right: 20, bottom: 20, left: 60 };
   const innerW = svgW - margin.left - margin.right;
   const innerH = svgH - margin.top - margin.bottom;
-  const xValue = (d: TDateCount) => d.date;
-  const yValue = (d: TDateCount) => d.count;
+  const xValue = (d: DateAndCount) => d.date;
+  const yValue = (d: DateAndCount) => d.count;
   const xScaleRef = useRef<d3.ScaleTime<number, number> | null>(null);
   const yScaleRef = useRef<d3.ScaleLinear<number, number> | null>(null);
   const tooltipG = d3.select("#tooltip-group");
 
   useEffect(() => {
-    const getLineChartData = (data: TCountryTimedata[]) => {
+    const getLineChartData = (data: CountryTimeData[]) => {
       return data.find((d) => d.country === selectedCountry)?.data ?? [];
     };
 
-    const getBarChartReturnData = (data: TDateCount[]) => {
-      const returnData: TDateCount[] = [];
+    const getBarChartReturnData = (data: DateAndCount[]) => {
+      const returnData: DateAndCount[] = [];
       returnData.push(data[0]);
       data.reduce((acc, d) => {
         returnData.push({ date: d.date, count: d.count - acc.count });
@@ -40,7 +40,7 @@ export const useChart = (
       return returnData;
     };
 
-    const getBarChartData = (data: TCountryTimedata[]) => {
+    const getBarChartData = (data: CountryTimeData[]) => {
       const targetData = data.find((d) => d.country === selectedCountry)?.data;
       if (targetData) {
         return getBarChartReturnData(targetData);
@@ -118,8 +118,8 @@ export const useChart = (
 
   // d3.extent() 에서 [undefined, undefined]가 나오는 경우를 배제하는 함수다.
   const getDomainArray = (
-    data: Array<TDateCount>,
-    xValue: (d: TDateCount) => number
+    data: Array<DateAndCount>,
+    xValue: (d: DateAndCount) => number
   ) => {
     const arr = d3.extent(data, xValue);
     if (!arr[0] || !arr[1]) {
@@ -130,8 +130,8 @@ export const useChart = (
   };
 
   const getMax = (
-    data: Array<TDateCount>,
-    yValue: (d: TDateCount) => number
+    data: Array<DateAndCount>,
+    yValue: (d: DateAndCount) => number
   ) => {
     const max = d3.max(data, yValue);
     if (typeof max !== "number") {
@@ -187,7 +187,7 @@ export const useChart = (
       const hoveredDate = xScaleRef.current
         .invert(e.clientX - elementCoord.x)
         .getTime();
-      const bs = d3.bisector((d: TDateCount) => d.date);
+      const bs = d3.bisector((d: DateAndCount) => d.date);
       const i = bs.left(data, hoveredDate, 1);
       const x = e.clientX - elementCoord.x;
       const y = yScaleRef.current(data[i].count);

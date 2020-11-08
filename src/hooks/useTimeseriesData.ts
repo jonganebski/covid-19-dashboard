@@ -1,8 +1,8 @@
 import * as d3 from "d3";
 import { useEffect, useState } from "react";
-import { TCountryTimedata, TDateCount } from "../types";
+import { CountryTimeData, DateAndCount } from "../types";
 
-const sumDateCount = (data: TDateCount[], date: number, count: number) => {
+const sumDateCount = (data: DateAndCount[], date: number, count: number) => {
   const dateData = data.find((d) => d.date === date);
   if (dateData) {
     dateData.count = dateData.count + count;
@@ -13,11 +13,11 @@ const sumDateCount = (data: TDateCount[], date: number, count: number) => {
 
 export const useTimeSeriesData = (
   url: string
-): [TCountryTimedata[] | null, TDateCount[] | null] => {
-  const [countriesData, setCountriesData] = useState<TCountryTimedata[] | null>(
+): [CountryTimeData[] | null, DateAndCount[] | null] => {
+  const [countriesData, setCountriesData] = useState<CountryTimeData[] | null>(
     null
   );
-  const [globalData, setGlobalData] = useState<TDateCount[] | null>(null);
+  const [globalData, setGlobalData] = useState<DateAndCount[] | null>(null);
 
   useEffect(() => {
     d3.csv(url).then((loadedData) => {
@@ -25,7 +25,7 @@ export const useTimeSeriesData = (
       // 2. 그러면서 모든 날짜의 데이터를 수집하여 글로벌 단위의 데이터를 만든다.
       const reduced = loadedData.reduce(
         (acc, D) => {
-          let country: TCountryTimedata = { country: "", data: [] };
+          let country: CountryTimeData = { country: "", data: [] };
 
           const { countries, global } = acc;
           const prevCountry = countries[countries.length - 1]?.country ?? "";
@@ -65,8 +65,8 @@ export const useTimeSeriesData = (
           return acc;
         },
         {
-          countries: [] as TCountryTimedata[],
-          global: [] as TDateCount[],
+          countries: [] as CountryTimeData[],
+          global: [] as DateAndCount[],
         }
       );
       setCountriesData(reduced.countries);

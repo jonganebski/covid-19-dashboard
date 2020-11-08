@@ -1,11 +1,11 @@
 import * as d3 from "d3";
 import { useEffect, useState } from "react";
 import { REFERENCE_CSV_URL } from "../constants";
-import { TReferenceD } from "../types";
+import { ReferenceData } from "../types";
 import { numOrNull } from "../utils/utils";
 
-export const useReferenceData = (): [TReferenceD[] | null] => {
-  const [referenceData, setReferenceData] = useState<TReferenceD[] | null>(
+export const useReferenceData = (): [ReferenceData[] | null] => {
+  const [referenceData, setReferenceData] = useState<ReferenceData[] | null>(
     null
   );
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { TDailyD } from "../types";
+import { DailyData } from "../types";
 
-export const useBlackSwans = (provinceData: TDailyD[] | null) => {
+export const useBlackSwans = (provinceData: DailyData[] | null) => {
   const [blackSwans, setBlackSwans] = useState<Set<string> | null>(null);
 
   useEffect(() => {

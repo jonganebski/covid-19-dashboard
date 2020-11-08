@@ -1,4 +1,4 @@
-import { TDailyD } from "../types";
+import { DailyData } from "../types";
 
 export const getMonthName = (i: number) => {
   const months = [
@@ -34,7 +34,7 @@ export const compare = (a: number | null, b: number | null) => {
 };
 
 export const getTotalCount = (
-  data: TDailyD[] | null,
+  data: DailyData[] | null,
   type: "confirmed" | "active" | "deaths" | "recovered" | "newCases"
 ): string => {
   let count = 0;
@@ -43,7 +43,7 @@ export const getTotalCount = (
 };
 
 export const getCountryCount = (
-  data: TDailyD[] | null,
+  data: DailyData[] | null,
   selectedCountry: string,
   type: "confirmed" | "active" | "deaths" | "recovered" | "newCases"
 ): string => {

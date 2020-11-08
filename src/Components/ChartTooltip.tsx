@@ -1,9 +1,9 @@
 import React from "react";
-import { TDateCount } from "../types";
+import { DateAndCount } from "../types";
 import { getMonthName } from "../utils/utils";
 
 interface ChartTooltipProps {
-  dataPiece: TDateCount;
+  dataPiece: DateAndCount;
 }
 
 const ChartTooltip: React.FC<ChartTooltipProps> = ({ dataPiece }) => {

@@ -1,15 +1,15 @@
 import { Box, Flex, Heading, List, ListItem, Text } from "@chakra-ui/core";
 import React from "react";
 import { useSelectCountryCtx } from "../contexts/selectContext";
-import { TListD, TTab } from "../types";
+import { CountryAndCount, TTab } from "../types";
 import { changeBg } from "../utils/utils";
 import Loading from "./Loading";
 import LoadingFailed from "./LoadingFailed";
 
 interface RightColumnListProps {
   globalCount: number;
-  targetData: TListD | null;
-  sortedData: TListD[];
+  targetData: CountryAndCount | null;
+  sortedData: CountryAndCount[];
   isLoading: boolean;
   tab: TTab;
   handleLiClick: (countryName: string) => void;

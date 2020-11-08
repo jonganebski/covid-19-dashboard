@@ -4,7 +4,7 @@ import { Map, TileLayer } from "react-leaflet";
 import { useCountryDataCtx, useProvinceDataCtx } from "../contexts/dataContext";
 import { useSelectCountryCtx } from "../contexts/selectContext";
 import { useViewPort } from "../hooks/useViewport";
-import { TDailyD } from "../types";
+import { DailyData } from "../types";
 import { TMapDataClass } from "./CenterColumn";
 import LeafletCircle from "./LeafletCircle";
 
@@ -14,7 +14,7 @@ interface LeafletMapProps {
 
 // ------------- SUB FUNCTIONS -------------
 
-const getMax = (data: TDailyD[] | null, dataClass: TMapDataClass) => {
+const getMax = (data: DailyData[] | null, dataClass: TMapDataClass) => {
   if (data) {
     return dataClass === "confirmed"
       ? d3.max(data, (D) => D.confirmed ?? 0) ?? 0

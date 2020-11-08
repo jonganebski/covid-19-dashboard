@@ -2,11 +2,11 @@ import { Heading, Text } from "@chakra-ui/core";
 import { LeafletMouseEvent } from "leaflet";
 import React from "react";
 import { Circle, Tooltip } from "react-leaflet";
-import { TDailyD } from "../types";
+import { DailyData } from "../types";
 import { TMapDataClass } from "./CenterColumn";
 
 interface LCProps {
-  d: TDailyD;
+  d: DailyData;
   radius: number;
   selected: string;
   setSelected: React.Dispatch<React.SetStateAction<string>>;

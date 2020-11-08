@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TDailyD } from "../types";
+import { DailyData } from "../types";
 
 // ------------- CONSTANT -------------
 
@@ -17,7 +17,7 @@ type TViewport = {
 
 export const useViewPort = (
   selectedCountry: string,
-  countryData: TDailyD[] | null
+  countryData: DailyData[] | null
 ): [TViewport, React.Dispatch<React.SetStateAction<TViewport>>] => {
   const [viewport, setViewport] = useState<TViewport>(initialViewport);
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TDailyD, TRate, TReferenceD } from "../types";
+import { DailyData, Rate, ReferenceData } from "../types";
 
 const sumValueOrNull = (a: number | null, b: number | null) => {
   if (a === null) {
@@ -12,7 +12,7 @@ const sumValueOrNull = (a: number | null, b: number | null) => {
 };
 
 const getCoordOrNull = (
-  reference: TReferenceD[],
+  reference: ReferenceData[],
   targetCountry: string,
   type: "lat" | "lon"
 ) => {
@@ -28,21 +28,21 @@ const getCoordOrNull = (
 };
 
 export const useDailyCountry = (
-  provinceData: TDailyD[] | null,
-  referenceData: TReferenceD[] | null,
+  provinceData: DailyData[] | null,
+  referenceData: ReferenceData[] | null,
   blackSwans: Set<string> | null,
-  yesterdayData?: TDailyD[] | null,
-  rateData?: TRate[] | null
-): [boolean, TDailyD[] | null] => {
+  yesterdayData?: DailyData[] | null,
+  rateData?: Rate[] | null
+): [boolean, DailyData[] | null] => {
   const [isLoading, setIsLoading] = useState(true);
-  const [countryData, setCountryData] = useState<TDailyD[] | null>(null);
+  const [countryData, setCountryData] = useState<DailyData[] | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
 
     const computeNewCases = (
-      todayData: TDailyD[],
-      yesterdayData: TDailyD[]
+      todayData: DailyData[],
+      yesterdayData: DailyData[]
     ) => {
       todayData.forEach((D) => {
         const country = D.country;
@@ -58,13 +58,13 @@ export const useDailyCountry = (
     };
 
     const getCountryWise = (
-      provinceWise: TDailyD[] | null,
-      referenceData: TReferenceD[],
+      provinceWise: DailyData[] | null,
+      referenceData: ReferenceData[],
       blackSwans: Set<string>
     ) => {
       // 전체 데이터를 두 종류로 분류한다. 깔끔한 데이터 / 더러운 데이터(blackSwan에 해당하는 데이터).
-      const cleanData: TDailyD[] = [];
-      const dirtyData: TDailyD[] = [];
+      const cleanData: DailyData[] = [];
+      const dirtyData: DailyData[] = [];
       provinceWise?.forEach((d) => {
         if (blackSwans.has(d.country)) {
           dirtyData.push(d);

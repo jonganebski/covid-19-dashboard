@@ -1,9 +1,9 @@
 import * as d3 from "d3";
 import { useEffect, useState } from "react";
-import { TDailyD } from "../types";
+import { DailyData } from "../types";
 import { numOrNull } from "../utils/utils";
 
-const rowValidator = (row: d3.DSVRowString<string>): [string, TDailyD?] => {
+const rowValidator = (row: d3.DSVRowString<string>): [string, DailyData?] => {
   const country = row.Country_Region;
   const combinedKey = row.Combined_Key;
   const lastUpdate = row.Last_Update;
@@ -51,15 +51,15 @@ const rowValidator = (row: d3.DSVRowString<string>): [string, TDailyD?] => {
 
 export const useDailyProvince = (
   url: string,
-  yesterdayData?: TDailyD[] | null
-): [boolean, string, TDailyD[] | null] => {
+  yesterdayData?: DailyData[] | null
+): [boolean, string, DailyData[] | null] => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState("");
-  const [provinceData, setProvinceData] = useState<TDailyD[] | null>(null);
+  const [provinceData, setProvinceData] = useState<DailyData[] | null>(null);
   useEffect(() => {
     const computeNewCases = (
-      todayData: TDailyD[],
-      yesterdayData: TDailyD[]
+      todayData: DailyData[],
+      yesterdayData: DailyData[]
     ) => {
       todayData.forEach((D) => {
         const key = D.combinedKey;

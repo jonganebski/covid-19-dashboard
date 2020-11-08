@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { TNewsData } from "../types";
+import { NewsData } from "../types";
 
 const NEWS_API_URL =
   (process.env.NODE_ENV === "development" &&
@@ -9,14 +9,14 @@ const NEWS_API_URL =
 
 export const useNewsData = (
   selectedCountry: string
-): [boolean, string, TNewsData[] | null] => {
+): [boolean, string, NewsData[] | null] => {
   const [isNewsLoading, setIsNewsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [newsData, setNewsData] = useState<TNewsData[] | null>(null);
+  const [newsData, setNewsData] = useState<NewsData[] | null>(null);
 
   useEffect(() => {
     setIsNewsLoading(true);
-    let result: TNewsData[] = [];
+    let result: NewsData[] = [];
 
     axios
       .post(NEWS_API_URL, { country: selectedCountry })

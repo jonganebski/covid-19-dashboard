@@ -1,13 +1,13 @@
 import React from "react";
 import theme from "../theme";
-import { TCoord, TDateCount } from "../types";
+import { Coord, DateAndCount } from "../types";
 import ChartTooltip from "./ChartTooltip";
 
 interface ILineChartProps {
-  data: TDateCount[] | null;
-  dataPiece: TDateCount | null;
-  lineGenerator: d3.Line<TDateCount>;
-  coord: TCoord | null;
+  data: DateAndCount[] | null;
+  dataPiece: DateAndCount | null;
+  lineGenerator: d3.Line<DateAndCount>;
+  coord: Coord | null;
 }
 
 const LineChart: React.FC<ILineChartProps> = ({
