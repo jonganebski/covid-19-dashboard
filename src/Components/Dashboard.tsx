@@ -30,3 +30,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+// 스크롤바 스타일링. 좀 얇게만 해도 괜찮을 듯
+// 달력 만들어서 원하는 날짜로 돌아갈 수 있도록 하는 기능 추가

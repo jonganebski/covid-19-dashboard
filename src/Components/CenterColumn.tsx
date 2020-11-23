@@ -28,6 +28,7 @@ const MyButton: React.FC<IMyButtonProps> = ({
 }) => (
   <Button
     size="sm"
+    w="25%"
     borderTop="none"
     borderTopLeftRadius={0}
     borderTopRightRadius={0}
@@ -51,8 +52,8 @@ const CenterColumn = () => {
         <Box h="100%">
           <LeafletMap dataClass={dataClass} />
         </Box>
-        <Flex>
-          <ButtonGroup mr={5}>
+        <Flex flexDir={{ base: "column", lg: "row" }} justify="space-between">
+          <ButtonGroup>
             <MyButton
               dataClass={dataClass}
               handleBtnClick={handleBtnClick}
@@ -78,7 +79,7 @@ const CenterColumn = () => {
               type={"newCases"}
             />
           </ButtonGroup>
-          <Text fontSize="13px" color="gray.500">
+          <Text h="100%" fontSize="13px" color="gray.500">
             NCR: New Cases per 100,000 population for last 7 days
           </Text>
         </Flex>
