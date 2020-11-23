@@ -5,7 +5,7 @@ import { NewsData } from "../types";
 const NEWS_API_URL =
   (process.env.NODE_ENV === "development" &&
     "http://localhost:4000/api/news") ||
-  "/api/news";
+  "https://covid-19-dashboard-project.herokuapp.com/api/news";
 
 export const useNewsData = (
   selectedCountry: string
