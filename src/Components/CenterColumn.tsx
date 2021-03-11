@@ -8,6 +8,8 @@ import {
   Text,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
+import { MapContainer } from "react-leaflet";
+import { INITIAL_COORDS, INITIAL_ZOOM } from "../constants";
 import LeafletMap from "./LeafletMap";
 import News from "./News";
 
@@ -50,7 +52,13 @@ const CenterColumn = () => {
     <Grid gridArea="center" gridTemplateRows="auto 250px" gap={1}>
       <Stack spacing={0} pb={2}>
         <Box h="100%">
-          <LeafletMap dataClass={dataClass} />
+          <MapContainer
+            center={INITIAL_COORDS}
+            zoom={INITIAL_ZOOM}
+            style={{ width: "100%", height: "100%", fill: "black" }}
+          >
+            <LeafletMap dataClass={dataClass} />
+          </MapContainer>
         </Box>
         <Flex flexDir={{ base: "column", lg: "row" }} justify="space-between">
           <ButtonGroup>

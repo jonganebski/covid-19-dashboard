@@ -1,3 +1,5 @@
+import { LatLngExpression } from "leaflet";
+
 export const DAILY_BASE_URL =
   "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/";
 
@@ -16,3 +18,6 @@ export const REFERENCE_CSV_URL =
   process.env.NODE_ENV === "development"
     ? "UID_ISO_FIPS_LookUp_Table.csv"
     : "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv";
+
+export const INITIAL_COORDS: LatLngExpression = { lat: 20, lng: 10 };
+export const INITIAL_ZOOM = 2;

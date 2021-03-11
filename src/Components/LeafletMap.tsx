@@ -1,9 +1,9 @@
 import * as d3 from "d3";
-import React from "react";
-import { Map, TileLayer } from "react-leaflet";
+import React, { useEffect } from "react";
+import { TileLayer, useMap } from "react-leaflet";
+import { INITIAL_COORDS, INITIAL_ZOOM } from "../constants";
 import { useCountryDataCtx, useProvinceDataCtx } from "../contexts/dataContext";
 import { useSelectCountryCtx } from "../contexts/selectContext";
-import { useViewPort } from "../hooks/useViewport";
 import { DailyData } from "../types";
 import { TMapDataClass } from "./CenterColumn";
 import LeafletCircle from "./LeafletCircle";
@@ -46,7 +46,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ dataClass }) => {
   const { selectedCountry, setSelectedCountry } = useSelectCountryCtx();
   const { data: provinceData } = useProvinceDataCtx();
   const { data: countryData } = useCountryDataCtx();
-  const [viewport, setViewport] = useViewPort(selectedCountry, countryData);
+  const map = useMap();
 
   // Function that gets the radius.
   const getRadius = d3
@@ -54,12 +54,25 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ dataClass }) => {
     .domain([0, getMax(provinceData, dataClass)])
     .range([0, 430000]);
 
+  useEffect(() => {
+    if (!selectedCountry) {
+      map.setView({ lat: 20, lng: 10 }, 2);
+    } else {
+      const countryD = countryData?.find((D) => D.country === selectedCountry);
+      const lat = countryD?.lat;
+      const lng = countryD?.lon;
+      const zoom = selectedCountry === "Russia" ? 3 : 4;
+      if (lat && lng) {
+        map.flyTo({ lat, lng }, zoom);
+      } else {
+        map.flyTo(INITIAL_COORDS, INITIAL_ZOOM);
+      }
+    }
+    // eslint-disable-next-line
+  }, [selectedCountry]);
+
   return (
-    <Map
-      center={{ lat: viewport.lat, lng: viewport.lng }}
-      zoom={viewport.zoom}
-      style={{ width: "100%", height: "100%", fill: "black" }}
-    >
+    <>
       <TileLayer
         attribution={`&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>`}
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -67,7 +80,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ dataClass }) => {
         minZoom={2}
       />
       {provinceData
-        ?.filter((d) => d[dataClass])
+        ?.slice()
         .sort((a, b) => b[dataClass]! - a[dataClass]!)
         .map((d, i) => {
           const radius = getRadius(d[dataClass] ?? 0);
@@ -76,15 +89,15 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ dataClass }) => {
               key={i}
               d={d}
               radius={radius && radius > 0 ? radius : 0}
+              isSelected={selectedCountry === d.country}
               selected={selectedCountry}
               setSelected={setSelectedCountry}
-              setViewport={setViewport}
               dataClass={dataClass}
               color={pickCircleColor(dataClass)}
             />
           );
         })}
-    </Map>
+    </>
   );
 };
 
