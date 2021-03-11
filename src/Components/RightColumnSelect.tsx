@@ -1,6 +1,7 @@
 import { Select } from "@chakra-ui/react";
 import React from "react";
 import { useCountryDataCtx } from "../contexts/dataContext";
+import Option from "./Option";
 
 interface RightColumnListSelectProps {
   setTab: React.Dispatch<
@@ -19,9 +20,8 @@ const RightColumnListSelect: React.FC<RightColumnListSelectProps> = ({
   return isLoading ? null : (
     <Select
       size="sm"
-      backgroundColor="black"
+      bg="black"
       color="white"
-      placeholder="Select option"
       defaultValue={defaultValue}
       onChange={(e) => {
         if (
@@ -34,12 +34,13 @@ const RightColumnListSelect: React.FC<RightColumnListSelectProps> = ({
         }
       }}
     >
-      <option value="active">Active ({data && data[0].lastUpdate})</option>
-      <option value="new cases">
-        New Cases ({data && data[0].newCasesLastUpdate})
-      </option>
-      <option value="deaths">Total deaths (cumulative)</option>
-      <option value="recovered">Total recovered (cumulative)</option>
+      <Option text={`Active (${data && data[0].lastUpdate})`} value="active" />
+      <Option
+        text={`New Cases (${data && data[0].newCasesLastUpdate})`}
+        value="new cases"
+      />
+      <Option text="Total deaths (cumulative)" value="deaths" />
+      <Option text="Total recovered (cumulative)" value="recovered" />
     </Select>
   );
 };

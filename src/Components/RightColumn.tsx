@@ -10,6 +10,7 @@ import { compare } from "../utils/utils";
 import ChartContainer from "./ChartContainer";
 import RightColumnList from "./RightColumnList";
 import RightColumnListSelect from "./RightColumnSelect";
+import Option from "./Option";
 
 // ----------- SUB FUNCTIONS -----------
 
@@ -103,9 +104,8 @@ const RightColumn = () => {
           <Select
             w="50%"
             size="sm"
-            backgroundColor="black"
+            bg="black"
             color="white"
-            placeholder="Select option"
             defaultValue="daily cases"
             onChange={(e) => {
               if (
@@ -118,10 +118,10 @@ const RightColumn = () => {
               }
             }}
           >
-            <option value="confirmed">Confirmed (cumulative)</option>
-            <option value="deaths">Deaths (cumulative)</option>
-            <option value="daily cases">Daily Cases</option>
-            <option value="daily deaths">Daily Deaths</option>
+            <Option value="confirmed" text="Confirmed (cumulative)" />
+            <Option value="deaths" text="Deaths (cumulative)" />
+            <Option value="daily cases" text="Daily Cases" />
+            <Option value="daily deaths" text="Daily Deaths" />
           </Select>
           <Flex w="50%" justify="center">
             <Heading size="lg" color="white">

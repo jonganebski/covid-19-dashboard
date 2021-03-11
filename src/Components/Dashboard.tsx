@@ -9,7 +9,7 @@ import RightColumn from "./RightColumn";
 
 const Dashboard = () => {
   return (
-    <Flex className="App" w="100vw" h="100vh" bg="black">
+    <Flex className="App" minW="100vh" h="100vh" bg="black">
       <Grid
         w="100%"
         gap={1}
