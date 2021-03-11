@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Heading, Select } from "@chakra-ui/core";
+import { Box, Flex, Grid, Heading, Select } from "@chakra-ui/react";
 import React from "react";
 import { useCountryDataCtx } from "../contexts/dataContext";
 import {

@@ -1,4 +1,4 @@
-import { useTheme } from "@chakra-ui/core";
+import { useTheme } from "@chakra-ui/react";
 import React from "react";
 import { useTimeSeriesDataCtx } from "../contexts/dataContext";
 import { useSelectCountryCtx } from "../contexts/selectContext";

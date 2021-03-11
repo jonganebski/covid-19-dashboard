@@ -1,5 +1,5 @@
+import { useTheme } from "@chakra-ui/react";
 import React from "react";
-import theme from "../theme";
 import { Coord, DateAndCount } from "../types";
 import ChartTooltip from "./ChartTooltip";
 
@@ -16,6 +16,7 @@ const LineChart: React.FC<ILineChartProps> = ({
   lineGenerator,
   coord,
 }) => {
+  const theme = useTheme();
   return (
     <>
       <g className="linegraph-group">

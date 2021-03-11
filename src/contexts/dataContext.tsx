@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext } from "react";
+import React, { createContext, useContext } from "react";
 import { TIMESERIES_CSV_URL } from "../constants";
 import { useBlackSwans } from "../hooks/useBlackSwans";
 import { useDailyCountry } from "../hooks/useDailyData-country";
@@ -9,7 +9,7 @@ import { useTargetUrls } from "../hooks/useTargetUrls";
 import { useTimeSeriesData } from "../hooks/useTimeseriesData";
 import { CountryTimeData, DailyData, DateAndCount, Rate } from "../types";
 
-interface DataContext {
+interface IDataContext {
   timeseriesData: {
     countryConfirmedTimeSeries: CountryTimeData[] | null;
     countryDeathsTimeSeries: CountryTimeData[] | null;
@@ -21,15 +21,9 @@ interface DataContext {
   rateData: { newCasesPer100kWeek: Rate[] | null };
 }
 
-const DataContext = createContext<Partial<DataContext>>({});
+const DataContext = createContext<Partial<IDataContext>>({});
 
-interface DataContextProviderProps {
-  children: ReactNode;
-}
-
-const DataContextProvider: React.FC<DataContextProviderProps> = ({
-  children,
-}) => {
+const DataContextProvider: React.FC = ({ children }) => {
   const [mostRecent, oneDayBefore] = useTargetUrls();
   const [reference] = useReferenceData();
   const [

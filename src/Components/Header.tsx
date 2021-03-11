@@ -2,7 +2,6 @@ import {
   Box,
   Flex,
   Heading,
-  Icon,
   Link,
   Modal,
   ModalBody,
@@ -13,14 +12,15 @@ import {
   ModalOverlay,
   Text,
   useDisclosure,
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
 import React from "react";
 import { useSelectCountryCtx } from "../contexts/selectContext";
+import { InfoIcon, EmailIcon, ViewIcon } from "@chakra-ui/icons";
 
 // ------------- COMPONENT -------------
 
 const Header = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: false });
   const { setSelectedCountry } = useSelectCountryCtx();
   return (
     <Flex
@@ -38,7 +38,7 @@ const Header = () => {
         Covid-19 Information Dashboard
       </Heading>
       <Box position="absolute" right={10}>
-        <Icon name="info" cursor="pointer" onClick={onOpen} />
+        <InfoIcon cursor="pointer" onClick={onOpen} />
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay></ModalOverlay>
           <ModalContent>
@@ -71,13 +71,13 @@ const Header = () => {
             </ModalBody>
             <ModalFooter display="block">
               <Text>
-                <Icon name="email" /> jon.ganebski@gmail.com
+                <EmailIcon /> jon.ganebski@gmail.com
               </Text>
               <Link
                 href="https://github.com/jonganebski/covid-19-dashboard"
                 target="_blank"
               >
-                <Icon name="view" /> See code in Github
+                <ViewIcon /> See code in Github
               </Link>
             </ModalFooter>
           </ModalContent>

@@ -1,14 +1,14 @@
+import { WarningIcon } from "@chakra-ui/icons";
 import {
   Box,
   Flex,
   Grid,
   Heading,
-  Icon,
   List,
   ListItem,
   Text,
   Tooltip,
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
 import React, { useRef } from "react";
 import { useCountryDataCtx } from "../contexts/dataContext";
 import { useSelectCountryCtx } from "../contexts/selectContext";
@@ -96,7 +96,7 @@ const LeftColumn = () => {
                         placement="left"
                         zIndex={90}
                       >
-                        <Icon name="warning" color="red.800" ml="auto" />
+                        <WarningIcon color="red.800" ml="auto" />
                       </Tooltip>
                     )}
                   </ListItem>

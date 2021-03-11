@@ -1,4 +1,5 @@
-import { Flex, Icon, Text } from "@chakra-ui/core";
+import { WarningIcon } from "@chakra-ui/icons";
+import { Flex, Text } from "@chakra-ui/react";
 import React from "react";
 
 const LoadingFailed = () => {
@@ -11,7 +12,7 @@ const LoadingFailed = () => {
       h="100%"
       color="gray.400"
     >
-      <Icon name="warning" size="20px" />
+      <WarningIcon size="20px" />
       <Text fontSize="10px">loading failed</Text>
     </Flex>
   );

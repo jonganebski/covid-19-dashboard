@@ -1,4 +1,4 @@
-import { DefaultTheme, useTheme } from "@chakra-ui/core";
+import { Theme, useTheme } from "@chakra-ui/react";
 import * as d3 from "d3";
 import React from "react";
 import styled from "styled-components";
@@ -19,7 +19,7 @@ interface IBarChartProps {
 
 interface IBarProps {
   chartTab: TChartTab;
-  theme: DefaultTheme;
+  theme: Theme;
   barDate: number;
   mouseDate?: number;
 }

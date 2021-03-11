@@ -1,4 +1,4 @@
-import { Flex, Stack, Link, Box, Heading, Text } from "@chakra-ui/core";
+import { Flex, Stack, Link, Box, Heading, Text } from "@chakra-ui/react";
 import React from "react";
 import { useSelectCountryCtx } from "../contexts/selectContext";
 import { useNewsData } from "../hooks/useNewsData";

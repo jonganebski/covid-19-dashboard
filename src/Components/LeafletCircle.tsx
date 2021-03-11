@@ -1,4 +1,4 @@
-import { Heading, Text } from "@chakra-ui/core";
+import { Heading, Text } from "@chakra-ui/react";
 import { LeafletMouseEvent } from "leaflet";
 import React from "react";
 import { Circle, Tooltip } from "react-leaflet";

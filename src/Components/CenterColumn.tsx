@@ -6,7 +6,7 @@ import {
   Grid,
   Stack,
   Text,
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
 import React, { useState } from "react";
 import LeafletMap from "./LeafletMap";
 import News from "./News";
@@ -33,7 +33,7 @@ const MyButton: React.FC<IMyButtonProps> = ({
     borderTopLeftRadius={0}
     borderTopRightRadius={0}
     variant="outline"
-    variantColor={dataClass === type ? "red" : "gray"}
+    colorScheme={dataClass === type ? "red" : "gray"}
     onClick={() => handleBtnClick(type)}
   >
     {text}

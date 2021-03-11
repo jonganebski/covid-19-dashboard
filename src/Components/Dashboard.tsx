@@ -1,4 +1,4 @@
-import { Flex, Grid } from "@chakra-ui/core";
+import { Flex, Grid } from "@chakra-ui/react";
 import React from "react";
 import CenterColumn from "./CenterColumn";
 import Header from "./Header";
