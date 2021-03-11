@@ -53,9 +53,10 @@ const CenterColumn = () => {
       <Stack spacing={0} pb={2}>
         <Box h="100%">
           <MapContainer
+            style={{ width: "100%", height: "100%", fill: "black" }}
             center={INITIAL_COORDS}
             zoom={INITIAL_ZOOM}
-            style={{ width: "100%", height: "100%", fill: "black" }}
+            preferCanvas={true}
           >
             <LeafletMap dataClass={dataClass} />
           </MapContainer>

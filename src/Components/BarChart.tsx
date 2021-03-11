@@ -58,21 +58,18 @@ const BarChart: React.FC<IBarChartProps> = ({
       {data?.map((d, i) => {
         const x = xBarScaleRef?.(xValue(d).toString());
         const y = yBarScaleRef?.(yValue(d));
-        return (
-          x &&
-          y && (
-            <Bar
-              key={i}
-              transform={`translate(${x}, ${y})`}
-              width={xBarScaleRef?.bandwidth()}
-              height={innerH - yBarScaleRef?.(yValue(d))!}
-              chartTab={chartTab}
-              theme={theme}
-              barDate={d.date}
-              mouseDate={dataPiece?.date}
-            ></Bar>
-          )
-        );
+        return x && y && 0 < innerH - y ? (
+          <Bar
+            key={i}
+            transform={`translate(${x}, ${y})`}
+            width={xBarScaleRef?.bandwidth()}
+            height={innerH - y}
+            chartTab={chartTab}
+            theme={theme}
+            barDate={d.date}
+            mouseDate={dataPiece?.date}
+          />
+        ) : null;
       })}
       {dataPiece && (
         <g transform={`translate(${coord?.x}, ${coord?.y})`}>
